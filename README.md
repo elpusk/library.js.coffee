@@ -1,2 +1,4 @@
 # library.js.coffee
-JavaScript library for coffee manager
+coffee manager interface JavaScript  library
+
+For generating API document, run "jsdoc scripts/elpusk.framework.coffee.js -d docs" on console.

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>test for javascript library</TITLE>
+
+</HEAD>
+<BODY>
+    <script type="text/javascript">
+        if (typeof Promise === "undefined") {
+            //document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"><\/script>');
+            document.write('<script src="scripts/bluebird.core.min.js"><\/script>');
+            document.write('<script src="scripts/elpusk.framework.coffee.js"><\/script>');
+        }
+        else{
+            document.write('<script src="scripts/elpusk.framework.coffee.js"><\/script>');
+        }
+    </script>    
+
+    <!-- fixed message area -->
+    this page supports elpusk coffee JavaScript library.
+    <br />
+    <!-- control area -->
+    <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
+
+    <br />
+    <br />
+    <input type="button" id="button_promise_connect_server_ws" onclick="on_button_promise_connect_server_ws();" value="connect websocket server by promise" />
+    <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+    <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
+    <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
+    <br />
+    <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+    <input type="button" id="button_promise_device_open" onclick="on_button_promise_device_open();" value="open device by promise" />
+    <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
+    <br />
+    <input type="button" id="button_promise_device_send" onclick="on_button_promise_device_send();" value="send data to device by promise" />
+    <input type="button" id="button_promise_device_receive" onclick="on_button_promise_device_receive();" value="receive data from device by promise" />
+    <input type="button" id="button_promise_device_transmit" onclick="on_button_promise_device_transmit();" value="send and receive data .. device by promise" />
+    <input type="button" id="button_promise_device_cancel" onclick="on_button_promise_device_cancel();" value="cancel operation of  device by promise" />
+    <br />
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field );
+                }
+                //
+
+            }while(false);
+        }
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                addMessage("ok promise");
+            }
+
+            var server1 = elpusk.framework.coffee.get_instance();
+            var server2 = elpusk.framework.coffee.get_instance();
+
+            if( server1 === server2 ){
+                addMessage( "server1 and 2 identical." );
+            }
+            else{
+                addMessage( "server1 and 2 different." );
+            }
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+        }
+
+        window.addEventListener("load", init, false);
+
+        function clearMessage() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage(Message)
+        {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function printMessage_pre(Message)
+        {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage_pre(Message) {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function on_button_promise_connect_server_ws()
+        {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("ws").then(function (s_session_number) {
+                // server is ready here
+                addMessage("websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_connect_server_wss()
+        {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss").then(function (s_session_number) {
+                // server is ready here
+                addMessage("security websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : security websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is ready here
+                addMessage("disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_echo_server() {
+            var server = elpusk.framework.coffee.get_instance();
+            //elpusk.framework.coffee.promise_echo_string(["abc", "a1b1c1", "a2b2c2"]).then(function (s_rx) {
+            server.echo_string("I am echo data.").then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("echo string array data : " + s_rx);
+                }
+                else {
+                    addMessage("echo string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : echo : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_echo_server_hex() {
+            var server = elpusk.framework.coffee.get_instance();
+            //"00 01 02 03 04 05 06 07 08 09 0a 0B 0c 0D 0f"
+            server.echo_hex("000102030405060708090a0B0c0D0f").then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("echo array data : " + s_rx);
+                }
+                else{
+                    addMessage("echo data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : echo : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_get_device_list() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.get_device_list("hid").then(function (s_rx) {
+                var select_dev = document.getElementById("drop_get_device_list");
+                var length = select_dev.options.length;
+                for (var i = length - 1; i >= 0; i--) {
+                    select_dev.options[i] = null;
+                }
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("array data paths : " + s_rx);
+
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_device_index;
+                        option.text = s_rx[n_device_index];
+                        select_dev.add(option, 0);
+                    }
+
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("no connect device.");
+                    }
+                    else {
+                        addMessage("string path : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_device_list : "+ server.get_error_message(event_error));
+            });
+        }
+
+        var n_opened_device_index = 0;
+
+        function on_button_promise_device_open() {
+            var select_dev = document.getElementById("drop_get_device_list");
+            var s_device_path = select_dev.options[select_dev.selectedIndex].text;
+
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_open(s_device_path).then(function (n_device_index) {
+                if( typeof n_device_index === 'undefined'){
+                    //error
+                    addMessage("error : open.");
+
+                }
+                else{
+                    if( n_device_index!==0){
+                        n_opened_device_index = n_device_index;
+                        addMessage("opened device index : " + n_device_index);
+                    }
+                    else{
+                        addMessage("opened device index : unknown - may be used in the other.");
+                    }
+                }
+            }).catch(function (event_error) {
+                n_opened_device_index = 0;
+                // error here
+                addMessage("fail : open device : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_close() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_close(n_opened_device_index).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("close failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("close success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device close : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_send(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_send(n_opened_device_index,0,"49 00 00").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("send failure");
+                        continue;
+                    }
+
+                    addMessage("send success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device send : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_receive(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_receive(n_opened_device_index,0).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("received : " + s_rx);
+                        continue;
+                    }
+
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+
+                    addMessage("receive failure : "+s_rx);
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device receive : "+ server.get_error_message(event_error));
+            });
+
+        }
+        function on_button_promise_device_transmit(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_transmit(n_opened_device_index,0,0,"49 00 00")
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("received : " + s_rx);
+                        continue;
+                    }
+
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+
+                    addMessage("receive failure : "+s_rx);
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device transmit : "+ server.get_error_message(event_error));
+            });
+
+        }
+        function on_button_promise_device_cancel(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_cancel(n_opened_device_index,0,0).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("cancel failure");
+                        continue;
+                    }
+
+                    addMessage("cancel success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device cancel : "+ server.get_error_message(event_error));
+            });
+        }
+
+
+
+    </script>
+</BODY>
+</HTML>
