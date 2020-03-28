@@ -1,13 +1,20 @@
 /**
  * 
  * 2020.3.5 - 
+ * 2020.3.25
  * @license MIT
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.0.0
+ * @version 1.1.0
  * @description elpusk framework coffee javascript library.
+ * <br />  2020.3.5 - release 1.0.
+ * <br />  2020.3.25 - release 1.1. 
+ * <br />  : change recover callback positon. from the end of function, to the first of function.
+ * <br />  : release device filter limit.
  * @namespace
  */
+
+'use strict';
 
 (function (windows, undefined) {
     /**@private */
@@ -41,7 +48,7 @@
         _elpusk.framework.coffee = {};
 
         /** 
-         * @class coffee class singleton pattern.
+         * @class coffee class. used by singleton pattern.
         */
         _elpusk.framework.coffee = (function(){
             /** 
@@ -70,8 +77,7 @@
                  * @constant {map} 
                  *  @description error code to error message map.
                 */                
-                var _error_name_message =
-                [
+                var _error_name_message = [
                     {name:'en_e_server_connect',message:"not connected to server"}
                     ,{name:'en_e_device_open',message:"device is not openned"}
                     ,{name:'en_e_server_mismatch_action',message:"server action code is not identical"}
@@ -152,8 +158,7 @@
                  * @returns {string}
                  * @description get error message with error name
                 */                
-                function _get_error_message(s_error_name)
-                {
+                function _get_error_message(s_error_name){
                     var s_message="";
 
                     do{
@@ -216,8 +221,7 @@
                  * @returns {string}
                  * @description get URL of coffee manager.
                 */                
-                function _get_server_url(s_protocol, s_port)
-                {
+                function _get_server_url(s_protocol, s_port){
                     var b_result = true;
                     var s_used_port = "443";
                     var s_used_protocol = "wss";
@@ -251,15 +255,18 @@
                     var b_result = false;
             
                     do {
-                        if (typeof s_request_type === 'undefined')
+                        if (typeof s_request_type === 'undefined'){
                             continue;
-                        if (typeof s_request_type !== 'string')
+                        }
+                        if (typeof s_request_type !== 'string'){
                             continue;
+                        }
                         switch (s_request_type) {
                             case _type_request_type.CLINET_TO_SERVER:
                             case _type_request_type.SERVER_TO_CLINET:
                             case _type_request_type.SYSTEM_EVENT:
                                 break;
+                            default:
                                 continue;
                         }//end switch
             
@@ -279,14 +286,17 @@
                     var b_result = false;
             
                     do {
-                        if (typeof s_packet_owner === 'undefined')
+                        if (typeof s_packet_owner === 'undefined'){
                             continue;
-                        if (typeof s_packet_owner !== 'string')
+                        }
+                        if (typeof s_packet_owner !== 'string'){
                             continue;
+                        }
                         switch (s_packet_owner) {
                             case _type_packet_owner.DEVICE:
                             case _type_packet_owner.MANAGER:
                                 break;
+                            default:
                                 continue;
                         }//end switch
             
@@ -306,10 +316,12 @@
                     var b_result = false;
             
                     do {
-                        if (typeof s_action_code === 'undefined')
+                        if (typeof s_action_code === 'undefined'){
                             continue;
-                        if (typeof s_action_code !== 'string')
+                        }
+                        if (typeof s_action_code !== 'string'){
                             continue;
+                        }
                         switch (s_action_code) {
                             case _type_action_code.CONTROL_SHOW:
                             case _type_action_code.DEVICE_CANCEL:
@@ -342,14 +354,17 @@
                     var b_result = false;
             
                     do {
-                        if (typeof s_data_field_type === 'undefined')
+                        if (typeof s_data_field_type === 'undefined'){
                             continue;
-                        if (typeof s_data_field_type !== 'string')
+                        }
+                        if (typeof s_data_field_type !== 'string'){
                             continue;
+                        }
                         switch (s_data_field_type) {
                             case _type_data_field_type.HEX_STRING:
                             case _type_data_field_type.STRING_OR_STRING_ARRAY:
                                 break;
+                            default:
                                 continue;
                         }//end switch
             
@@ -369,22 +384,26 @@
                     var b_result = false;
             
                     do {
-                        if (typeof session_number === 'undefined')
+                        if (typeof session_number === 'undefined'){
                             continue;
-                        if (typeof session_number !== 'string' && typeof session_number !== 'number')
+                        }
+                        if (typeof session_number !== 'string' && typeof session_number !== 'number'){
                             continue;
+                        }
                         //
                         var n_session = 0;
                         if (typeof session_number === 'string') {
                             n_session = parseInt(session_number);
-                            if (isNaN(n_session))
+                            if (isNaN(n_session)){
                                 continue;
+                            }
                         }
                         else {
                             n_session = session_number;
                         }
-                        if (n_session == const_n_undefined_session_number)
+                        if (n_session == const_n_undefined_session_number){
                             continue;
+                        }
             
                         b_result = true;
                     } while (false);
@@ -402,22 +421,26 @@
                     var b_result = false;
             
                     do {
-                        if (typeof device_index === 'undefined')
+                        if (typeof device_index === 'undefined'){
                             continue;
-                        if (typeof device_index !== 'string' && typeof device_index !== 'number')
+                        }
+                        if (typeof device_index !== 'string' && typeof device_index !== 'number'){
                             continue;
+                        }
                         //
                         var n_device_index = 0;
                         if (typeof device_index === 'string') {
                             n_device_index = parseInt(device_index);
-                            if (isNaN(n_device_index))
+                            if (isNaN(n_device_index)){
                                 continue;
+                            }
                         }
                         else {
                             n_device_index = device_index;
                         }
-                        if (n_device_index == const_n_undefined_device_index)
+                        if (n_device_index == const_n_undefined_device_index){
                             continue;
+                        }
             
                         b_result = true;
                     } while (false);
@@ -435,22 +458,26 @@
                     var b_result = false;
             
                     do {
-                        if (typeof device_id === 'undefined')
+                        if (typeof device_id === 'undefined'){
                             continue;
-                        if (typeof device_id !== 'string' && typeof device_id !== 'number')
+                        }
+                        if (typeof device_id !== 'string' && typeof device_id !== 'number'){
                             continue;
+                        }
                         //
                         var n_device_id = 0;
                         if (typeof device_id === 'string') {
                             n_device_id = parseInt(device_id);
-                            if (isNaN(n_device_id))
+                            if (isNaN(n_device_id)){
                                 continue;
+                            }
                         }
                         else {
                             n_device_id = device_id;
                         }
-                        if (n_device_id < 0 || n_device_id > 255)
+                        if (n_device_id < 0 || n_device_id > 255){
                             continue;
+                        }
             
                         b_result = true;
                     } while (false);
@@ -477,28 +504,36 @@
                 ) {
                     var b_result = false;
                     do {
-                        if (!_is_valid_packet_owner(s_packet_owner))
+                        if (!_is_valid_packet_owner(s_packet_owner)){
                             continue;
-                        if (!_is_valid_session_number(_s_session))
-                            continue;
-                        if (!_is_valid_device_index(n_device_index)) {
-                            if (n_device_index != const_n_undefined_device_index)
-                                continue;
                         }
-                        if (!_is_valid_action_code(s_action_code))
+                        if (!_is_valid_session_number(_s_session)){
                             continue;
-                        if (!_is_valid_device_id(n_in_id))
+                        }
+                        if (!_is_valid_device_index(n_device_index)) {
+                            if (n_device_index != const_n_undefined_device_index){
+                                continue;
+                            }
+                        }
+                        if (!_is_valid_action_code(s_action_code)){
                             continue;
-                        if (!_is_valid_device_id(n_out_id))
+                        }
+                        if (!_is_valid_device_id(n_in_id)){
                             continue;
-                        if (!_is_valid_data_field_type(s_data_field_type))
+                        }
+                        if (!_is_valid_device_id(n_out_id)){
                             continue;
+                        }
+                        if (!_is_valid_data_field_type(s_data_field_type)){
+                            continue;
+                        }
             
                         b_result = true;
                     } while (false);
             
-                    if (!b_result)
+                    if (!b_result){
                         return undefined;
+                    }
             
                     var json_packet = {
                         request_type: _type_request_type.CLINET_TO_SERVER,
@@ -510,7 +545,7 @@
                         out_id: Number(n_out_id),
                         data_field_type: s_data_field_type,
                         data_field: data_field
-                    }
+                    };
             
                     return json_packet;
                 }
@@ -547,11 +582,14 @@
                             }
             
                             _websocket.onerror = function(evt){
-                                reject(evt);
                                 _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                reject(evt);
                             }
 
                             _websocket.onmessage = function (evt) {
+                                //recover default handler.
+                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                 var json_obj = JSON.parse(evt.data);
                                 if (json_obj.action_code == _type_action_code.ECHO) {
                                     resolve(json_obj.data_field);
@@ -559,9 +597,6 @@
                                 else {
                                     reject(_get_error_object('en_e_server_mismatch_action'));
                                 }
-                                
-                                //recover default handler.
-                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
                             }
             
                             //send request
@@ -582,7 +617,7 @@
                                 , 0
                                 , s_used_data_type
                                 , String(s_echo_data)
-                            )
+                            );
             
                             var s_json_packet = JSON.stringify(json_packet);
                             _websocket.send(s_json_packet);
@@ -597,8 +632,7 @@
                  * @param {Event} evt
                  * @description default callback function of websocket open event.
                 */                
-               function _on_def_open(evt)
-                {
+               function _on_def_open(evt){
                     //console.log('_on_def_open');
                 }
 
@@ -608,8 +642,7 @@
                  * @param {Event} evt
                  * @description default callback function of websocket close event.
                 */                
-                function _on_def_close(evt)
-                {
+                function _on_def_close(evt){
                     //console.log('_on_def_close');
                     _b_connet = false;
                     _s_session = "";
@@ -621,8 +654,7 @@
                  * @param {Event} evt
                  * @description default callback function of websocket reecive event.
                 */                
-                function _on_def_message_json_format(evt)
-                {
+                function _on_def_message_json_format(evt){
                     //console.log('_on_def_message_json_format');
                     do{
                         if( typeof _system_handler === 'undefined'){
@@ -646,8 +678,7 @@
                  * @param {Event} evt
                  * @description default callback function of websocket error event.
                 */                
-                function _on_def_error(evt)
-                {
+                function _on_def_error(evt){
                 }
 
                 return{
@@ -661,8 +692,7 @@
                      * 
                      * @description get error message of error object.
                     */                
-                    get_error_message : function(error_object)
-                    {
+                    get_error_message : function(error_object){
                         return _get_error_message(error_object.name);
                     },
                 
@@ -678,8 +708,7 @@
                      * 
                      * @description connect to server by promise.
                     */                
-                   connect : function (s_protocol, s_port)
-                    {
+                   connect : function (s_protocol, s_port){
                         return new Promise(function (resolve, reject) {
                 
                             var s_url = _get_server_url(s_protocol, s_port);
@@ -693,6 +722,9 @@
                                 _websocket.onclose = function (evt) { _on_def_close(evt); }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (!_b_connet) {
                                         _s_session = json_obj.session_number.toString();
@@ -700,14 +732,10 @@
                                     }
                 
                                     resolve(_s_session);
-
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    reject(evt);
                                 }
                             }
                         });
@@ -732,16 +760,19 @@
                             }
                             else {
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
+                                    //recover default handler
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+
+                                    reject(evt);
                                 }
 
                                 _websocket.onclose = function (evt) {
+                                    //recover default handler
+                                    _websocket.onclose = function (evt) { _on_def_close(evt); }
+
                                     _b_connet = false;
                                     resolve(_s_session);
                                     _s_session = "";
-                                    //recover default handler
-                                    _websocket.onclose = function (evt) { _on_def_close(evt); }
                                 }
 
                                 _websocket.close();
@@ -798,8 +829,7 @@
                      * <br /> this list contains only the managed device on server. 
                     */                
                     get_device_list : function (s_filter) {
-                        return new Promise(function (resolve, reject)
-                        {
+                        return new Promise(function (resolve, reject){
                 
                             do {
                                 if (!_b_connet) {
@@ -812,15 +842,13 @@
                                 var action_code = _type_action_code.DEVICE_LIST;
                 
                                 if (typeof s_filter !== 'undefined') {
-                                    if (s_filter !== "hid") {
-                                        //support only hid filter in versuin 1.0.0
-                                        reject(_get_error_object('en_e_server_unsupport_data'));
-                                        continue;
-                                    }
                                     s_used_filter = s_filter;
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -828,13 +856,12 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
+                                    //recover default handler.
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -846,7 +873,7 @@
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
                                     , [String(s_used_filter)]
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -884,6 +911,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         if(json_obj.data_field == "success"){
@@ -897,13 +927,10 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -915,7 +942,7 @@
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
                                     , String(s_path)
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -955,6 +982,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -962,13 +992,11 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -979,7 +1007,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -1038,6 +1066,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -1045,13 +1076,11 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -1063,7 +1092,7 @@
                                     , n_out_id
                                     , _type_data_field_type.HEX_STRING
                                     , String(s_hex_string)
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -1120,6 +1149,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -1127,12 +1159,10 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -1143,7 +1173,7 @@
                                     , n_in_id
                                     , 0
                                     , _type_data_field_type.HEX_STRING
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -1212,6 +1242,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -1219,12 +1252,10 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -1236,7 +1267,7 @@
                                     , n_out_id
                                     , _type_data_field_type.HEX_STRING
                                     , String(s_hex_string)
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -1299,6 +1330,9 @@
                                 }
                 
                                 _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         resolve(json_obj.data_field);
@@ -1306,12 +1340,10 @@
                                     else {
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
                                 }
                                 _websocket.onerror = function(evt){
-                                    reject(evt);
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    reject(evt);
                                 }
                 
                                 //send request
@@ -1322,7 +1354,7 @@
                                     , n_in_id
                                     , n_out_id
                                     , _type_data_field_type.HEX_STRING
-                                )
+                                );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -1338,6 +1370,14 @@
         
             /*** @return {_instance} the instance of coffee class. */
             return{
+                /** 
+                 * @public 
+                 * @function get_instance
+                 * 
+                 * @returns {coffee class instatnce } return coffee class instance.
+                 * 
+                 * @description coffee class use singleton pattern. you can get the instance of coffee class.
+                */                   
                 get_instance : function(){
                     if(!_instance){
                         _instance = _constructor();
@@ -1355,7 +1395,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.0.0";
+        return "1.1.0";
     }
 
     /**
