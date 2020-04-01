@@ -46,7 +46,7 @@
     <br />
 
     <br />
-    <input type="button" id="button_get_id" onclick="on_button_get_id();" value="get id of lpu237" />
+    <input type="button" id="button_get_id" onclick="on_button_system_info();" value="get id of lpu237" />
     <br />
 
     <br />
@@ -85,16 +85,8 @@
         function _test(){
             addMessage(" : test : ");
 
-            var buffer = new ArrayBuffer(20);
-            var uint8View = new Uint8Array(buffer);
-            var uint32View = new Uint32Array(buffer);
-
-            uint32View[0] = 511;
-            uint32View[1] = 259;
-
-            addMessage(uint8View.toString());
-            addMessage(uint32View.toString());
         }
+
 
 
         function init() {
@@ -273,9 +265,9 @@
 
         ///////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////
-        function on_button_get_id(){
+        function on_button_system_info(){
             var server = elpusk.framework.coffee.get_instance();
-            server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_request_data_field_of_get_id())
+            server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_generate())
             .then(
                 function (s_rx) {
                     do{
