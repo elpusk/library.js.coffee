@@ -267,6 +267,7 @@
         ///////////////////////////////////////////////////////////////////
         function on_button_system_info(){
             var server = elpusk.framework.coffee.get_instance();
+            var 
             server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_generate())
             .then(
                 function (s_rx) {
