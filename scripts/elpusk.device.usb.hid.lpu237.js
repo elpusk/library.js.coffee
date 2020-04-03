@@ -242,21 +242,6 @@
         var _const_default_buzzer_frequency = 25000;	// default buzzer frequency.
         var _const_default_buzzer_frequency_for_wiznova_board = 16000;	// default buzzer frequency. ganymede.
 
-        function _is_generated_request_valied( s_requset ){
-            var b_result = false;
-
-            do{
-                if( typeof s_requset !== 'string'){
-                    continue;
-                }
-                if( s_requset.length <= 0 ){
-                    continue;
-                }
-                b_result = true;
-            }while(false);
-            return b_result;
-        }
-
         function _first_version_greater_then_second_version(first_version,second_version){
             var b_result = false;
 
@@ -336,27 +321,6 @@
             return b_result;
         }
 
-        /**
-         * @private
-         * @function _get_dword_hex_string
-         * @param {number} dw_data unsigned int - double word number.
-         * @returns {string} little endian double word hex string format. always 8 characters.
-         */
-        function _get_dword_hex_string( dw_data ){
-            var s_big_hex = dw_data.toString(16);
-
-            s_big_hex = s_big_hex.replace(/^(.(..)*)$/, "0$1"); // add a leading zero if needed
-            var n_need_zeros = 4*2 - s_big_hex.length;
-            for( var i = 0; i<n_need_zeros; i++ ){
-                s_big_hex = "0" + s_big_hex;    //padding for dword.
-            }//end for
-
-            var a = s_big_hex.match(/../g);     // split number in groups of two
-            a.reverse();                        // reverse the groups
-
-            var s_little_hex = a.join("");
-            return s_little_hex;
-        }
 
         /**
          * @private
@@ -381,20 +345,10 @@
                     s_tag.length = 14*2;
                 }
 
-                var s_len = _get_byte_hex_string(s_tag.length / 2);
+                var s_len = elpusk.util.get_byte_hex_string(s_tag.length / 2);
                 s_out = s_len + s_tag;
             }while(false);
             return s_out;
-        }
-        /**
-         * @private
-         * @function _get_byte_hex_string
-         * @param {number} c_data unsigned char
-         * @returns {string} little endian byte hex string format. always 2 characters.
-         */
-        function _get_byte_hex_string( n_data ){
-            var s_dword = _get_dword_hex_string(n_data);
-            return s_dword.substring(0,2);
         }
 
         /**
@@ -404,9 +358,10 @@
          * @param {string} s_type_request the type of request.  this valus is one of _type_cmd.
          * @param {string} s_hex_sub the type of request. 2 character hexcimal string format.
          * @param {string} s_hex_data_field the data field of request. hexcimal string format. none separator.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */
         function _generate_request( queue_s_tx, s_type_request, s_hex_sub, s_hex_data_field ){
+            var b_result = false;
             var s_request = "";
 
             do{
@@ -433,8 +388,9 @@
                 }
 
                 queue_s_tx.push(s_request);
+                b_result = true;
             }while(false);
-            return s_request;
+            return b_result;
         }
         
         /**
@@ -443,9 +399,10 @@
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_offset the offset of a system parameter.
          * @param {number} n_size the size of a system parameter.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */
         function _generate_config_get( queue_s_tx,n_offset, n_size ){
+            var b_result = false;
             var s_request = "";
 
             do{
@@ -462,24 +419,24 @@
                     continue;
                 }
 
-                var s_offset = _get_dword_hex_string( n_offset )
-                var s_size = _get_dword_hex_string(n_size);
+                var s_offset = elpusk.util.get_dword_hex_string( n_offset )
+                var s_size = elpusk.util.get_dword_hex_string(n_size);
                 var s_data = s_offset + s_size;
 
-                s_request = _generate_request(
+                b_result = _generate_request(
                     queue_s_tx
                     ,REQ_CONFIG
                     ,_type_system_request_config.request_config_get.toString(16)
                     ,s_data);
             }while(false);
-            return s_request;
+            return b_result;
         }
         
         /**
          * @private
          * @function _generate_get_version
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for get version request
+         * @return {boolean} true(success) or false(failure).
         */
        function _generate_get_version(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_VERSION;
@@ -491,7 +448,7 @@
          * @private
          * @function _generate_get_name
          * @param {string[]} generated request will be saved in this queue( array type ).
-         * @return {string} hex string for get name request
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_name(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_NAME;
@@ -503,7 +460,7 @@
          * @private
          * @function _generate_get_device_support_mmd1000
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for get support mmd1000
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_device_support_mmd1000(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_IS_MMD1000,"00");
@@ -513,7 +470,7 @@
          * @private
          * @function _generate_get_uid
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for get id request.
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_uid(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_GET_ID,"00");
@@ -523,7 +480,7 @@
          * @private
          * @function _generate_get_device_ibutton_type
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for device is only i-button request.
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_device_ibutton_type(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_IS_ONLY_IBUTTON,"00");
@@ -533,7 +490,7 @@
          * @private
          * @function _generate_get_device_type
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for device is standard.
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_device_type(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_IS_STANDARD,"00");
@@ -543,7 +500,7 @@
          * @private
          * @function _generate_get_global_pre_postfix_send_condition
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of global pre/postfix send condition.
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_global_pre_postfix_send_condition(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_G_TAG_CONDITION;
@@ -555,7 +512,7 @@
          * @private
          * @function _generate_get_interface
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of device interface
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_interface(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_INTERFACE;
@@ -567,7 +524,7 @@
          * @private
          * @function _generate_get_language
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of language
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_language(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_KEYMAP;
@@ -579,7 +536,7 @@
          * @private
          * @function _generate_get_buzzer_frequency
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of buzzer frequency
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_buzzer_frequency(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_BUZZER_FREQ;
@@ -591,7 +548,7 @@
          * @private
          * @function _generate_get_boot_run_time
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of boot running time
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_boot_run_time(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_BOOT_RUN_TIME;
@@ -603,67 +560,69 @@
          * @private
          * @function _generate_get_enable_track
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr track enable
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_enable_track(queue_s_tx,n_track){
+            var b_result = false;
             var s_request = "";
             switch(n_track){
                 case 0:
                     n_offset = _type_system_offset.SYS_OFFSET_ENABLE_TRACK[n_track];
                     n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
                     n_offset = _type_system_offset.SYS_OFFSET_ENABLE_TRACK[n_track];
                     n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
                     n_offset = _type_system_offset.SYS_OFFSET_ENABLE_TRACK[n_track];
                     n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
                     break;
             }//end switch
-            return s_request;      
+            return b_result;      
         }
 
         /**
          * @private
          * @function _generate_get_direction
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr reading direction
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_direction(queue_s_tx,n_track){
+            var b_result = false;
             var s_request = "";
             switch(n_track){
                 case 0:
                     n_offset = _type_system_offset.SYS_OFFSET_DIRECTION[n_track];
                     n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
                     n_offset = _type_system_offset.SYS_OFFSET_DIRECTION[n_track];
                     n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
                     n_offset = _type_system_offset.SYS_OFFSET_DIRECTION[n_track];
                     n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
                     break;
             }//end switch
-            return s_request;      
+            return b_result;      
         }
 
         /**
          * @private
          * @function _generate_get_global_prefix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr global prefix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_global_prefix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_G_PRE;
@@ -675,7 +634,7 @@
          * @private
          * @function _generate_get_global_postfix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr global postfix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_global_postfix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_G_POST;
@@ -687,67 +646,69 @@
          * @private
          * @function _generate_get_private_prefix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr private prefix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_private_prefix(queue_s_tx,n_track){
+            var b_result = false;
             var s_request = "";
             switch(n_track){
                 case 0:
                     n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
                     n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
                     n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
                     n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
                     n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
                     n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
                     break;
             }//end switch
-            return s_request;      
+            return b_result;      
         }
 
         /**
          * @private
          * @function _generate_get_private_postfix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of msr private postfix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_private_postfix(queue_s_tx,n_track){
+            var b_result = false;
             var s_request = "";
             switch(n_track){
                 case 0:
                     n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];
                     n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
                     n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];;
                     n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
                     n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];;
                     n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
-                    s_request = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
                     break;
             }//end switch
-            return s_request;      
+            return b_result;      
         }
 
         /**
          * @private
          * @function _generate_get_ibutton_prefix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of i-button prefix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_ibutton_prefix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_PRE;
@@ -759,7 +720,7 @@
          * @private
          * @function _generate_get_ibutton_postfix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of i-button postfix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_ibutton_postfix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_POST;
@@ -771,7 +732,7 @@
          * @private
          * @function _generate_get_uart_prefix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of uart prefix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_uart_prefix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_PRE;
@@ -783,7 +744,7 @@
          * @private
          * @function _generate_get_uart_postfix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of uart postfix
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_uart_postfix(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_POST;
@@ -795,7 +756,7 @@
          * @private
          * @function _generate_get_f12_ibutton
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of i-button F12 mode.
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_f12_ibutton(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_F12_IBUTTON;
@@ -807,7 +768,7 @@
          * @private
          * @function _generate_get_zeros_ibutton
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of i-button zeros
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_zeros_ibutton(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_ZEROS_IBUTTON;
@@ -819,7 +780,7 @@
          * @private
          * @function _generate_get_zeros_7times_ibutton
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of i-button 7times zeros
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_zeros_7times_ibutton(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_ZERO_7TIMES_IBUTTON;
@@ -831,7 +792,7 @@
          * @private
          * @function _generate_get_addmit_code_stick_ibutton
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for setting of device addmit's "code stick" mode.
+         * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_addmit_code_stick_ibutton(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_ADDMIT_CODE_STCIK_IBUTTON;
@@ -847,9 +808,10 @@
          * @param {number} n_offset the offset of a system parameter.
          * @param {number} n_size the size of a system parameter.
          * @param {string} s_setting_data setting data.( hex string , none separator)
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */
         function _generate_config_set( queue_s_tx,n_offset, n_size, s_setting_data ){
+            var b_result = false;
             var s_request = "";
 
             do{
@@ -866,18 +828,18 @@
                     continue;
                 }
 
-                var s_offset = _get_dword_hex_string( n_offset )
-                var s_size = _get_dword_hex_string(n_size);
+                var s_offset = elpusk.util.get_dword_hex_string( n_offset )
+                var s_size = elpusk.util.get_dword_hex_string(n_size);
                 var s_data = s_offset + s_size + s_setting_data;
 
-                s_request = _generate_request(
+                b_result = _generate_request(
                     queue_s_tx
                     ,REQ_CONFIG
                     ,_type_system_request_config.request_config_set.toString(16)
                     ,s_data
                     );
             }while(false);
-            return s_request;
+            return b_result;
         }
 
         //generate IO pattern with _generate_config_set()
@@ -886,7 +848,7 @@
          * @function _generate_set_global_pre_postfix_send_condition
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {boolean} b_global_pre_postfix_send_condition setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */
         function _generate_set_global_pre_postfix_send_condition(queue_s_tx, b_global_pre_postfix_send_condition){
             var n_offset = _type_system_offset.SYS_OFFSET_G_TAG_CONDITION;
@@ -894,7 +856,7 @@
             var s_data = "00000000";//dword zero
 
             if(b_global_pre_postfix_send_condition ){
-                s_data = _get_dword_hex_string(1);
+                s_data = elpusk.util.get_dword_hex_string(1);
             }
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
@@ -905,12 +867,12 @@
          * @function _generate_set_interface
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_interface setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_interface(queue_s_tx,n_interface){
             var n_offset = _type_system_offset.SYS_OFFSET_INTERFACE;
             var n_size = _type_system_size.SYS_SIZE_INTERFACE;
-            var s_data = _get_byte_hex_string(n_interface);
+            var s_data = elpusk.util.get_byte_hex_string(n_interface);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -919,12 +881,13 @@
          * @function _generate_set_language
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_language setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_language(queue_s_tx, n_language ){
+            //todo more code.
             var n_offset = _type_system_offset.SYS_OFFSET_KEYMAP;
             var n_size = _type_system_size.SYS_SIZE_KEYMAP;
-            var s_data = _get_dword_hex_string(n_language);
+            var s_data = elpusk.util.get_dword_hex_string(n_language);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -933,12 +896,12 @@
          * @function _generate_set_buzzer_frequency
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_buzzer setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_buzzer_frequency(queue_s_tx,n_buzzer){
             var n_offset = _type_system_offset.SYS_OFFSET_BUZZER_FREQ;
             var n_size = _type_system_size.SYS_SIZE_BUZZER_FREQ;
-            var s_data = _get_dword_hex_string(n_buzzer);
+            var s_data = elpusk.util.get_dword_hex_string(n_buzzer);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -948,14 +911,14 @@
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_track msr track number 0~2
          * @param {boolean} b_enable setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */
         function _generate_set_enable_track(queue_s_tx,n_track,b_enable){
             var n_offset = _type_system_offset.SYS_OFFSET_ENABLE_TRACK[n_track];
             var n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
             var s_data = "00";
             if(b_enable){
-                s_data = _get_byte_hex_string(1);
+                s_data = elpusk.util.get_byte_hex_string(1);
             }
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
@@ -966,12 +929,12 @@
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_track msr track number 0~2
          * @param {number} n_direction setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_direction(queue_s_tx,n_track,n_direction){
             var n_offset = _type_system_offset.SYS_OFFSET_DIRECTION[n_track];
             var n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
-            var s_data = _get_byte_hex_string(n_direction);
+            var s_data = elpusk.util.get_byte_hex_string(n_direction);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -980,7 +943,7 @@
          * @function _generate_set_global_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_global_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_G_PRE;
@@ -994,7 +957,7 @@
          * @function _generate_set_global_postfix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_global_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_G_POST;
@@ -1005,10 +968,10 @@
 
         /**
          * @private
-         * @function _generate_set_buzzer_frequency
+         * @function _generate_set_private_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_private_prefix(queue_s_tx,n_track,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
@@ -1019,10 +982,10 @@
 
         /**
          * @private
-         * @function _generate_set_buzzer_frequency
+         * @function _generate_set_private_postfix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_private_postfix(queue_s_tx,n_track,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];
@@ -1035,11 +998,49 @@
          * @private
          * @function _generate_set_key_map
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number} n_buzzer setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @param {number} n_language setting data.
+         * @returns {boolean} true(success) or false(failure).
          */        
-        function _generate_set_key_map(queue_s_tx){
-            //TODO........
+        function _generate_set_key_map(queue_s_tx,n_language){
+            var b_result = false;
+
+            do{
+                //USB map
+                var n_offset = _const_address_system_hid_key_map_offset;
+                var n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                var s_full_data = elpusk.util.keyboard.map.get_ascii_to_hid_key_map_string(n_language);
+                var s_half_data = s_full_data.substring(0,s_full_data,length/2);
+                if(!_generate_config_set(queue_s_tx,n_offset,n_size,s_half_data) ){
+                    continue;
+                }
+
+                n_offset = _const_address_system_hid_key_map_offset + elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                s_half_data = s_full_data.substring(s_full_data,length/2);
+                if(!_generate_config_set(queue_s_tx,n_offset,n_size,s_half_data)){
+                    continue;
+                }
+
+                //PS2 map
+                n_offset = _const_address_system_ps2_key_map_offset;
+                n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                s_full_data = elpusk.util.keyboard.map.get_ascii_to_ps2_key_map_string(n_language);
+                s_half_data = s_full_data.substring(0,s_full_data,length/2);
+                if(!_generate_config_set(queue_s_tx,n_offset,n_size,s_half_data)){
+                    continue;
+                }
+
+                n_offset = _const_address_system_ps2_key_map_offset + elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                s_half_data = s_full_data.substring(s_full_data,length/2);
+                if(!_generate_config_set(queue_s_tx,n_offset,n_size,s_half_data) ){
+                    continue;
+                }
+
+                b_result = true;
+            }while(false);
+
+            return b_result;
         }
 
         /**
@@ -1047,7 +1048,7 @@
          * @function _generate_set_ibutton_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_ibutton_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_PRE;
@@ -1061,7 +1062,7 @@
          * @function _generate_set_ibutton_postfix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_ibutton_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_POST;
@@ -1075,7 +1076,7 @@
          * @function _generate_set_uart_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_uart_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_PRE;
@@ -1089,7 +1090,7 @@
          * @function _generate_set_uart_postfix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_uart_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_POST;
@@ -1103,7 +1104,7 @@
          * @function _generate_set_f12_ibutton
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_f12_ibutton(queue_s_tx,cblank){
             var n_offset = _type_system_offset.SYS_OFFSET_F12_IBUTTON;
@@ -1111,7 +1112,7 @@
             var s_data = "";
 
             for( var i = 0; i<4; i++ ){
-                s_data.push(_get_byte_hex_string(cblank[i]));
+                s_data.push(elpusk.util.get_byte_hex_string(cblank[i]));
             }//end for
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
@@ -1122,7 +1123,7 @@
          * @function _generate_set_zeros_ibutton
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {{boolean} true(success) or false(failure).
          */        
         function _generate_set_zeros_ibutton(queue_s_tx,cblank){
             return _generate_set_f12_ibutton(queue_s_tx,cblank);
@@ -1133,7 +1134,7 @@
          * @function _generate_set_zeros_7times_ibutton
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_zeros_7times_ibutton(queue_s_tx,cblank){
             return _generate_set_f12_ibutton(queue_s_tx,cblank);
@@ -1144,7 +1145,7 @@
          * @function _generate_set_addmit_code_stick
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
-         * @returns {string} request data by hexcimal string format. none separator.
+         * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_addmit_code_stick(queue_s_tx,cblank){
             return _generate_set_f12_ibutton(queue_s_tx,cblank);
@@ -1159,7 +1160,7 @@
          * @private
          * @function _generate_enter_opos_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for enter opos mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_enter_opos_mode(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_ENTER_OPOS,"00");
@@ -1169,7 +1170,7 @@
          * @private
          * @function _generate_leave_opos_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for leave opos mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_leave_opos_mode(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_LEAVE_OPOS,"00");
@@ -1179,7 +1180,7 @@
          * @private
          * @function _generate_enter_config_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for enter config mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_enter_config_mode(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_ENTER_CS,"00");
@@ -1189,7 +1190,7 @@
          * @private
          * @function _generate_leave_config_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for leave config mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_leave_config_mode(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_LEAVE_CS,"00");
@@ -1199,7 +1200,7 @@
          * @private
          * @function _generate_apply_config_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for leave config mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_apply_config_mode(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_APPLY,"00");
@@ -1209,12 +1210,14 @@
          * @private
          * @function _generate_run_boot_loader
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {string} hex string for leave config mode
+         * @return {boolean} true(success) or false(failure).
         */
         function _generate_run_boot_loader(queue_s_tx){
             return _generate_request( queue_s_tx,_type_cmd.REQ_GOTO_BOOT,"00");
         }
 
+
+        
         /**
          * @constructs elpusk.device.usb.hid.lpu237
          * @param {string} s_path the path of usb hid lpu237 device.
@@ -1399,23 +1402,19 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_get_system_information
-         * @return {boolean} generate success or failure
+         * @return {boolean} generate result success or failure
         */
         _elpusk.device.usb.hid.lpu237.prototype.generate_get_system_information = function(){
             var b_result = false;
-            var s_req;
 
 			do {
-                s_req = _generate_enter_config_mode(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_enter_config_mode(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_config );
 
-                s_req = _generate_get_version(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_version(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_version );
                 
-                s_req = _generate_leave_config_mode(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_leave_config_mode(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
                 
 				b_result = true;
@@ -1426,57 +1425,47 @@
                 this._deque_generated_tx.length = 0;
             }
 
-            return requests;
+            return b_result;
         }
 
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_get_parameters
-         * @return {boolean} generate success or failure
+         * @return {boolean} generate result success or failure
         */
        _elpusk.device.usb.hid.lpu237.prototype.generate_get_parameters = function(){
             var b_result = false;
-            var s_req;
 
             do {
-                s_req = _generate_enter_config_mode(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_enter_config_mode(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_config );
 
-                s_req = _generate_get_version(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_version(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_version );
 
                 /////////////////////////////
                 // setting detail
-                s_req = _generate_get_global_pre_postfix_send_condition(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_global_pre_postfix_send_condition(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_global_prepostfix_send_condition );
                 
-                s_req = _generate_get_device_support_mmd1000(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_device_support_mmd1000(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_support_mmd1000 );
 
-                s_req = _generate_get_interface(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_interface(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_interface );
                 
-                s_req = _generate_get_language(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_language(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_language );
                 
-                s_req = _generate_get_buzzer_frequency(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_buzzer_frequency(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_buzzer_frequency );
 
-                s_req = _generate_get_boot_run_time(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_boot_run_time(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_boot_run_time );
                 
                 b_result = true;
                 for( var i = 0; i<3; i++){
-                    s_req = _generate_get_direction(this._dequeu_s_tx,i);
-                    if(!_is_generated_request_valied(s_req)){ b_result = false; break;}
+                    if( !_generate_get_direction(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_direction1+i );
                 }//end for
                 if( !b_result ){
@@ -1485,68 +1474,55 @@
                 b_result = false;
 
                 if( _first_version_greater_then_second_version( this._version,[3,0,0,0]) ){
-                    s_req = _generate_get_ibutton_prefix(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_ibutton_prefix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_prefix_ibutton );
                         
-                    s_req = _generate_get_ibutton_postfix(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_ibutton_postfix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_postfix_ibutton );
     
-                    s_req = _generate_get_uart_prefix(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_uart_prefix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_prefix_uart );
                         
-                    s_req = _generate_get_uart_postfix(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_uart_postfix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_postfix_uart );
                         
-                    s_req = _generate_get_f12_ibutton(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_f12_ibutton(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_f12_ibutton );
                         
-                    s_req = _generate_get_zeros_ibutton(this._dequeu_s_tx);
-                    if(!_is_generated_request_valied(s_req)){ continue;}
+                    if( !_generate_get_zeros_ibutton(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros_ibutton );
                 }
 
                 if( _first_version_greater_then_second_version([4,0,0,0],this._version) ){
                     if( _first_version_greater_then_second_version(this._version, [3,15,0,0]) ){
-                        s_req =  _generate_get_zeros_7times_ibutton(this._dequeu_s_tx);
-                        if(!_is_generated_request_valied(s_req)){ continue;}
+                        if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros7_times_ibutton );
                     }
                     if( _first_version_greater_then_second_version(this._version, [3,16,0,0]) ){
-                        s_req =  _generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx);
-                        if(!_is_generated_request_valied(s_req)){ continue;}
+                        if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_get_addmit_code_stick_ibutton );
                     }
                 }
                 else{
                     if( _first_version_greater_then_second_version(this._version, [5,7,0,0]) ){
-                        s_req =  _generate_get_zeros_7times_ibutton(this._dequeu_s_tx);
-                        if(!_is_generated_request_valied(s_req)){ continue;}
+                        if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type._generate_get_zeros_7times_ibutton );
                     }
                     if( _first_version_greater_then_second_version(this._version, [5,8,0,0]) ){
-                        s_req =  _generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx);
-                        if(!_is_generated_request_valied(s_req)){ continue;}
+                        if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_get_addmit_code_stick_ibutton );
                     }
                 }
 
                 b_result = true;
                 for( var i = 0; i<3; i++){
-                    s_req = _generate_get_enable_track(this._dequeu_s_tx,i);
-                    if(!_is_generated_request_valied(s_req)){ b_result = false; break;}
+                    if( !_generate_get_enable_track(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_enable_iso1+i );
                     //
-                    s_req = _generate_get_private_prefix(this._dequeu_s_tx,i);
-                    if(!_is_generated_request_valied(s_req)){ b_result = false; break;}
+                    if( !_generate_get_private_prefix(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix1+i );
                     //
-                    s_req = _generate_get_private_postfix(this._dequeu_s_tx,i);
-                    if(!_is_generated_request_valied(s_req)){ b_result = false; break;}
+                    if( !_generate_get_private_postfix(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix1+i );
 
                 }//end for
@@ -1555,24 +1531,22 @@
                 }
                 b_result = false;
 
-                s_req =  _generate_get_global_prefix(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_global_prefix(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_global_prefix );
         
-                s_req =  _generate_get_global_postfix(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_get_global_postfix(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_global_postfix );
 
                 ////////////////////////////
                 
-                s_req = _generate_leave_config_mode(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if( !_generate_leave_config_mode(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
                 
                 b_result = true;
             } while (false);
             
             if( !b_result ){
+                this._dequeu_s_tx.length = 0;
                 this._deque_generated_tx.length = 0;
             }
 
@@ -1582,78 +1556,90 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_set_parameters
-         * @return {boolean} generate success or failure
+         * @return {boolean} generate result success or failure
         */
-       _elpusk.device.usb.hid.lpu237.prototype.generate_set_parameters = function(){
+        _elpusk.device.usb.hid.lpu237.prototype.generate_set_parameters = function(){
             var b_result = false;
             var s_req = "";
 
             do{
-                s_req = _generate_enter_config_mode(this._dequeu_s_tx);
-                if(!_is_generated_request_valied(s_req)){ continue;}
+                if(!_generate_enter_config_mode(this._dequeu_s_tx) ){ continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_config );
 
                 //
                 if( _first_version_greater_then_second_version(this._version,[3,0,0,0])){
+                    /*
                     // . set device type.
-                    if (!_generate_set_device_type())
+                    if (!_generate_set_device_type())//dummy code
                         continue;
+                    */
 
                     // . set iButton Pretag
-                    if (m_set_change_parameter.find(cp_Prefix_iButton) != m_set_change_parameter.end())
-                        if (!_generate_set_ibutton_prefix())
-                            continue;
+                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
+                        if (!_generate_set_ibutton_prefix(this._dequeu_s_tx,)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    }
 
                     // . set iButton Posttag
-                    if (m_set_change_parameter.find(cp_Postfix_iButton) != m_set_change_parameter.end())
-                        if(!_generate_set_ibutton_postfix())
-                            continue;
+                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_iButton ) >= 0 ){
+                        if (!_generate_set_ibutton_postfix(this._dequeu_s_tx,)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    }
 
                     // . set Uart Pretag
-                    if (m_set_change_parameter.find(cp_Prefix_Uart) != m_set_change_parameter.end())
-                        if(!_generate_set_uart_prefix())
-                            continue;
+                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_Uart ) >= 0 ){
+                        if (!_generate_set_uart_prefix(this._dequeu_s_tx,)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    }
 
                     // . set Uart Posttag
-                    if (m_set_change_parameter.find(cp_Postfix_Uart) != m_set_change_parameter.end())
-                        if(!_generate_set_uart_postfix())
-                            continue;
+                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
+                        if (!_generate_set_uart_postfix(this._dequeu_s_tx,)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    }
 
                     do {//ibutton setting
-                        if (m_set_change_parameter.find(cp_EnableF12iButton) != m_set_change_parameter.end()) {
-                            _generate_set_f12_ibutton();
-                            continue;
+                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
+                            if (!_generate_set_f12_ibutton(this._dequeu_s_tx,)){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if (m_set_change_parameter.find(cp_EnableZerosiButton) != m_set_change_parameter.end()) {
-                            _generate_set_zeros_ibutton();
-                            continue;
+                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
+                            if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,)){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if (m_set_change_parameter.find(cp_EnableZeros7TimesiButton) != m_set_change_parameter.end()) {
-                            _generate_set_zeros_7times_ibutton();
-                            continue;
+                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
+                            if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,)){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if (m_set_change_parameter.find(cp_EnableAddmitCodeStickiButton) != m_set_change_parameter.end()) {
-                            _generate_set_addmit_code_stick();
-                            continue;
+                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
+                            if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,)){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
                     } while (false);
                 }
                 //. set globalPrePostfixSendCondition
-                if (m_set_change_parameter.find(cp_GlobalPrePostfixSendCondition) != m_set_change_parameter.end())
-                    if(_generate_set_global_pre_postfix_send_condition())
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
+                    if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . set interface
-                if (m_set_change_parameter.find(cp_Interface) != m_set_change_parameter.end())
-                    if(!_generate_set_interface())
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
+                    if (!_generate_set_interface(this._dequeu_s_tx,)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . get language
-                if (m_set_change_parameter.find(cp_Language) != m_set_change_parameter.end()) {
-                    if(!_generate_set_language())
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Language ) >= 0 ){
+                    if (!_generate_set_language(this._dequeu_s_tx,)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+
+                if (m_set_change_parameter.find() != m_set_change_parameter.end()) {
+                    if(!())
                         continue;
                     //set key map
                     if (get_removed_key_map_table())
