@@ -106,7 +106,9 @@
             SYS_OFFSET_F12_IBUTTON : 0,
             SYS_OFFSET_ZEROS_IBUTTON : 0,
             SYS_OFFSET_ZERO_7TIMES_IBUTTON : 0,
-            SYS_OFFSET_ADDMIT_CODE_STCIK_IBUTTON : 0
+            SYS_OFFSET_ADDMIT_CODE_STCIK_IBUTTON : 0,
+            SYS_OFFSET_CONTAINER_MAP_INDEX : 103,
+            SYS_OFFSET_INFOMSR_MAP_INDEX : [334,521,708]
         };
         var _type_system_size = {
             SYS_SIZE_VERSION : 4,
@@ -129,7 +131,9 @@
             SYS_SIZE_F12_IBUTTON : 4,
             SYS_SIZE_ZEROS_IBUTTON : 4,
             SYS_SIZE_ZERO_7TIMES_IBUTTON : 4,
-            SYS_SIZE_ADDMIT_CODE_STCIK_IBUTTON : 4
+            SYS_SIZE_ADDMIT_CODE_STCIK_IBUTTON : 4,
+            SYS_SIZE_CONTAINER_MAP_INDEX : 4,
+            SYS_SIZE_INFOMSR_MAP_INDEX : [4,4,4]
         };
 
 		var _type_format = {
@@ -229,7 +233,8 @@
                 
         var _const_min_size_request_header = 3;
         var _const_min_size_response_header = 3;
-        var _const_the_number_of_reack = 3;
+        var _const_the_number_of_track = 3;
+        var _const_the_size_of_name = 16;
         var _const_the_size_of_uid = 4 * 4;
         var _const_the_size_of_system_blank = 4;
         var _const_the_number_of_frequency = 22;
@@ -884,11 +889,39 @@
          * @returns {boolean} true(success) or false(failure).
          */        
         function _generate_set_language(queue_s_tx, n_language ){
-            //todo more code.
-            var n_offset = _type_system_offset.SYS_OFFSET_KEYMAP;
-            var n_size = _type_system_size.SYS_SIZE_KEYMAP;
-            var s_data = elpusk.util.get_dword_hex_string(n_language);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            var b_result  = false;
+
+            do{
+                var n_offset = 0;
+                var n_size = 0;
+                var s_full_data = "";
+                var s_half_data = "";
+
+                n_offset = _type_system_offset.SYS_OFFSET_CONTAINER_MAP_INDEX;
+                n_size = _type_system_size.SYS_SIZE_CONTAINER_MAP_INDEX;
+                s_data = elpusk.util.get_dword_hex_string(n_language);
+                if( !_generate_config_set(queue_s_tx,n_offset,n_size,s_data) ){
+                    continue;
+                }
+
+                b_result = true;
+                for( var i = 0; i<_const_the_number_of_track; i++ ){
+                    n_offset = _type_system_offset.SYS_OFFSET_INFORMSR_MAP_INDEX[i];
+                    n_size = _type_system_size.SYS_SIZE_INFORMSR_MAP_INDEX[i];
+                    if( !_generate_config_set(queue_s_tx,n_offset,n_size,s_data) ){
+                        b_result = false;
+                        break;
+                    }
+    
+                }//end for
+                if(!b_result){
+                    continue;
+                }
+                //
+                b_result = true;
+            }while(false);
+
+            return b_result;
         }
 
         /**
@@ -1005,11 +1038,15 @@
             var b_result = false;
 
             do{
+                var n_offset = 0;
+                var n_size = 0;
+                var s_full_data = "";
+                var s_half_data = "";
                 //USB map
-                var n_offset = _const_address_system_hid_key_map_offset;
-                var n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
-                var s_full_data = elpusk.util.keyboard.map.get_ascii_to_hid_key_map_string(n_language);
-                var s_half_data = s_full_data.substring(0,s_full_data,length/2);
+                n_offset = _const_address_system_hid_key_map_offset;
+                n_size = elpusk.util.keyboard.const.FOR_CVT_MAX_ASCII_CODE;
+                s_full_data = elpusk.util.keyboard.map.get_ascii_to_hid_key_map_string(n_language);
+                s_half_data = s_full_data.substring(0,s_full_data,length/2);
                 if(!_generate_config_set(queue_s_tx,n_offset,n_size,s_half_data) ){
                     continue;
                 }
@@ -1151,11 +1188,6 @@
             return _generate_set_f12_ibutton(queue_s_tx,cblank);
         }
 
-
-
-
-
-
         /**
          * @private
          * @function _generate_enter_opos_mode
@@ -1237,10 +1269,10 @@
             this._set_change_parameter = [];
 
             this._b_global_pre_postfix_send_condition = true;
-            this._manufacture = _type_manufacturer.mf_elpusk;
+            this._n_manufacture = _type_manufacturer.mf_elpusk;
     
-            this._v_uid= null;
-            this._device_function = _type_function.fun_none;
+            this._s_uid= null;
+            this._n_device_function = _type_function.fun_none;
             this._version = [0,0,0,0];
     
             //device information
@@ -1253,40 +1285,391 @@
             this._b_device_is_ibutton_only = false;
             this._b_device_is_standard = false;
     
-            this._interface = _type_system_interface.system_interface_usb_keyboard;
+            this._n_interface = _type_system_interface.system_interface_usb_keyboard;
             this._dw_buzzer_frequency = _const_default_buzzer_frequency;
             this._dw_boot_run_time = 15000;
-            this._language_index = _type_keyboard_language_index.language_map_index_english;
+            this._n_language_index = _type_keyboard_language_index.language_map_index_english;
     
             this._b_enable_iso = [true,true,true];
     
-            this._direction = [_type_direction.dir_bidectional,_type_direction.dir_bidectional,_type_direction.dir_bidectional];
+            this._n_direction = [_type_direction.dir_bidectional,_type_direction.dir_bidectional,_type_direction.dir_bidectional];
     
-            this._v_global_prefix = null;
-            this._v_global_postfix = null;
+            this._s_global_prefix = null;
+            this._s_global_postfix = null;
     
-            this._v_private_prefix = [null,null,null];
-            this._v_private_postfix = [null,null,null];
+            this._s_private_prefix = [null,null,null];
+            this._s_private_postfix = [null,null,null];
     
             //i-button
-            this._v_prefix_ibutton = null;
-            this._v_postfix_ibutton = null;
-            this._b_f12_ibutton = false;
-            this._b_zeros_ibutton = true;
-            this._b_zeros_7times_ibutton = false;
-            this._b_addmit_code_stick_ibutton = false;
+            this._s_prefix_ibutton = null;
+            this._s_postfix_ibutton = null;
+
+            this._n_ibutton_mode = _type_ibutton_mode.ibutton_zeros;
             this._c_blank = [0,0,0,0];
     
             //rs232
-            this._v_prefix_uart = null;
-            this._v_postfix_uart = null;
+            this._s_prefix_uart = null;
+            this._s_postfix_uart = null;
             //
             this._token_format = _type_format.ef_decimal;
-            this._v_name = null;            
+            this._s_name = null;            
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
         _elpusk.device.usb.hid.lpu237.prototype.constructor = _elpusk.device.usb.hid.lpu237;
+
+        /////////////////////////////////////////////////////////////////////
+        // getter
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_name
+         * @returns {string} system name or null
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_name = function(){
+            var s_name = "";
+
+            do{
+                if( this._s_name === null ){
+                    continue;
+                }
+                if( this._s_name.length > _const_the_size_of_name ){
+                    s_name = this._s_name.substring(0,_const_the_size_of_name);
+                }
+                else{
+                    s_name = this._s_name;
+                }
+            }while(false);
+            return s_name;
+        }
+        
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_global_pre_postfix_send_condition
+         * @returns {boolean} true - send prepostfix data when all track don't have error.
+         * <br /> false - send prepostfix data when any track have none-error.
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
+            return this._b_global_pre_postfix_send_condition; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_device_is_mmd1000
+         * @returns {boolean} true - used decoder is MMD1000.
+         * <br /> false - used decoder is Magtek DeltaAsic
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_mmd1000 = function(){ 
+            return this._b_device_is_mmd1000; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_manufacture
+         * @returns {number} 0 - manufacture is elpusk.
+         * <br /> 1 - manufacture is BTC.(not supported now. old device)
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_manufacture = function(){ 
+            return this._n_manufacture; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_uid
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_uid = function(){ 
+            var s_uid = "";
+
+            do{
+                if( this._s_uid === null ){
+                    continue;
+                }
+                if( this._s_uid.length > (_const_the_size_of_uid*2) ){
+                    s_uid = this._s_uid.substring(0,_const_the_size_of_uid*2);
+                }
+                else{
+                    s_uid = this._s_uid;
+                }
+            }while(false);
+            return s_uid;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_device_function
+         * @returns {number} 0 - function is undefined.
+         * <br /> 1 - support msr function.
+         * <br /> 2 - support msr & i-button function.
+         * <br /> 3 - support i-button function.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_device_function = function(){ 
+            return this._n_device_function; 
+        }
+        
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_system_version
+         * @returns {number[]} 4 number array.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_system_version = function(){ 
+            return  this._version; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_removed_key_map_table
+         * @returns {boolean} true - saved only the selected language key map.
+         * <br /> false - all language key map is saved.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_removed_key_map_table = function(){ 
+            return this._b_removed_key_map_table; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_hid_boot
+         * @returns {boolean} true - hid bootloader is used.
+         * <br /> false - MSD bootloader is used.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_hid_boot = function(){ 
+            return this._b_is_hid_boot; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_device_is_ibutton_only
+         * @returns {boolean} true - this device supports only i-button reader.
+         * <br /> false - this device is support i-button & msr reader or msr reader only.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_ibutton_only = function(){ 
+            return this._b_device_is_ibutton_only; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_device_is_standard
+         * @returns {boolean} true - this device is D or E type HW.
+         * <br /> false - this device is C or F type HW.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_standard = function(){ 
+            return this._b_device_is_standard; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_interface
+         * @returns {number} return interface type.
+         * <br /> 0 - system interface is USB keyboard.
+         * <br /> 1 - system interface is USB MSR(generic HID interface).
+		 * <br /> 10 - system interface is uart.
+		 * <br /> 20 - system interface is PS2 stand along mode.
+		 * <br /> 21 - system interface is bypass mode.
+		 * <br /> 100 - system interface is determined by HW Dip switch
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_interface = function(){ 
+            return this._n_interface; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_buzzer_frequency
+         * @returns {number} return buzzer frequency
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_buzzer_frequency = function(){ 
+            return this._dw_buzzer_frequency; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_boot_run_time
+         * @returns {number} MSD boot loader runnung time( unit msec ).
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_boot_run_time = function(){ 
+            return this._dw_boot_run_time; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_language
+         * @returns {number} language index
+         * <br /> 0 - US english
+         * <br /> 1 - spanish 
+         * <br /> 2 - danish
+         * <br /> 3 - french
+         * <br /> 4 - german
+         * <br /> 5 - italian
+         * <br /> 6 - norwegian
+         * <br /> 7 - swedish
+         * <br /> 8 - UK english
+         * <br /> 9 - israel
+         * <br /> 10 - turkey
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_language = function(){ 
+            return this._n_language_index; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_enable_iso
+         * @param {number} n_track msr track number 0~2
+         * @returns {boolean} true - read a track.
+         * <br /> false - not read.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_enable_iso = function (n_track){ 
+            return this._b_enable_iso[n_track];
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_direction
+         * @param {number} n_track msr track number 0~2
+         * @returns {number} reading direction.
+         * <br /> 0 - reading direction forward & backward.
+         * <br /> 1 - reading direction forward.
+         * <br /> 2 - reading direction backward.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_direction = function(n_track){
+            if( typeof n_track === 'undefined'){
+                return this._n_direction[0]
+            }
+            else{
+                return this._n_direction[track];
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_global_prefix
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_global_prefix = function(){
+            return this._s_global_prefix; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_global_postfix
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_global_postfix = function(){ 
+            return this._s_global_postfix; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_private_prefix
+         * @param {number} n_track msr track number 0~2
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_private_prefix = function(n_track){ 
+            return this._s_private_prefix[n_track]; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_private_postfix
+         * @param {number} n_track msr track number 0~2
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_private_postfix = function(n_track){ 
+            return this._s_private_postfix[n_track]; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_prefix_ibutton
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_prefix_ibutton = function(){ 
+            return this._s_prefix_ibutton; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_postfix_ibutton
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_postfix_ibutton = function(){ 
+            return this._s_postfix_ibutton; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_prefix_uart
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_prefix_uart = function(){ 
+            return this._s_prefix_uart; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_postfix_uart
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_postfix_uart = function(){ 
+            return this._s_postfix_uart; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_tx_transaction
+         * @returns {boolean} true - the current i-button mode is F12 mode.
+         * <br /> false - the current i-button mode isn't F12 mode.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_enable_f12_ibutton = function(){ 
+            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_f12){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_tx_transaction
+         * @returns {boolean} true - the current i-button mode is zeros mode.
+         * <br /> false - the current i-button mode isn't zeros mode.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton = function(){ 
+            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_enable_zeros_7times_ibutton
+         * @returns {boolean} true - the current i-button mode is zeros7 mode.
+         * <br /> false - the current i-button mode isn't zeros7 mode.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton = function(){ 
+            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros7){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_enable_addmit_code_stick_ibutton
+         * @returns {boolean} true - the current i-button mode is ibutton_addmit mode.
+         * <br /> false - the current i-button mode isn't ibutton_addmit mode.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton = function(){ 
+            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_addmit){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }        
 
         /**
          * @public
@@ -1576,149 +1959,167 @@
 
                     // . set iButton Pretag
                     if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
-                        if (!_generate_set_ibutton_prefix(this._dequeu_s_tx,)){continue;}
+                        if (!_generate_set_ibutton_prefix(this._dequeu_s_tx,this._s_prefix_ibutton )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set iButton Posttag
                     if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_iButton ) >= 0 ){
-                        if (!_generate_set_ibutton_postfix(this._dequeu_s_tx,)){continue;}
+                        if (!_generate_set_ibutton_postfix(this._dequeu_s_tx,this._s_postfix_ibutton )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set Uart Pretag
                     if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_Uart ) >= 0 ){
-                        if (!_generate_set_uart_prefix(this._dequeu_s_tx,)){continue;}
+                        if (!_generate_set_uart_prefix(this._dequeu_s_tx,this._s_prefix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set Uart Posttag
                     if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
-                        if (!_generate_set_uart_postfix(this._dequeu_s_tx,)){continue;}
+                        if (!_generate_set_uart_postfix(this._dequeu_s_tx,this._s_postfix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     do {//ibutton setting
                         if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
-                            if (!_generate_set_f12_ibutton(this._dequeu_s_tx,)){continue;}
+                            if (!_generate_set_f12_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.get_enable_f12_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
                         if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
-                            if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,)){continue;}
+                            if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
                         if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
-                            if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,)){continue;}
+                            if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
                         if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
-                            if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,)){continue;}
+                            if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
                     } while (false);
                 }
                 //. set globalPrePostfixSendCondition
                 if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
-                    if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,)){continue;}
+                    if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,this._b_global_pre_postfix_send_condition)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . set interface
                 if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
-                    if (!_generate_set_interface(this._dequeu_s_tx,)){continue;}
+                    if (!_generate_set_interface(this._dequeu_s_tx,this._n_interface )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
-                // . get language
+                // . set language
                 if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Language ) >= 0 ){
-                    if (!_generate_set_language(this._dequeu_s_tx,)){continue;}
+                    if (!_generate_set_language(this._dequeu_s_tx,this._n_language_index)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
-                }
 
-                if (m_set_change_parameter.find() != m_set_change_parameter.end()) {
-                    if(!())
-                        continue;
                     //set key map
-                    if (get_removed_key_map_table())
-                        if(!_generate_set_key_map())
-                            continue;
+                    if( _b_removed_key_map_table ){
+                        if( !_generate_set_key_map(this._deque_generated_tx,this._n_language_index)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    }
+                    
                 }
 
                 // . set buzzer
-                if (m_set_change_parameter.find(cp_BuzzerFrequency) != m_set_change_parameter.end())
-                    if(!_generate_set_buzzer_frequency())
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
+                    if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // .enable 1
-                if (m_set_change_parameter.find(cp_EnableISO1) != m_set_change_parameter.end())
-                    if (!_generate_set_enable_track(iso1_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO1 ) >= 0 ){
+                    if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._b_enable_iso[_type_msr_track_Numer.iso1_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+                    
                 // .enable 2
-                if (m_set_change_parameter.find(cp_EnableISO2) != m_set_change_parameter.end())
-                    if (!_generate_set_enable_track(iso2_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO2 ) >= 0 ){
+                    if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._b_enable_iso[_type_msr_track_Numer.iso2_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+
                 // .enable 3
-                if (m_set_change_parameter.find(cp_EnableISO3) != m_set_change_parameter.end())
-                    if (!_generate_set_enable_track(iso3_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO3 ) >= 0 ){
+                    if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._b_enable_iso[_type_msr_track_Numer.iso3_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // direction 1
-                if (m_set_change_parameter.find(cp_Direction1) != m_set_change_parameter.end())
-                    if (!_generate_set_direction(iso1_track))
-                        continue;
-                if (m_set_change_parameter.find(cp_Direction2) != m_set_change_parameter.end())
-                    if (!_generate_set_direction(iso2_track))
-                        continue;
-                if (m_set_change_parameter.find(cp_Direction3) != m_set_change_parameter.end())
-                    if (!_generate_set_direction(iso3_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction1 ) >= 0 ){
+                    if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._n_direction[_type_msr_track_Numer.iso1_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction2 ) >= 0 ){
+                    if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._n_direction[_type_msr_track_Numer.iso2_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction3 ) >= 0 ){
+                    if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._n_direction[_type_msr_track_Numer.iso3_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
 
-                // . global prefix
-                if (m_set_change_parameter.find(cp_GlobalPrefix) != m_set_change_parameter.end())
-                    if (!_generate_set_global_prefix())
-                        continue;
+                // . global prefix.............................................
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPrefix ) >= 0 ){
+                    if (!_generate_set_global_prefix(this._dequeu_s_tx,this._s_global_prefix )){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . global postfix
-                if (m_set_change_parameter.find(cp_GlobalPostfix) != m_set_change_parameter.end())
-                    if (!_generate_set_global_postfix())
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPostfix ) >= 0 ){
+                    if (!_generate_set_global_postfix(this._dequeu_s_tx,this._s_global_postfix )){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . private prefix 1
-                if (m_set_change_parameter.find(cp_PrivatePrefix1) != m_set_change_parameter.end())
-                    if (!_generate_set_private_prefix(iso1_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix1 ) >= 0 ){
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_prefix[_type_msr_track_Numer.iso1_track] )){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+
                 // . private postfix 1
-                if (m_set_change_parameter.find(cp_PrivatePostfix1) != m_set_change_parameter.end())
-                    if (!_generate_set_private_postfix(iso1_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix1 ) >= 0 ){
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_postfix[_type_msr_track_Numer.iso1_track] )){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . private prefix 2
-                if (m_set_change_parameter.find(cp_PrivatePrefix2) != m_set_change_parameter.end())
-                    if (!_generate_set_private_prefix(iso2_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix2 ) >= 0 ){
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_prefix[_type_msr_track_Numer.iso2_track] )){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
+                
                 // . private postfix 2
-                if (m_set_change_parameter.find(cp_PrivatePostfix2) != m_set_change_parameter.end())
-                    if (!_generate_set_private_postfix(iso2_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
+                    if (!_generate_set_private_postfix(iso2this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 // . private prefix 3
-                if (m_set_change_parameter.find(cp_PrivatePrefix3) != m_set_change_parameter.end())
-                    if (!_generate_set_private_prefix(iso3_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix3 ) >= 0 ){
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_prefix[_type_msr_track_Numer.iso3_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
                 // . private postfix 3
-                if (m_set_change_parameter.find(cp_PrivatePostfix3) != m_set_change_parameter.end())
-                    if (!_generate_set_private_postfix(iso3_track))
-                        continue;
+                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix3 ) >= 0 ){
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_postfix[_type_msr_track_Numer.iso3_track])){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                }
 
                 //
-                if (!generate_apply_config_mode())
-                    continue;
-                if (!generate_leave_config_mode())
-                    continue;
+                if (!_generate_apply_config_mode(this._dequeu_s_tx)){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_s.gt_apply_config );
+
+                if (!_generate_leave_config_mode(this._dequeu_s_tx)){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
                 //
                 b_result = true;
                 m_set_change_parameter.clear();
