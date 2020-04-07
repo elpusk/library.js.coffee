@@ -14,11 +14,32 @@
 
         /**
          * @public
-         * @function elpusk.util.get_dword_hex_string
+         * @function elpusk.util.get_number_from_little_endian_hex_string
+         * @param {string} s_hex little endian hex string.
+         * @returns {number} converted number.
+         */
+        _elpusk.util.prototype.get_number_from_little_endian_hex_string = function( s_hex ){
+            var n_value = 0;
+
+            do{
+
+                var a = s_hex.match(/../g);     // split number in groups of two
+                a.reverse();                    // reverse the groups
+    
+                var s_big_hex = a.join("");
+    
+                n_value = parseInt(s_big_hex,16);
+            }while(false);
+            return n_value;
+        }
+
+        /**
+         * @public
+         * @function elpusk.util.get_dword_hex_string_from_number
          * @param {number} dw_data unsigned int - double word number.
          * @returns {string} little endian double word hex string format. always 8 characters.
          */
-        _elpusk.util.prototype.get_dword_hex_string = function( dw_data ){
+        _elpusk.util.prototype.get_dword_hex_string_from_number = function( dw_data ){
             var s_big_hex = dw_data.toString(16);
 
             s_big_hex = s_big_hex.replace(/^(.(..)*)$/, "0$1"); // add a leading zero if needed
@@ -36,12 +57,12 @@
 
         /**
          * @public
-         * @function elpusk.util.get_byte_hex_string
+         * @function elpusk.util.get_byte_hex_string_from_number
          * @param {number} c_data unsigned char
          * @returns {string} little endian byte hex string format. always 2 characters.
          */
-        _elpusk.util.prototype.get_byte_hex_string = function( n_data ){
-            var s_dword = _elpusk.util.prototype.get_dword_hex_string(n_data);
+        _elpusk.util.prototype.get_byte_hex_string_from_number = function( n_data ){
+            var s_dword = _elpusk.util.prototype.get_dword_hex_string_from_number(n_data);
             return s_dword.substring(0,2);
         }
         

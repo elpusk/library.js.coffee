@@ -350,11 +350,981 @@
                     s_tag.length = 14*2;
                 }
 
-                var s_len = elpusk.util.get_byte_hex_string(s_tag.length / 2);
+                var s_len = elpusk.util.get_byte_hex_string_from_number(s_tag.length / 2);
                 s_out = s_len + s_tag;
             }while(false);
             return s_out;
         }
+
+        /**
+         * @private
+         * @function _is_success_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */
+        function _is_success_response(s_response){
+            var b_result = false;
+
+            do{
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 0;
+                var n_size = 1;
+                if( parseInt(s_response.substr(n_offset*2,n_size*2),16) !== 0x52 ){
+                    continue;//invalid prefix
+                }
+                b_result = true;
+                n_offset++;
+
+                var c_result = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( c_result === 0xFF ){
+                    continue;//good
+                }
+                if( c_result === 0x80 ){
+                    continue;//negative good
+                }
+
+                b_result = false;
+            }while(false);
+            return b_result;
+        }
+
+        /**
+         * @private
+         * @function _is_good_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good.
+         * <br /> false - else case.
+         */
+        function _is_good_response(s_response){
+            var b_result = false;
+
+            do{
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 0;
+                var n_size = 1;
+                if( parseInt(s_response.substr(n_offset*2,n_size*2),16) !== 0x52 ){
+                    continue;//invalid prefix
+                }
+                b_result = true;
+                n_offset++;
+
+                var c_result = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( c_result === 0xFF ){
+                    continue;//good
+                }
+
+                b_result = false;
+            }while(false);
+            return b_result;
+        }
+
+        /**
+         * @private
+         * @function _is_success_enter_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */
+        function _is_success_enter_opos_mode(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _is_success_leave_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        function _is_success_leave_opos_mode(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _is_success_enter_config_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        function _is_success_enter_config_mode(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _is_success_leave_config_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        function _is_success_leave_config_mode(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _is_success_apply_config_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        function _is_success_apply_config_mode(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _is_success_run_boot_loader
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        function _is_success_run_boot_loader(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _get_length_member_of_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number} greater then equal 0, the length member of response.
+         * <br /> negative value.
+         */
+        function _get_length_member_of_response(s_response){
+            var n_length = -1;
+
+            do{
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+
+            }while(false);
+            return n_length;
+        }
+
+        /**
+         * @private
+         * @function _get_data_field_member_of_response_by_number_array
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number[]} each byte of lpu237 protocol packet's data field to number array
+         */
+        function _get_data_field_member_of_response_by_number_array(s_response){
+            var n_data = [];
+
+            do{
+                var n_length = -1;
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( n_length <= 0 ){
+                    continue;
+                }
+                
+                var c_val = 0;
+
+                for( var i = 0; i<n_length; i++ ){
+                    c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    n_data.push(c_val);
+                }//end for
+
+            }while(false);
+            return n_data;
+        }
+
+        /**
+         * @private
+         * @function _get_data_field_member_of_response_by_string
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} lpu237 protocol packet's data field to string
+         */
+        function _get_data_field_member_of_response_by_string(s_response){
+            var s_data = "";
+
+            do{
+                var n_length = -1;
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( n_length <= 0 ){
+                    continue;
+                }
+                
+                var n_val = 0;
+
+                for( var i = 0; i<n_length; i++ ){
+                    n_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    if( n_val == 0){
+                        break;//terminate null
+                    }
+                    s_data += String.fromCharCode(n_val);
+                }//end for
+
+            }while(false);
+            return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_data_field_member_of_response_by_hex_string
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} lpu237 protocol packet's data field.
+         */
+        function _get_data_field_member_of_response_by_hex_string(s_response){
+            var s_data = "";
+
+            do{
+                var n_length = -1;
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( n_length <= 0 ){
+                    continue;
+                }
+                
+                s_data = s_response.substr((++n_offset)*2,n_length*2);
+            }while(false);
+            return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_data_field_member_of_response_by_boolean
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} lpu237 protocol packet's data field to boolean.
+         */
+        function _get_data_field_member_of_response_by_boolean(s_response){
+            var b_result = false;
+
+            do{
+                var n_length = -1;
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( n_length <= 0 ){
+                    continue;
+                }
+                
+                var c_val = 0;
+
+                for( var i = 0; i<n_length; i++ ){
+                    c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    if( c_val !== 0 ){
+                        b_result = true;
+                        break;
+                    }
+                }//end for
+
+            }while(false);
+            return b_result;
+        }        
+        
+        /**
+         * @private
+         * @function _get_data_field_member_of_response_by_number
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} lpu237 protocol packet's data field to number.
+         */
+        function _get_data_field_member_of_response_by_number(s_response){
+            var n_data = 0;
+
+            do{
+                var s_data = "";
+                var n_length = -1;
+                if( typeof s_response !== 'string'){
+                    continue;
+                }
+                if(s_response.length<(2*_const_min_size_response_header)){
+                    continue;
+                }
+                var n_offset = 2;
+                var n_size = 1;
+
+                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                if( n_length <= 0 ){
+                    continue;
+                }
+                
+                s_data = s_response.substr((++n_offset)*2,n_length*2);
+                n_data = elpusk.util.get_number_from_little_endian_hex_string(s_data);
+            }while(false);
+            return n_data;
+        }
+
+		//set by response data.
+        ///////////////////////////////////////////////////////////////////////////////
+        /**
+         * @private
+         * @function _get_version_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number[]} version - number 4 array for version data.
+         * <br /> null - processing failure.
+         */
+		function _get_version_from_response(s_response ){
+            var version = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_VERSION;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                version = _get_data_field_member_of_response_by_number_array(s_response);
+			} while (false);
+			return version;
+        }
+        
+        /**
+         * @private
+         * @function _get_name_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} name - the system name.
+         * <br /> null - processing failure.
+         */
+		function _get_name_from_response(s_response,s_name){
+			var s_name = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_NAME;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+                    
+                s_name = _get_data_field_member_of_response_by_string(s_response);
+			} while (false);
+			return s_name;
+        }
+        
+        /**
+         * @private
+         * @function _get_support_mmd1000_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - used  mmd1000 decoder
+         * <br /> false - used deltaAsic.
+         */
+		function _get_support_mmd1000_from_response(s_response){
+            return _is_good_response(s_response);
+        }
+        
+        /**
+         * @private
+         * @function _get_uid_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format UID.
+         */
+		function _get_uid_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _const_the_size_of_uid;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_ibutton_type_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - HW support i-button
+         * <br /> false - HW is not support i-button.
+         */
+		function _get_ibutton_type_from_response(s_response){
+            return _is_good_response(s_response);
+        }
+
+        /**
+         * @private
+         * @function _get_type_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - HW is standard type
+         * <br /> false - HW is not standard type
+         */
+		function _get_type_from_response(s_response){
+            return _is_good_response(s_response);
+        }
+        
+        /**
+         * @private
+         * @function _get_global_pre_postfix_send_condition_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - if all track is not error,global pro/postfix will be sent. 
+         * <br /> false - else case
+         */
+		function _get_global_pre_postfix_send_condition_from_response(s_response){
+			var b_result = false;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_G_TAG_CONDITION;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+                b_result = _get_data_field_member_of_response_by_boolean(s_response);
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_interface_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number} interface number.
+         */
+		function _get_interface_from_response(s_response){
+			var n_value = 0;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_INTERFACE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_language_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number} language number.
+         */
+		function _get_language_from_response(s_response){
+			var n_value = 0;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_CONTAINER_MAP_INDEX;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_buzzer_frequency_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number} buzzer frequency.
+         */
+		function _get_buzzer_frequency_from_response(s_response){
+			var n_value = 0;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_BUZZER_FREQ;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_boot_run_time_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {number} MSD bootloader running msec time .
+         */
+		function _get_boot_run_time_from_response(s_response){
+			var n_value = 0;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_BOOT_RUN_TIME;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_enable_track_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @returns {boolean} true - read track.
+         * <br /> false - don't read track.
+         */
+		function _get_enable_track_from_response(s_response,n_track){
+			var b_result = false;
+
+			do {
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
+					break;
+				default:
+					continue;
+                }//end switch
+                
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+				b_result = _get_data_field_member_of_response_by_boolean(s_response);;
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_direction_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @returns {number} reading direction.
+         */
+		function _get_direction_from_response(s_response,n_track){
+			var n_value = 0;
+
+			do {
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
+					break;
+				default:
+					continue;
+                }//end switch
+                
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+				n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_global_prefix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_global_prefix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_G_PRE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_global_postfix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_global_postfix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_G_POST;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_private_prefix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @returns {string} hex string format.
+         */
+		function _get_private_prefix_from_response(s_response, n_track ){
+			var s_data = "";
+
+			do {
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+					break;
+				default:
+					continue;
+                }//end switch
+                
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_private_postfix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @returns {string} hex string format.
+         */
+		function _get_private_postfix_from_response(s_response, n_track ){
+			var s_data = "";
+
+			do {
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+					break;
+				default:
+					continue;
+                }//end switch
+                
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_ibutton_prefix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_ibutton_prefix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_OFFSET_IBUTTON_G_PRE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_ibutton_postfix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_ibutton_postfix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_OFFSET_IBUTTON_G_POST;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_uart_prefix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_uart_prefix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_UART_G_PRE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_uart_postfix_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {string} hex string format.
+         */
+		function _get_uart_postfix_from_response(s_response){
+			var s_data = "";
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_UART_G_POST;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_f12_ibutton_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} the current i-button mode is F12.
+         */
+		function _get_f12_ibutton_from_response(s_response){
+            var b_result = false;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[2] & 0x01 ){
+                    b_result = true;
+                }
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_zeros_ibutton_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} the current i-button mode is zeros.
+         */
+		function _get_zeros_ibutton_from_response(s_response){
+            var b_result = false;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[2] & 0x02 ){
+                    b_result = true;
+                }
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_zeros_7times_ibutton_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} the current i-button mode is 7 times zeros.
+         */
+		function _get_zeros_7times_ibutton_from_response(s_response){
+            var b_result = false;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[2] & 0x04 ){
+                    b_result = true;
+                }
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_addmit_code_stick_ibutton_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} the current i-button mode is addmit codestick.
+         */
+		function _get_addmit_code_stick_ibutton_from_response(s_response){
+            var b_result = false;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[2] & 0x08 ){
+                    b_result = true;
+                }
+			} while (false);
+			return b_result;
+        }
+
+		///////////////////////////////////////////////////////////////////////////////        
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // generate basic IO pattern.
+        ////////////////////////////////////////////////////////////////////////////////////////////////
 
         /**
          * @private
@@ -424,8 +1394,8 @@
                     continue;
                 }
 
-                var s_offset = elpusk.util.get_dword_hex_string( n_offset )
-                var s_size = elpusk.util.get_dword_hex_string(n_size);
+                var s_offset = elpusk.util.get_dword_hex_string_from_number( n_offset )
+                var s_size = elpusk.util.get_dword_hex_string_from_number(n_size);
                 var s_data = s_offset + s_size;
 
                 b_result = _generate_request(
@@ -445,7 +1415,7 @@
         */
        function _generate_get_version(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_VERSION;
-            var n_size = system_size.SYS_SIZE_VERSION;;
+            var n_size = system_size.SYS_SIZE_VERSION;
             return _generate_config_get(queue_s_tx,n_offset,n_size);
         }
 
@@ -833,8 +1803,8 @@
                     continue;
                 }
 
-                var s_offset = elpusk.util.get_dword_hex_string( n_offset )
-                var s_size = elpusk.util.get_dword_hex_string(n_size);
+                var s_offset = elpusk.util.get_dword_hex_string_from_number( n_offset )
+                var s_size = elpusk.util.get_dword_hex_string_from_number(n_size);
                 var s_data = s_offset + s_size + s_setting_data;
 
                 b_result = _generate_request(
@@ -861,7 +1831,7 @@
             var s_data = "00000000";//dword zero
 
             if(b_global_pre_postfix_send_condition ){
-                s_data = elpusk.util.get_dword_hex_string(1);
+                s_data = elpusk.util.get_dword_hex_string_from_number(1);
             }
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
@@ -877,7 +1847,7 @@
         function _generate_set_interface(queue_s_tx,n_interface){
             var n_offset = _type_system_offset.SYS_OFFSET_INTERFACE;
             var n_size = _type_system_size.SYS_SIZE_INTERFACE;
-            var s_data = elpusk.util.get_byte_hex_string(n_interface);
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_interface);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -899,7 +1869,7 @@
 
                 n_offset = _type_system_offset.SYS_OFFSET_CONTAINER_MAP_INDEX;
                 n_size = _type_system_size.SYS_SIZE_CONTAINER_MAP_INDEX;
-                s_data = elpusk.util.get_dword_hex_string(n_language);
+                s_data = elpusk.util.get_dword_hex_string_from_number(n_language);
                 if( !_generate_config_set(queue_s_tx,n_offset,n_size,s_data) ){
                     continue;
                 }
@@ -934,7 +1904,7 @@
         function _generate_set_buzzer_frequency(queue_s_tx,n_buzzer){
             var n_offset = _type_system_offset.SYS_OFFSET_BUZZER_FREQ;
             var n_size = _type_system_size.SYS_SIZE_BUZZER_FREQ;
-            var s_data = elpusk.util.get_dword_hex_string(n_buzzer);
+            var s_data = elpusk.util.get_dword_hex_string_from_number(n_buzzer);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -951,7 +1921,7 @@
             var n_size = _type_system_size.SYS_SIZE_ENABLE_TRACK[n_track];
             var s_data = "00";
             if(b_enable){
-                s_data = elpusk.util.get_byte_hex_string(1);
+                s_data = elpusk.util.get_byte_hex_string_from_number(1);
             }
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
@@ -967,7 +1937,7 @@
         function _generate_set_direction(queue_s_tx,n_track,n_direction){
             var n_offset = _type_system_offset.SYS_OFFSET_DIRECTION[n_track];
             var n_size = _type_system_size.SYS_SIZE_DIRECTION[n_track];
-            var s_data = elpusk.util.get_byte_hex_string(n_direction);
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_direction);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -1149,7 +2119,7 @@
             var s_data = "";
 
             for( var i = 0; i<4; i++ ){
-                s_data.push(elpusk.util.get_byte_hex_string(cblank[i]));
+                s_data.push(elpusk.util.get_byte_hex_string_from_number(cblank[i]));
             }//end for
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
@@ -1674,14 +2644,14 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_tx_transaction
-         * @returns {string} request string or null
+         * @returns {number} request number
          */
         _elpusk.device.usb.hid.lpu237.prototype.get_tx_transaction = function(){
-            if( this._deque_generated_tx.length <= 0 ){
+            if( this._dequeu_s_tx.length <= 0 ){
                 return null;
             }
 
-            return this._deque_generated_tx.shift();
+            return this._dequeu_s_tx.shift();
         }
 
         /**
@@ -2126,7 +3096,149 @@
             }while (false);
             return b_result;           
        }
-                    
+
+        _elpusk.device.usb.hid.lpu237.prototype.set_from_response = function( s_response ){
+            var b_result = false;
+            do {
+                if (this._deque_generated_tx.length <= 0)
+                    continue;
+
+                var n_generated_tx = this._deque_generated_tx.shift();
+                switch (n_generated_tx) {
+                case gt_read_uid:	
+                    this._s_uid = _get_uid_from_response(s_response);
+                    if( this._s_uid ){
+                        b_result = true;
+                    }
+                    break;
+                case gt_change_authkey:
+                case gt_change_status:
+                case gt_change_sn:
+                    b_result = _is_success_response(s_response);
+                    break;
+                case gt_enter_config:
+                    b_result = _is_success_enter_config_mode(s_response);
+                    break;
+                case gt_leave_config:
+                    b_result = _is_success_leave_config_mode(s_response);
+                    break;
+                case gt_apply:
+                    b_result = _is_success_apply_config_mode(s_response);
+                    break;
+                case gt_goto_boot:
+                    b_result = _is_success_run_boot_loader(s_response);
+                    break;
+                case gt_enter_opos:
+                    b_result = _is_success_enter_opos_mode(s_response);
+                    break;
+                case gt_leave_opos:
+                    b_result = _is_success_leave_opos_mode(s_response);
+                    break;
+                case gt_support_mmd1000:
+                    b_result = _get_support_mmd1000_from_response(s_response);
+                    break;
+                case gt_type_ibutton:
+                    b_result = _set_device_ibutton_type_from_response(s_response);
+                    break;
+                case gt_type_device:
+                    b_result = _set_device_type_from_response(s_response);
+                    break;
+                case gt_get_version:
+                    b_result = _set_version_from_response(s_response);
+                    break;
+                case gt_get_name:
+                    b_result = _set_name_from_response(s_response);
+                    break;
+                case gt_get_global_prepostfix_send_condition:
+                    b_result = _set_global_pre_postfix_send_condition_from_response(s_response);
+                    break;
+                case gt_get_interface:
+                    b_result = _set_interface_from_response(s_response);
+                    break;
+                case gt_get_language:
+                    b_result = _set_language_from_response(s_response);
+                    break;
+                case gt_get_buzzer_frequency:
+                    b_result = _set_buzzer_frequency_from_response(s_response);
+                    break;
+                case gt_get_boot_run_time:
+                    b_result = _set_boot_run_time_from_response(s_response);
+                    break;
+                case gt_get_enable_iso1:
+                    b_result = _set_enable_track_from_response(s_response,iso1_track);
+                    break;
+                case gt_get_enable_iso2:
+                    b_result = _set_enable_track_from_response(s_response,iso2_track);
+                    break;
+                case gt_get_enable_iso3:
+                    b_result = _set_enable_track_from_response(s_response,iso3_track);
+                    break;
+                case gt_get_direction1:
+                    b_result = _set_direction_from_response(s_response,iso1_track);
+                    break;
+                case gt_get_direction2:
+                    b_result = _set_direction_from_response(s_response,iso2_track);
+                    break;
+                case gt_get_direction3:
+                    b_result = _set_direction_from_response(s_response,iso3_track);
+                    break;
+                case gt_get_global_prefix:
+                    b_result = _set_global_prefix_from_response(s_response);
+                    break;
+                case gt_get_global_postfix:
+                    b_result = _set_global_postfix_from_response(s_response);
+                    break;
+                case gt_get_private_prefix1:
+                    b_result = _set_private_prefix_from_response(s_response,iso1_track);
+                    break;
+                case gt_get_private_prefix2:
+                    b_result = _set_private_prefix_from_response(s_response,iso2_track);
+                    break;
+                case gt_get_private_prefix3:
+                    b_result = _set_private_prefix_from_response(s_response,iso3_track);
+                    break;
+                case gt_get_private_postfix1:
+                    b_result = _set_private_postfix_from_response(s_response,iso1_track);
+                    break;
+                case gt_get_private_postfix2:
+                    b_result = _set_private_postfix_from_response(s_response,iso2_track);
+                    break;
+                case gt_get_private_postfix3:
+                    b_result = _set_private_postfix_from_response(s_response,iso3_track);
+                    break;
+                case gt_get_prefix_ibutton:
+                    b_result = _set_ibutton_prefix_from_response(s_response);
+                    break;
+                case gt_get_postfix_ibutton:
+                    b_result = _set_ibutton_postfix_from_response(s_response);
+                    break;
+                case gt_get_prefix_uart:
+                    b_result = _set_uart_prefix_from_response(s_response);
+                    break;
+                case gt_get_postfix_uart:
+                    b_result = _set_uart_postfix_from_response(s_response);
+                    break;
+                case gt_get_f12_ibutton:
+                    b_result = _set_f12_ibutton_from_response(s_response);
+                    break;
+                case gt_get_zeros_ibutton:
+                    b_result = _set_zeros_ibutton_from_response(s_response);
+                    break;
+                case gt_get_zeros7_times_ibutton:
+                    b_result = _set_zeros_7times_ibutton_from_response(s_response);
+                    break;
+                case gt_get_addmit_code_stick_ibutton:
+                    b_result = _set_addmit_code_stick_ibutton_from_response(s_response);
+                    break;
+                case gt_set_config:
+                    b_result = _is_success_response(s_response);
+                    break;
+                default:
+                    continue;
+                }
+            } while (false);
+            return b_result;
+        }                    
     }
 
 
