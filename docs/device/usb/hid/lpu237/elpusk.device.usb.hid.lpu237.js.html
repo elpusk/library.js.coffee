@@ -1,4 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: elpusk.device.usb.hid.lpu237.js</title>
 
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: elpusk.device.usb.hid.lpu237.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
 'use strict';
 
 (function (windows, undefined) {
@@ -226,7 +254,7 @@
 		};
 
         var _type_direction = {//reading diection, unsigned char
-			dir_bidectional : 0,	//reading direction forward & backward
+			dir_bidectional : 0,	//reading direction forward &amp; backward
 			dir_forward : 1,	//reading direction forward
 			dir_backward : 2	//reading direction backward
         };
@@ -251,10 +279,10 @@
             var b_result = false;
 
             do{
-                if( !Array.isArray(first_version) && (typeof(first_version) !== 'number') ){
+                if( !Array.isArray(first_version) &amp;&amp; (typeof(first_version) !== 'number') ){
                     continue;
                 }
-                if( !Array.isArray(second_version) && (typeof(second_version) !== 'number') ){
+                if( !Array.isArray(second_version) &amp;&amp; (typeof(second_version) !== 'number') ){
                     continue;
                 }
 
@@ -267,10 +295,10 @@
                 }
                 else{
                     n_check =ar1.length;
-                    if( first_version.length < n_check){
+                    if( first_version.length &lt; n_check){
                         n_check = first_version.length;
                     }
-                    for( var i = 0; i<n_check; i++ ){
+                    for( var i = 0; i&lt;n_check; i++ ){
                         ar1[i] = first_version[i];
                     }//end for
                 }
@@ -280,16 +308,16 @@
                 }
                 else{
                     n_check =ar2.length;
-                    if( second_version.length < n_check){
+                    if( second_version.length &lt; n_check){
                         n_check = second_version.length;
                     }
-                    for( var i = 0; i<n_check; i++ ){
+                    for( var i = 0; i&lt;n_check; i++ ){
                         ar2[i] = second_version[i];
                     }//end for
                 }
 
                 var j = 0;
-                if( ar1[j] < ar2[j] ){
+                if( ar1[j] &lt; ar2[j] ){
                     continue;
                 }
                 if( ar1[j] > ar2[j] ){
@@ -298,7 +326,7 @@
                 }
 
                 j++;
-                if( ar1[j] < ar2[j] ){
+                if( ar1[j] &lt; ar2[j] ){
                     continue;
                 }
                 if( ar1[j] > ar2[j] ){
@@ -307,7 +335,7 @@
                 }
 
                 j++;
-                if( ar1[j] < ar2[j] ){
+                if( ar1[j] &lt; ar2[j] ){
                     continue;
                 }
                 if( ar1[j] > ar2[j] ){
@@ -316,7 +344,7 @@
                 }
 
                 j++;
-                if( ar1[j] <= ar2[j] ){
+                if( ar1[j] &lt;= ar2[j] ){
                     continue;
                 }
 
@@ -332,7 +360,7 @@
          * @function _get_15_bytes_tag_string
          * @param {string} s_tag - hex string of tag
          * @returns {string} hex string of tag, length 1 byte + 14 bytes tag
-         * <br /> return value bytes stream is converted to hex string.
+         * &lt;br /> return value bytes stream is converted to hex string.
          */
         function _get_15_bytes_tag_string( s_tag ){
             var s_out = "000000000000000000000000000000";//default zeros 15 bytes
@@ -361,7 +389,7 @@
          * @function _is_success_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */
         function _is_success_response(s_response){
             var b_result = false;
@@ -370,7 +398,7 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 0;
@@ -399,7 +427,7 @@
          * @function _is_good_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */
         function _is_good_response(s_response){
             var b_result = false;
@@ -408,7 +436,7 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 0;
@@ -434,7 +462,7 @@
          * @function _is_success_enter_opos_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */
         function _is_success_enter_opos_mode(s_response){
             return _is_success_response(s_response);
@@ -445,7 +473,7 @@
          * @function _is_success_leave_opos_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */        
         function _is_success_leave_opos_mode(s_response){
             return _is_success_response(s_response);
@@ -456,7 +484,7 @@
          * @function _is_success_enter_config_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */        
         function _is_success_enter_config_mode(s_response){
             return _is_success_response(s_response);
@@ -467,7 +495,7 @@
          * @function _is_success_leave_config_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */        
         function _is_success_leave_config_mode(s_response){
             return _is_success_response(s_response);
@@ -478,7 +506,7 @@
          * @function _is_success_apply_config_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */        
         function _is_success_apply_config_mode(s_response){
             return _is_success_response(s_response);
@@ -489,7 +517,7 @@
          * @function _is_success_run_boot_loader
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * &lt;br /> false - else case.
          */        
         function _is_success_run_boot_loader(s_response){
             return _is_success_response(s_response);
@@ -500,7 +528,7 @@
          * @function _get_length_member_of_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} greater then equal 0, the length member of response.
-         * <br /> negative value.
+         * &lt;br /> negative value.
          */
         function _get_length_member_of_response(s_response){
             var n_length = -1;
@@ -509,7 +537,7 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
@@ -526,7 +554,7 @@
          * @function _get_data_field_member_of_response_by_number_array
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number[]} each byte of lpu237 protocol packet's data field to number array
-         * <br /> null - error
+         * &lt;br /> null - error
          */
         function _get_data_field_member_of_response_by_number_array(s_response){
             var n_data = null;
@@ -536,21 +564,21 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
                 var n_size = 1;
 
                 n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
-                if( n_length <= 0 ){
+                if( n_length &lt;= 0 ){
                     continue;
                 }
                 
                 n_data = [];
                 var c_val = 0;
 
-                for( var i = 0; i<n_length; i++ ){
+                for( var i = 0; i&lt;n_length; i++ ){
                     c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
                     n_data.push(c_val);
                 }//end for
@@ -564,7 +592,7 @@
          * @function _get_data_field_member_of_response_by_string
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} lpu237 protocol packet's data field to string
-         * <br /> null - error
+         * &lt;br /> null - error
          */
         function _get_data_field_member_of_response_by_string(s_response){
             var s_data = null;
@@ -574,21 +602,21 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
                 var n_size = 1;
 
                 n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
-                if( n_length <= 0 ){
+                if( n_length &lt;= 0 ){
                     continue;
                 }
                 
                 s_data = "";
                 var n_val = 0;
 
-                for( var i = 0; i<n_length; i++ ){
+                for( var i = 0; i&lt;n_length; i++ ){
                     n_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
                     if( n_val == 0){
                         break;//terminate null
@@ -605,7 +633,7 @@
          * @function _get_data_field_member_of_response_by_hex_string
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} lpu237 protocol packet's data field.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
         function _get_data_field_member_of_response_by_hex_string(s_response){
             var s_data = null;
@@ -615,14 +643,14 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
                 var n_size = 1;
 
                 n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
-                if( n_length <= 0 ){
+                if( n_length &lt;= 0 ){
                     continue;
                 }
                 
@@ -636,7 +664,7 @@
          * @function _get_data_field_member_of_response_by_boolean
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} lpu237 protocol packet's data field to boolean.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
         function _get_data_field_member_of_response_by_boolean(s_response){
             var b_result = null;
@@ -646,21 +674,21 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
                 var n_size = 1;
 
                 n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
-                if( n_length <= 0 ){
+                if( n_length &lt;= 0 ){
                     continue;
                 }
                 
                 b_result = false;
                 var c_val = 0;
 
-                for( var i = 0; i<n_length; i++ ){
+                for( var i = 0; i&lt;n_length; i++ ){
                     c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
                     if( c_val !== 0 ){
                         b_result = true;
@@ -677,7 +705,7 @@
          * @function _get_data_field_member_of_response_by_number
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} lpu237 protocol packet's data field to number.
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
         function _get_data_field_member_of_response_by_number(s_response){
             var n_data = -1;
@@ -688,14 +716,14 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length<(2*_const_min_size_response_header)){
+                if(s_response.length&lt;(2*_const_min_size_response_header)){
                     continue;
                 }
                 var n_offset = 2;
                 var n_size = 1;
 
                 n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
-                if( n_length <= 0 ){
+                if( n_length &lt;= 0 ){
                     continue;
                 }
                 
@@ -712,7 +740,7 @@
          * @function _get_version_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number[]} version - number 4 array for version data.
-         * <br /> null - processing failure.
+         * &lt;br /> null - processing failure.
          */
 		function _get_version_from_response(s_response ){
             var version = null;
@@ -737,7 +765,7 @@
          * @function _get_name_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} name - the system name.
-         * <br /> null - processing failure.
+         * &lt;br /> null - processing failure.
          */
 		function _get_name_from_response(s_response,s_name){
 			var s_name = null;
@@ -762,7 +790,7 @@
          * @function _get_support_mmd1000_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - used  mmd1000 decoder
-         * <br /> false - used deltaAsic.
+         * &lt;br /> false - used deltaAsic.
          */
 		function _get_support_mmd1000_from_response(s_response){
             return _is_good_response(s_response);
@@ -773,7 +801,7 @@
          * @function _get_uid_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format UID.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_uid_from_response(s_response){
 			var s_data = null;
@@ -798,7 +826,7 @@
          * @function _get_ibutton_type_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - HW support i-button
-         * <br /> false - HW is not support i-button.
+         * &lt;br /> false - HW is not support i-button.
          */
 		function _get_ibutton_type_from_response(s_response){
             return _is_good_response(s_response);
@@ -809,7 +837,7 @@
          * @function _get_type_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - HW is standard type
-         * <br /> false - HW is not standard type
+         * &lt;br /> false - HW is not standard type
          */
 		function _get_type_from_response(s_response){
             return _is_good_response(s_response);
@@ -820,8 +848,8 @@
          * @function _get_global_pre_postfix_send_condition_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - if all track is not error,global pro/postfix will be sent. 
-         * <br /> false - else case.
-         * <br /> null - error.
+         * &lt;br /> false - else case.
+         * &lt;br /> null - error.
          */
 		function _get_global_pre_postfix_send_condition_from_response(s_response){
 			var b_result = null;
@@ -846,7 +874,7 @@
          * @function _get_interface_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} interface number.
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
 		function _get_interface_from_response(s_response){
 			var n_value = -1;
@@ -871,7 +899,7 @@
          * @function _get_language_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} language number.
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
 		function _get_language_from_response(s_response){
 			var n_value = -1;
@@ -896,7 +924,7 @@
          * @function _get_buzzer_frequency_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} buzzer frequency.
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
 		function _get_buzzer_frequency_from_response(s_response){
 			var n_value = -1;
@@ -921,7 +949,7 @@
          * @function _get_boot_run_time_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} MSD bootloader running msec time .
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
 		function _get_boot_run_time_from_response(s_response){
 			var n_value = -1;
@@ -947,8 +975,8 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @returns {boolean} true - read track.
-         * <br /> false - don't read track.
-         * <br /> null - error.
+         * &lt;br /> false - don't read track.
+         * &lt;br /> null - error.
          */
 		function _get_enable_track_from_response(s_response,n_track){
 			var b_result = null;
@@ -985,7 +1013,7 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @returns {number} reading direction.
-         * <br /> negative value is error.
+         * &lt;br /> negative value is error.
          */
 		function _get_direction_from_response(s_response,n_track){
 			var n_value = -1;
@@ -1020,7 +1048,7 @@
          * @function _get_global_prefix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_global_prefix_from_response(s_response){
 			var s_data = null;
@@ -1045,7 +1073,7 @@
          * @function _get_global_postfix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_global_postfix_from_response(s_response){
 			var s_data = null;
@@ -1071,7 +1099,7 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_private_prefix_from_response(s_response, n_track ){
 			var s_data = null;
@@ -1106,7 +1134,7 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_private_postfix_from_response(s_response, n_track ){
 			var s_data = null;
@@ -1140,7 +1168,7 @@
          * @function _get_ibutton_prefix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_ibutton_prefix_from_response(s_response){
 			var s_data = null;
@@ -1165,7 +1193,7 @@
          * @function _get_ibutton_postfix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_ibutton_postfix_from_response(s_response){
 			var s_data = null;
@@ -1190,7 +1218,7 @@
          * @function _get_uart_prefix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_uart_prefix_from_response(s_response){
 			var s_data = null;
@@ -1215,7 +1243,7 @@
          * @function _get_uart_postfix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {string} hex string format.
-         * <br /> null - error.
+         * &lt;br /> null - error.
          */
 		function _get_uart_postfix_from_response(s_response){
 			var s_data = null;
@@ -1256,7 +1284,7 @@
                 }
 
                 c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x01 ){
+                if( c_blank[2] &amp; 0x01 ){
                     b_result = true;
                 }
 			} while (false);
@@ -1284,7 +1312,7 @@
                 }
 
                 c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x02 ){
+                if( c_blank[2] &amp; 0x02 ){
                     b_result = true;
                 }
 			} while (false);
@@ -1312,7 +1340,7 @@
                 }
 
                 c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x04 ){
+                if( c_blank[2] &amp; 0x04 ){
                     b_result = true;
                 }
 			} while (false);
@@ -1340,7 +1368,7 @@
                 }
 
                 c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x08 ){
+                if( c_blank[2] &amp; 0x08 ){
                     b_result = true;
                 }
 			} while (false);
@@ -1413,10 +1441,10 @@
                 if( typeof n_size !== 'number' ){
                     continue;
                 }
-                if( n_offset< 0 ){
+                if( n_offset&lt; 0 ){
                     continue;
                 }
-                if( n_size < 0 ){
+                if( n_size &lt; 0 ){
                     continue;
                 }
 
@@ -1830,10 +1858,10 @@
                 if( typeof n_size !== 'number' ){
                     continue;
                 }
-                if( n_offset< 0 ){
+                if( n_offset&lt; 0 ){
                     continue;
                 }
-                if( n_size < 0 ){
+                if( n_size &lt; 0 ){
                     continue;
                 }
 
@@ -1909,7 +1937,7 @@
                 }
 
                 b_result = true;
-                for( var i = 0; i<_const_the_number_of_track; i++ ){
+                for( var i = 0; i&lt;_const_the_number_of_track; i++ ){
                     n_offset = _type_system_offset.SYS_OFFSET_INFORMSR_MAP_INDEX[i];
                     n_size = _type_system_size.SYS_SIZE_INFORMSR_MAP_INDEX[i];
                     if( !_generate_config_set(queue_s_tx,n_offset,n_size,s_data) ){
@@ -2152,7 +2180,7 @@
             var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
             var s_data = "";
 
-            for( var i = 0; i<4; i++ ){
+            for( var i = 0; i&lt;4; i++ ){
                 s_data.push(elpusk.util.get_byte_hex_string_from_number(cblank[i]));
             }//end for
 
@@ -2350,7 +2378,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_global_pre_postfix_send_condition
          * @returns {boolean} true - send prepostfix data when all track don't have error.
-         * <br /> false - send prepostfix data when any track have none-error.
+         * &lt;br /> false - send prepostfix data when any track have none-error.
          */
 		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
             return this._b_global_pre_postfix_send_condition; 
@@ -2360,7 +2388,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_device_is_mmd1000
          * @returns {boolean} true - used decoder is MMD1000.
-         * <br /> false - used decoder is Magtek DeltaAsic
+         * &lt;br /> false - used decoder is Magtek DeltaAsic
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_mmd1000 = function(){ 
             return this._b_device_is_mmd1000; 
@@ -2370,7 +2398,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_manufacture
          * @returns {number} 0 - manufacture is elpusk.
-         * <br /> 1 - manufacture is BTC.(not supported now. old device)
+         * &lt;br /> 1 - manufacture is BTC.(not supported now. old device)
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_manufacture = function(){ 
             return this._n_manufacture; 
@@ -2402,9 +2430,9 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_device_function
          * @returns {number} 0 - function is undefined.
-         * <br /> 1 - support msr function.
-         * <br /> 2 - support msr & i-button function.
-         * <br /> 3 - support i-button function.
+         * &lt;br /> 1 - support msr function.
+         * &lt;br /> 2 - support msr &amp; i-button function.
+         * &lt;br /> 3 - support i-button function.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_device_function = function(){ 
             return this._n_device_function; 
@@ -2423,7 +2451,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_removed_key_map_table
          * @returns {boolean} true - saved only the selected language key map.
-         * <br /> false - all language key map is saved.
+         * &lt;br /> false - all language key map is saved.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_removed_key_map_table = function(){ 
             return this._b_removed_key_map_table; 
@@ -2433,7 +2461,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_hid_boot
          * @returns {boolean} true - hid bootloader is used.
-         * <br /> false - MSD bootloader is used.
+         * &lt;br /> false - MSD bootloader is used.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_hid_boot = function(){ 
             return this._b_is_hid_boot; 
@@ -2443,7 +2471,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_device_is_ibutton_only
          * @returns {boolean} true - this device supports only i-button reader.
-         * <br /> false - this device is support i-button & msr reader or msr reader only.
+         * &lt;br /> false - this device is support i-button &amp; msr reader or msr reader only.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_ibutton_only = function(){ 
             return this._b_device_is_ibutton_only; 
@@ -2453,7 +2481,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_device_is_standard
          * @returns {boolean} true - this device is D or E type HW.
-         * <br /> false - this device is C or F type HW.
+         * &lt;br /> false - this device is C or F type HW.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_device_is_standard = function(){ 
             return this._b_device_is_standard; 
@@ -2463,12 +2491,12 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_interface
          * @returns {number} return interface type.
-         * <br /> 0 - system interface is USB keyboard.
-         * <br /> 1 - system interface is USB MSR(generic HID interface).
-		 * <br /> 10 - system interface is uart.
-		 * <br /> 20 - system interface is PS2 stand along mode.
-		 * <br /> 21 - system interface is bypass mode.
-		 * <br /> 100 - system interface is determined by HW Dip switch
+         * &lt;br /> 0 - system interface is USB keyboard.
+         * &lt;br /> 1 - system interface is USB MSR(generic HID interface).
+		 * &lt;br /> 10 - system interface is uart.
+		 * &lt;br /> 20 - system interface is PS2 stand along mode.
+		 * &lt;br /> 21 - system interface is bypass mode.
+		 * &lt;br /> 100 - system interface is determined by HW Dip switch
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_interface = function(){ 
             return this._n_interface; 
@@ -2496,17 +2524,17 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_language
          * @returns {number} language index
-         * <br /> 0 - US english
-         * <br /> 1 - spanish 
-         * <br /> 2 - danish
-         * <br /> 3 - french
-         * <br /> 4 - german
-         * <br /> 5 - italian
-         * <br /> 6 - norwegian
-         * <br /> 7 - swedish
-         * <br /> 8 - UK english
-         * <br /> 9 - israel
-         * <br /> 10 - turkey
+         * &lt;br /> 0 - US english
+         * &lt;br /> 1 - spanish 
+         * &lt;br /> 2 - danish
+         * &lt;br /> 3 - french
+         * &lt;br /> 4 - german
+         * &lt;br /> 5 - italian
+         * &lt;br /> 6 - norwegian
+         * &lt;br /> 7 - swedish
+         * &lt;br /> 8 - UK english
+         * &lt;br /> 9 - israel
+         * &lt;br /> 10 - turkey
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_language = function(){ 
             return this._n_language_index; 
@@ -2517,7 +2545,7 @@
          * @function elpusk.device.usb.hid.lpu237.get_enable_iso
          * @param {number} n_track msr track number 0~2
          * @returns {boolean} true - read a track.
-         * <br /> false - not read.
+         * &lt;br /> false - not read.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_iso = function (n_track){ 
             return this._b_enable_iso[n_track];
@@ -2528,9 +2556,9 @@
          * @function elpusk.device.usb.hid.lpu237.get_direction
          * @param {number} n_track msr track number 0~2
          * @returns {number} reading direction.
-         * <br /> 0 - reading direction forward & backward.
-         * <br /> 1 - reading direction forward.
-         * <br /> 2 - reading direction backward.
+         * &lt;br /> 0 - reading direction forward &amp; backward.
+         * &lt;br /> 1 - reading direction forward.
+         * &lt;br /> 2 - reading direction backward.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_direction = function(n_track){
             if( typeof n_track === 'undefined'){
@@ -2619,7 +2647,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_enable_f12_ibutton
          * @returns {boolean} true - the current i-button mode is F12 mode.
-         * <br /> false - the current i-button mode isn't F12 mode.
+         * &lt;br /> false - the current i-button mode isn't F12 mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_f12_ibutton = function(){ 
             if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_f12){
@@ -2634,7 +2662,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_enable_zeros_ibutton
          * @returns {boolean} true - the current i-button mode is zeros mode.
-         * <br /> false - the current i-button mode isn't zeros mode.
+         * &lt;br /> false - the current i-button mode isn't zeros mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton = function(){ 
             if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros){
@@ -2649,7 +2677,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_enable_zeros_7times_ibutton
          * @returns {boolean} true - the current i-button mode is zeros7 mode.
-         * <br /> false - the current i-button mode isn't zeros7 mode.
+         * &lt;br /> false - the current i-button mode isn't zeros7 mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton = function(){ 
             if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros7){
@@ -2664,7 +2692,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_enable_addmit_code_stick_ibutton
          * @returns {boolean} true - the current i-button mode is ibutton_addmit mode.
-         * <br /> false - the current i-button mode isn't ibutton_addmit mode.
+         * &lt;br /> false - the current i-button mode isn't ibutton_addmit mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton = function(){ 
             if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_addmit){
@@ -2679,13 +2707,13 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_tx_transaction
          * @returns {number} request string
-         * <br /> null none request string
+         * &lt;br /> null none request string
          */
         _elpusk.device.usb.hid.lpu237.prototype.get_tx_transaction = function(){
             var s_request = null;
 
             do{
-                if( this._dequeu_s_tx.length <= 0 ){
+                if( this._dequeu_s_tx.length &lt;= 0 ){
                     continue;
                 }
 
@@ -2699,7 +2727,7 @@
          * @function elpusk.device.usb.hid.lpu237.set_rx_transaction
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - rx is saved ok.
-         * <br /> false - error.
+         * &lt;br /> false - error.
          */
         _elpusk.device.usb.hid.lpu237.prototype.set_rx_transaction = function( s_response ){
             var b_result = false;
@@ -2708,7 +2736,7 @@
                 if( typeof s_response !== 'string'){
                     continue;
                 }
-                if(s_response.length <= 0 ){
+                if(s_response.length &lt;= 0 ){
                     continue;
                 }
 
@@ -2730,7 +2758,7 @@
             do{
                 var n_index = 2*2;
                 var n_length = parseInt(s_data_field.substr(n_index,2),16);
-                if(n_length<=0){
+                if(n_length&lt;=0){
                     continue;
                 }
 
@@ -2806,7 +2834,7 @@
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_boot_run_time );
                 
                 b_result = true;
-                for( var i = 0; i<3; i++){
+                for( var i = 0; i&lt;3; i++){
                     if( !_generate_get_direction(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_direction1+i );
                 }//end for
@@ -2857,7 +2885,7 @@
                 }
 
                 b_result = true;
-                for( var i = 0; i<3; i++){
+                for( var i = 0; i&lt;3; i++){
                     if( !_generate_get_enable_track(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_enable_iso1+i );
                     //
@@ -3095,10 +3123,10 @@
         _elpusk.device.usb.hid.lpu237.prototype.set_from_rx = function(){
             var b_result = false;
             do {
-                if (this._deque_generated_tx.length <= 0){
+                if (this._deque_generated_tx.length &lt;= 0){
                     continue;
                 }
-                if( this._dequeu_s_rx.length <= 0 ){
+                if( this._dequeu_s_rx.length &lt;= 0 ){
                     continue;
                 }
                 var s_response = this._dequeu_s_rx.shift();
@@ -3345,4 +3373,26 @@
 
     // the end of function
     window.elpusk = _elpusk;
-}(window))
+}(window))</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="elpusk.device.usb.hid.lpu237.html">lpu237</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Apr 08 2020 15:04:59 GMT+0900 (GMT+09:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

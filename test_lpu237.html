@@ -272,21 +272,93 @@
 
         ///////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////
+        function cb_received_from_server( s_rx  ){
+            do{
+                //
+                if( !lpu237.set_rx_transaction(s_rx) ){
+                    addMessage("fail : cb_received_from_server : set_rx_transaction");
+                    continue;
+                }
+                if( !lpu237.set_from_rx() ){
+                    addMessage("fail : cb_received_from_server : set_from_rx");
+                    continue;
+                }
+                addMessage("rx : "+ s_rx);
+
+                var s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    b_run = false;
+                    addMessage("no more tx data");
+                    continue;
+                }
+                addMessage( s_request );
+
+                var server = elpusk.framework.coffee.get_instance();
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : cb_received_from_server : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+            }while(false);
+        }
+
+        function cb_error_from_server( event_error ){
+            addMessage("fail : cb_error_from_server : "+ server.get_error_message(event_error));
+        }
+
         function on_button_system_info(){
             var server = elpusk.framework.coffee.get_instance();
-            var 
+            var b_result = false;
+            var s_request = null;
+
+            do{
+                b_result = lpu237.generate_get_system_information();
+                if( !b_result ){
+                    addMessage("lpu237.generate_get_system_information() : " + "error");
+                    continue;
+                }
+                addMessage("lpu237.generate_get_system_information() : " + "ok");
+
+                s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    b_run = false;
+                    addMessage("no more tx data");
+                    continue;
+                }
+                addMessage( "tx : " + s_request );
+
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+            }while(false);
+            
+            /*
             server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_generate())
             .then(
                 function (s_rx) {
                     do{
-                        if( !lpu237.is_valid_response(s_rx) ){
-                            addMessage("received : " + "invalid");
+                        if( !lpu237.set_rx_transaction(s_rx) ){
+                            addMessage("fail : cb_received_from_server : set_rx_transaction");
                             continue;
                         }
-                        if( !lpu237.is_good_response(s_rx) ){
-                            addMessage("received : " + "error");
+                        if( !lpu237.set_from_rx() ){
+                            addMessage("fail : cb_received_from_server : set_from_rx");
                             continue;
                         }
+                        addMessage("rx : "+ s_rx);
+
 
                         var s_data = lpu237.get_data_field(s_rx);
 
@@ -298,38 +370,42 @@
                 // error here
                 addMessage("fail : device transmit : "+ server.get_error_message(event_error));
             });
+            */
 
         }        
 
-        function on_button_get_parameters()
-        {
+        function on_button_get_parameters(){
             var server = elpusk.framework.coffee.get_instance();
+            var b_result = false;
+            var s_request = null;
 
             do{
-                server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_request_data_field_of_enter_cs())
-                .then(
-                    function (s_rx) {
-                        do{
-                            if( !lpu237.is_valid_response(s_rx) ){
-                                addMessage("received : " + "invalid");
-                                continue;
-                            }
-                            if( !lpu237.is_good_response(s_rx) ){
-                                addMessage("received : " + "error");
-                                continue;
-                            }
+                b_result = lpu237.generate_get_parameters();
+                if( !b_result ){
+                    addMessage("lpu237.generate_get_parameters() : " + "error");
+                    continue;
+                }
+                addMessage("lpu237.generate_get_parameters() : " + "ok");
 
-                            addMessage("enter cs");
-                        }while(false);
-                    }
-                ).catch(function (event_error) {
-                    // error here
-                    addMessage("fail : enter cs : "+ server.get_error_message(event_error));
-                    throw(event_error);
-                });
-                //
+                s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    b_run = false;
+                    addMessage("no more tx data");
+                    continue;
+                }
+                addMessage( "tx : " + s_request );
+
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
             }while(false);
-
         }
 
     </script>

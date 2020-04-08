@@ -22,7 +22,7 @@
 
             //maps ASCII to USB HID-key code.
             //gASCToHIDKeyMap[i][j][k] ....... index i language map index, index j is ascii code.. editing 200 item
-            _elpusk.util.keyboard.map.prototype.sASCToHIDKeyMap = [
+            _elpusk.util.keyboard.map.sASCToHIDKeyMap = [
                 [	//xxx.English.Table......
                     //[ Modified key,HID key ]
                     // 0 ==================
@@ -1635,7 +1635,7 @@
             /////////////////////////////////////////////////////////////////////////////
             //maps ASCII to PS/2 set2 scan-code.
             //gAsciiToPS2KeyTable[i][j][k] ....... index i language map index, index j is ascii code.. editing 200 item
-            _elpusk.util.keyboard.map.prototype.sASCToPS2KeyMap = [
+            _elpusk.util.keyboard.map.sASCToPS2KeyMap = [
                 [	// xxx.English PS2 keymap
                     //[ control key key,general key ]
                     // 0 ==================
@@ -3235,29 +3235,29 @@
                 ]
             ];
 
-            _elpusk.util.keyboard.map.prototype.get_ascii_to_hid_key_map_value = function(n_language, n_ascii, n_item){
-                return _elpusk.util.keyboard.map.prototype.sASCToHIDKeyMap[n_language][n_ascii][n_item];
+            _elpusk.util.keyboard.map.get_ascii_to_hid_key_map_value = function(n_language, n_ascii, n_item){
+                return _elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][n_ascii][n_item];
             }
-            _elpusk.util.keyboard.map.prototype.get_ascii_to_ps2_key_map_value = function(n_language, n_ascii, n_item){
-                return _elpusk.util.keyboard.map.prototype.sASCToPS2KeyMap[n_language][n_ascii][n_item];
+            _elpusk.util.keyboard.map.get_ascii_to_ps2_key_map_value = function(n_language, n_ascii, n_item){
+                return _elpusk.util.keyboard.map.sASCToPS2KeyMap[n_language][n_ascii][n_item];
             }
     
-            _elpusk.util.keyboard.map.prototype.get_ascii_to_hid_key_map_string = function(n_language){
+            _elpusk.util.keyboard.map.get_ascii_to_hid_key_map_string = function(n_language){
                 var s_map = "";
 
-                for( var i = 0; i<_elpusk.util.keyboard.map.prototype.sASCToHIDKeyMap[n_language].length; i++  ){
-                    for( var j = 0; j<_elpusk.util.keyboard.map.prototype.sASCToHIDKeyMap[n_language][i].length; j++ ){
-                        s_map += _elpusk.util.keyboard.map.prototype.sASCToHIDKeyMap[n_language][i][j];
+                for( var i = 0; i<_elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language].length; i++  ){
+                    for( var j = 0; j<_elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][i].length; j++ ){
+                        s_map += _elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][i][j];
                     }//end for
                 }//end for
                 return s_map;
             }
-            _elpusk.util.keyboard.map.prototype.get_ascii_to_ps2_key_map_string = function(n_language){
+            _elpusk.util.keyboard.map.get_ascii_to_ps2_key_map_string = function(n_language){
                 var s_map = "";
 
-                for( var i = 0; i<_elpusk.util.keyboard.map.prototype.sASCToPS2KeyMap[n_language].length; i++  ){
-                    for( var j = 0; j<_elpusk.util.keyboard.map.prototype.sASCToPS2KeyMap[n_language][i].length; j++ ){
-                        s_map += _elpusk.util.keyboard.map.prototype.sASCToPS2KeyMap[n_language][i][j];
+                for( var i = 0; i<_elpusk.util.keyboard.map.sASCToPS2KeyMap[n_language].length; i++  ){
+                    for( var j = 0; j<_elpusk.util.keyboard.map.sASCToPS2KeyMap[n_language][i].length; j++ ){
+                        s_map += _elpusk.util.keyboard.map.sASCToPS2KeyMap[n_language][i][j];
                     }//end for
                 }//end for
                 return s_map;

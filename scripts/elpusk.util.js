@@ -18,16 +18,16 @@
          * @param {string} s_hex little endian hex string.
          * @returns {number} converted number.
          */
-        _elpusk.util.prototype.get_number_from_little_endian_hex_string = function( s_hex ){
+        _elpusk.util.get_number_from_little_endian_hex_string = function( s_hex ){
             var n_value = 0;
 
             do{
 
                 var a = s_hex.match(/../g);     // split number in groups of two
                 a.reverse();                    // reverse the groups
-    
+
                 var s_big_hex = a.join("");
-    
+
                 n_value = parseInt(s_big_hex,16);
             }while(false);
             return n_value;
@@ -39,7 +39,7 @@
          * @param {number} dw_data unsigned int - double word number.
          * @returns {string} little endian double word hex string format. always 8 characters.
          */
-        _elpusk.util.prototype.get_dword_hex_string_from_number = function( dw_data ){
+        _elpusk.util.get_dword_hex_string_from_number = function( dw_data ){
             var s_big_hex = dw_data.toString(16);
 
             s_big_hex = s_big_hex.replace(/^(.(..)*)$/, "0$1"); // add a leading zero if needed
@@ -61,7 +61,7 @@
          * @param {number} c_data unsigned char
          * @returns {string} little endian byte hex string format. always 2 characters.
          */
-        _elpusk.util.prototype.get_byte_hex_string_from_number = function( n_data ){
+        _elpusk.util.get_byte_hex_string_from_number = function( n_data ){
             var s_dword = _elpusk.util.prototype.get_dword_hex_string_from_number(n_data);
             return s_dword.substring(0,2);
         }
@@ -73,7 +73,7 @@
          * @param {any} item
          * @returns {boolean} processing result
          */
-        _elpusk.util.prototype.insert_to_set = function( target_set, item ){
+        _elpusk.util.insert_to_set = function( target_set, item ){
             var b_result = false;
             do{
                 if( typeof target_set === 'undefined' ){
@@ -104,7 +104,7 @@
          * @param {any} item
          * @returns {boolean} processing result
          */
-        _elpusk.util.prototype.remove_from_set = function( target_set, item ){
+        _elpusk.util.remove_from_set = function( target_set, item ){
             var b_result = false;
             do{
                 if( typeof target_set === 'undefined' ){
@@ -136,7 +136,7 @@
          * @param {any} item
          * @returns {number} index of item in target_set.
          */
-        _elpusk.util.prototype.find_from_set = function( target_set, item ){
+        _elpusk.util.find_from_set = function( target_set, item ){
             var n_index = -1;
             do{
                 if( typeof target_set === 'undefined' ){
@@ -152,9 +152,8 @@
                 n_index = target_set.indexOf(item);
             }while(false);
             return n_index;
-        }
-
-    }
+        }         
+    }//the end of _elpusk.util
 
     // the end of function
     window.elpusk = _elpusk;
