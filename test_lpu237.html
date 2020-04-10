@@ -53,7 +53,7 @@
     <br />
 
     <br />
-    <input type="button" id="button_get_id" onclick="on_button_system_info();" value="get id of lpu237" />
+    <input type="button" id="button_system_info" onclick="on_button_system_info();" value="get id of lpu237" />
     <br />
 
     <br />
@@ -125,7 +125,7 @@
             server.connect("wss","443").then(
                 function(s_session_number){
                     console.log("session : " + s_session_number);
-                    return server.get_device_list("hid#vid_134b&pid_0206&mi_01");
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
                 }
             )
             .catch(
@@ -148,7 +148,7 @@
                         if( array_device_list.length > 0 ){
                             lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
                             console.log("create : "+lpu237);
-                            return server.device_open(lpu237.get_path());
+                            return elpusk.framework.coffee.get_instance().device_open(lpu237.get_path());
                         }
                     }
                 }
@@ -209,6 +209,12 @@
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML += (Message + "<br />");
+        }
+        function addMultiMessage(ssMessage) {
+            var ss_msg = ssMessage.split("\n");
+            for( var i = 0; i<ss_msg.length; i++ ){
+                addMessage(ss_msg[i]);
+            }
         }
 
         function printMessage_pre(Message)
@@ -277,18 +283,24 @@
                 //
                 if( !lpu237.set_rx_transaction(s_rx) ){
                     addMessage("fail : cb_received_from_server : set_rx_transaction");
+                    addMessage("rx : "+ s_rx);
                     continue;
                 }
                 if( !lpu237.set_from_rx() ){
                     addMessage("fail : cb_received_from_server : set_from_rx");
+                    addMessage("rx : "+ s_rx);                    
                     continue;
                 }
-                addMessage("rx : "+ s_rx);
+                //
 
                 var s_request = lpu237.get_tx_transaction();
                 if( s_request === null ){
-                    b_run = false;
                     addMessage("no more tx data");
+                    addMultiMessage( lpu237.get_string() );
+
+                    addMessage(
+                        lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
+                    );
                     continue;
                 }
                 addMessage( s_request );
@@ -311,6 +323,44 @@
             addMessage("fail : cb_error_from_server : "+ server.get_error_message(event_error));
         }
 
+        function cb_received_sys_info_from_server( s_rx  ){
+            do{
+                //
+                if( !lpu237.set_rx_transaction(s_rx) ){
+                    addMessage("fail : cb_received_sys_info_from_server : set_rx_transaction");
+                    continue;
+                }
+                if( !lpu237.set_from_rx() ){
+                    addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
+                    continue;
+                }
+                //addMessage("rx : "+ s_rx);
+
+                var s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("complete system info.");
+
+                    var version = lpu237.get_version();
+                    addMessage( "version : "+String(version) );
+
+                    continue;
+                }
+                //addMessage( s_request );
+
+                var server = elpusk.framework.coffee.get_instance();
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_sys_info_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : cb_received_sys_info_from_server : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+            }while(false);
+        }
+
         function on_button_system_info(){
             var server = elpusk.framework.coffee.get_instance();
             var b_result = false;
@@ -326,15 +376,14 @@
 
                 s_request = lpu237.get_tx_transaction();
                 if( s_request === null ){
-                    b_run = false;
                     addMessage("no more tx data");
                     continue;
                 }
-                addMessage( "tx : " + s_request );
+                //addMessage( "tx : " + s_request );
 
                 b_result = server.device_transmit_with_callback(
                     lpu237.get_device_index(),0,0, s_request,
-                    cb_received_from_server,
+                    cb_received_sys_info_from_server,
                     cb_error_from_server
                     );
                 if( !b_result ){
@@ -389,7 +438,6 @@
 
                 s_request = lpu237.get_tx_transaction();
                 if( s_request === null ){
-                    b_run = false;
                     addMessage("no more tx data");
                     continue;
                 }

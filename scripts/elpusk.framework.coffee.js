@@ -1,8 +1,26 @@
 /**
- * 
- * 2020.3.5 - 
- * 2020.3.25
+ * 2020.4.10
  * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
  * @version 1.1.0
@@ -47,29 +65,31 @@
          _b_connet = false;
         _elpusk.framework.coffee = {};
 
-        /** 
-         * @class coffee class. used by singleton pattern.
+        /**
+         * @class coffee
+         * @classdesc this class support the interface to "coffee manager".
+         * <br /> this class must be used by singleton pattern.
+         * <br /> Use get_instance() method.
         */
         _elpusk.framework.coffee = (function(){
             /** 
              * instance of class
              * @private 
             */ 
-           var _instance;
+            var _instance;
             
             /** 
              * websocket instance.
              * @private 
             */ 
-           var _websocket;
+            var _websocket;
 
             /** 
              * session number
              * @private
             */ 
-           var _s_session;
+            var _s_session;
 
-            /** @constructor coffee class singleton. */
             function _constructor(){
 
                 /** 
@@ -698,6 +718,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function connect
                      * @param {string} s_protocol For security Websocket. Use "wss". 
                      * <br /> For WebSocket. Use "ws".
@@ -744,6 +765,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function disconnect
                      * 
                      * @returns {Promise} if success, resolve with session number by string format.
@@ -782,6 +804,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function echo_string
                      * @param {string} s_data s_data is string type.
                      * 
@@ -796,6 +819,7 @@
 
                     /** 
                      * @public 
+                     * @async
                      * @function echo_hex
                      * @param {string} s_data s_data is hex string type.
                      * <br />  server will change this parameter to binary. 
@@ -811,6 +835,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function get_device_list
                      * @param {string} s_filter This filter is used to represent the desired USB device.
                      * <br />the filter format is “class#vid_xxxx&pid_yyyy&mi_zz".  
@@ -884,6 +909,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_open
                      * @param {string} s_path device path string
                      * 
@@ -953,6 +979,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_close
                      * @param {number} n_device_index device index number must be greater then zero.
                      * 
@@ -1018,6 +1045,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_send
                      * @param {number} n_device_index device index number.
                      * @param {number} n_out_id
@@ -1103,6 +1131,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_receive
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1184,6 +1213,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_transmit
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1278,6 +1308,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_transmit_with_callback
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1378,6 +1409,7 @@
                     },                    
                     /** 
                      * @public 
+                     * @async
                      * @function device_cancel
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1472,7 +1504,7 @@
             return{
                 /** 
                  * @public 
-                 * @function get_instance
+                 * @constructs get_instance
                  * 
                  * @returns {object} return coffee class instance.
                  * 

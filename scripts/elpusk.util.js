@@ -61,8 +61,8 @@
          * @param {number} c_data unsigned char
          * @returns {string} little endian byte hex string format. always 2 characters.
          */
-        _elpusk.util.get_byte_hex_string_from_number = function( n_data ){
-            var s_dword = _elpusk.util.prototype.get_dword_hex_string_from_number(n_data);
+        _elpusk.util.get_byte_hex_string_from_number = function( c_data ){
+            var s_dword = _elpusk.util.prototype.get_dword_hex_string_from_number(c_data);
             return s_dword.substring(0,2);
         }
         
