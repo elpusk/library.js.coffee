@@ -2592,16 +2592,15 @@
             return _generate_request( queue_s_tx,_type_cmd.REQ_GOTO_BOOT,"00");
         }
 
-
         /**
          * @private
-         * @function _get_tag_by_ascii_hex_string
+         * @function _get_tag_by_ascii_code
          * @param {number} n_language language index number 0~10. type is _type_keyboard_language_index.
          * @param {string} s_len_tag_hex this string is received from device by hex string format.
-         * @returns {string} hex string format of ASCII code of tag.
+         * @returns {number[]} ASCII code array of tag.
          */
-        function _get_tag_by_ascii_hex_string(n_language,s_len_tag_hex){
-            var s_hex = "";
+        function _get_tag_by_ascii_code(n_language,s_len_tag_hex){
+            var n_hex = [];
 
             do{
                 if( typeof n_language !== 'number'){
@@ -2633,31 +2632,71 @@
                 n_tag.length = n_len;
 
                 //
+                var c_mod = 0;
+                var c_key = 0;
                 for( var i = 0; i<n_tag.length; i=i+2 ){
                     if(n_tag[i] === 0 && n_tag[i+1] === 0 ){
                         continue;
                     }
                     if(n_tag[i]===0xff ){
                         //ascii code format
-                        s_hex.push(elpusk.util.get_byte_hex_string_from_number(n_tag[i+1]));
+                        n_hex.push(n_tag[i+1]);
                         continue;
                     }
                     //hid keyboard code.
                     for( var j = 0; j< elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language].length; j++ ){
-                        if(elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][j][0] !==  n_tag[i] ){
+                        c_mod = parseInt(elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][j][0],16);
+                        if( c_mod !==  n_tag[i] ){
                             continue;
                         }
-                        if(elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][j][1] !==  n_tag[i+1] ){
+                        c_key = parseInt(elpusk.util.keyboard.map.sASCToHIDKeyMap[n_language][j][1],16);
+                        if(c_key !==  n_tag[i+1] ){
                             continue;
                         }
-                        s_hex.push(elpusk.util.get_byte_hex_string_from_number(j));
+                        n_hex.push( j );
                     }//end for j
                 }//end for i
 
             }while(false);
+            return n_hex;
+        }
+
+        /**
+         * @private
+         * @function _get_tag_by_ascii_hex_string
+         * @param {number} n_language language index number 0~10. type is _type_keyboard_language_index.
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {string[]} hex string format of ASCII code of tag.
+         */
+        function _get_tag_by_ascii_hex_string(n_language,s_len_tag_hex){
+            var s_hex = [];
+
+            var n_ascii = _get_tag_by_ascii_code(n_language,s_len_tag_hex);
+
+            for( var i =0 ; i<n_ascii.length; i++ ){
+                s_hex.push( elpusk.util.get_byte_hex_string_from_number(n_ascii[i]) );
+            }//end for
             return s_hex;
         }
-        
+
+        /**
+         * @private
+         * @function _get_tag_by_ascii_string
+         * @param {number} n_language language index number 0~10. type is _type_keyboard_language_index.
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {string[]} string format of ASCII code of tag.
+         */
+        function _get_tag_by_ascii_string(n_language,s_len_tag_hex){
+            var s_ascii = [];
+
+            var n_ascii = _get_tag_by_ascii_code(n_language,s_len_tag_hex);
+
+            for( var i =0 ; i<n_ascii.length; i++ ){
+                s_ascii.push( String.fromCharCode(n_ascii[i]) );
+            }//end for
+            return s_ascii;
+        }
+
         /**
          * @class lpu237
          * @classdesc this class support protocol layer for lpu237 magnetic card reader.
@@ -3930,7 +3969,7 @@
                 s_description = s_description + "i-Button mode : " + _get_ibutton_mode_string(this._n_ibutton_mode) + "\n";
 
                 if(this._b_global_pre_postfix_send_condition){
-                    s_description = s_description + "MSR global pre/postfixs sending condition : send when all track is error.\n";
+                    s_description = s_description + "MSR global pre/postfixs sending condition : send when all track isn't error.\n";
                 }
                 else{
                     s_description = s_description + "MSR global pre/postfixs sending condition : send when a track isn't error.\n";
@@ -3965,11 +4004,32 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_hex_string
          * @param {string} s_tag this string is received from device by hex string format.
-         * @returns {string} hex string format of ASCII code of tag.
+         * @returns {string[]} hex string format array of ASCII code of tag.
         */
         _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_hex_string = function(s_tag){
             return _get_tag_by_ascii_hex_string( this._n_language_index, s_tag );
         }
+
+        /**
+         * @private
+         * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_code
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {number[]} ASCII code array of tag.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_code = function(s_tag){
+            return _get_tag_by_ascii_code(this._n_language_index, s_tag );
+        }
+
+        /**
+         * @private
+         * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_string
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {string[]} string format of ASCII code of tag.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_string = function(s_tag){
+            return _get_tag_by_ascii_string(this._n_language_index, s_tag );
+        }
+
 
     }//the end of _elpusk.device.usb.hid.lpu237
 

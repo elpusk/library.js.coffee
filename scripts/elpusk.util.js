@@ -62,8 +62,15 @@
          * @returns {string} little endian byte hex string format. always 2 characters.
          */
         _elpusk.util.get_byte_hex_string_from_number = function( c_data ){
-            var s_dword = _elpusk.util.prototype.get_dword_hex_string_from_number(c_data);
-            return s_dword.substring(0,2);
+            var s_big_hex = c_data.toString(16);
+
+            s_big_hex = s_big_hex.replace(/^(.(..)*)$/, "0$1"); // add a leading zero if needed
+            var n_need_zeros = 1*2 - s_big_hex.length;
+            for( var i = 0; i<n_need_zeros; i++ ){
+                s_big_hex = "0" + s_big_hex;    //padding for dword.
+            }//end for
+
+            return s_big_hex.substring(0,2);
         }
         
         /**
