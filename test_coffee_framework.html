@@ -1,3 +1,27 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
 <!DOCTYPE html>
 
 
@@ -39,6 +63,10 @@
     <br />
     <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
     <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
+    <br />
+
+    <br />
+    the registered usb device in coffee manager.
     <br />
     <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
     <br />
@@ -112,13 +140,13 @@
             parag_main.innerHTML ="";
         }
 
-        function printMessage(Message)
-        {
+        function printMessage(Message){
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML = Message + "<br />";
         }
+
         function addMessage(Message) {
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
@@ -126,22 +154,21 @@
             parag_main.innerHTML += (Message + "<br />");
         }
 
-        function printMessage_pre(Message)
-        {
+        function printMessage_pre(Message){
             var parag_main = document.getElementById("p_pre_main");
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML = Message + "<br />";
         }
-        function addMessage_pre(Message) {
+
+        function addMessage_pre(Message){
             var parag_main = document.getElementById("p_pre_main");
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML += (Message + "<br />");
         }
 
-        function on_button_promise_connect_server_ws()
-        {
+        function on_button_promise_connect_server_ws(){
             var server = elpusk.framework.coffee.get_instance();
 
             server.connect("ws").then(function (s_session_number) {
@@ -152,8 +179,8 @@
                 addMessage("fail : websocket connection : "+ server.get_error_message(event_error));
             });
         }
-        function on_button_promise_connect_server_wss()
-        {
+
+        function on_button_promise_connect_server_wss(){
             var server = elpusk.framework.coffee.get_instance();
 
             server.connect("wss").then(function (s_session_number) {

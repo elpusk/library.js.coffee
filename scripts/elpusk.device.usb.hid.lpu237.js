@@ -3282,7 +3282,8 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_get_system_information
-         * @return {boolean} generate result success or failure
+         * @return {number} the number of generated requests.
+         * <br /> 0 - error
         */
         _elpusk.device.usb.hid.lpu237.prototype.generate_get_system_information = function(){
             var b_result = false;
@@ -3308,13 +3309,14 @@
                 this._deque_generated_tx.length = 0;
             }
 
-            return b_result;
+            return this._deque_generated_tx.length;
         }
 
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_get_parameters
-         * @return {boolean} generate result success or failure
+         * @return {number} the number of generated requests.
+         * <br /> 0 - error
         */
        _elpusk.device.usb.hid.lpu237.prototype.generate_get_parameters = function(){
             var b_result = false;
@@ -3451,17 +3453,17 @@
                 this._deque_generated_tx.length = 0;
             }
 
-            return b_result;
+            return this._deque_generated_tx.length;
         }        
 
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.generate_set_parameters
-         * @return {boolean} generate result success or failure
+         * @return {number} the number of generated requests.
+         * <br /> 0 - error
         */
         _elpusk.device.usb.hid.lpu237.prototype.generate_set_parameters = function(){
             var b_result = false;
-            var s_req = "";
 
             do{
                 if(!_generate_enter_config_mode(this._dequeu_s_tx) ){ continue;}
@@ -3640,9 +3642,15 @@
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
                 //
                 b_result = true;
-                m_set_change_parameter.clear();
+                elpusk.util.clear_set(_set_change_parameter);
             }while (false);
-            return b_result;           
+
+            if( !b_result ){
+                this._dequeu_s_tx.length = 0;
+                this._deque_generated_tx.length = 0;
+            }
+
+            return this._deque_generated_tx.length;;           
        }
 
         /**
