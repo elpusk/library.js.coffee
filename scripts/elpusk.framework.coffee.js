@@ -139,6 +139,7 @@
                     ECHO: "E",
                     DEVICE_LIST: "L",
                     CONTROL_SHOW: "S",
+                    DEVICE_PLUG_IN: "P",
                     DEVICE_OPEN: "o",
                     DEVICE_CLOSE: "c",
                     DEVICE_SEND: "s",
@@ -328,7 +329,7 @@
                 /** 
                  * @private 
                  * @function _is_valid_action_code
-                 * @param {string} s_action_code
+                 * @param {string} s_action_code this code is only for client request.
                  * @returns {boolean}
                  * @description checks whether or not packet action code is valied.
                 */                
@@ -1551,6 +1552,7 @@
      * <br /> the second parameter is string or string array.
      * <br /> the current system event is
      * <br /> 1. removed device : the first parameter is "c". the second parameter is the removed device path.
+     * <br /> 2. plugged in device : the first parameter is "P". the second parameter is the inserted device path.
      */
     _elpusk.framework.coffee.set_system_event_handler = function (handler) {
         _system_handler = handler;

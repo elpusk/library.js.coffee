@@ -106,6 +106,12 @@
                     ++n_system_event;
                     printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field );
                 }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
                 //
 
             }while(false);

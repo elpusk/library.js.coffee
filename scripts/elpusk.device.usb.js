@@ -40,7 +40,6 @@
      * @class usb device manager
     */
     if (!_elpusk.device.usb) {
-        'use strict';
         /**
          * @constructs elpusk.device.usb
          * @param {string} s_path the path of usb device.
