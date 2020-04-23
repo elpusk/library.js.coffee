@@ -1,3 +1,28 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+
 <!DOCTYPE html>
 
 
@@ -11,20 +36,26 @@
 <BODY>
     <script type="text/javascript">
         if (typeof Promise === "undefined") {
-            //document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"><\/script>');
-            document.write('<script src="scripts/bluebird.core.min.js"><\/script>');
-            document.write('<script src="scripts/elpusk.framework.coffee.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.hid.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
+
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
         }
         else{
-            document.write('<script src="scripts/elpusk.framework.coffee.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.hid.js"><\/script>');
-            document.write('<script src="scripts/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
         }
     </script>    
 
@@ -35,28 +66,20 @@
     <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
 
     <br />
-    <br />
-    <input type="button" id="button_promise_connect_server_ws" onclick="on_button_promise_connect_server_ws();" value="connect websocket server by promise" />
-    <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
-    <br />
     <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
-    <br />
-    <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
-    <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
     <br />
     <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
     <br />
     <select id="drop_get_device_list">
     </select>
     <br />
-    <input type="button" id="button_promise_device_open" onclick="on_button_promise_device_open();" value="open device by promise" />
     <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
     <br />
-    <input type="button" id="button_promise_device_send" onclick="on_button_promise_device_send();" value="send data to device by promise" />
-    <input type="button" id="button_promise_device_receive" onclick="on_button_promise_device_receive();" value="receive data from device by promise" />
-    <input type="button" id="button_promise_device_transmit" onclick="on_button_promise_device_transmit();" value="send and receive data .. device by promise" />
-    <input type="button" id="button_promise_device_cancel" onclick="on_button_promise_device_cancel();" value="cancel operation of  device by promise" />
+
     <br />
+    <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters of lpu237" />
+    <br />
+    <progress id="progress_get_parameters" value="0" max="100"></progress>
 
     <p id="p_pre_main">
         <!-- pre main print area -->
@@ -82,10 +105,23 @@
                     ++n_system_event;
                     printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field );
                 }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
                 //
 
             }while(false);
         }
+
+        function _test(){
+            addMessage(" : test : ");
+
+        }
+
+
 
         function init() {
             if( typeof Promise === 'undefined'){
@@ -95,85 +131,10 @@
                 addMessage("ok promise");
             }
 
-            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
-            //
-            var device = new elpusk.device("device");
-            var usb = new elpusk.device.usb("usb");
-            var hid = new elpusk.device.usb.hid("hid");
-
-            console.log(device);
-            console.log(usb);
-            console.log(hid);
-
-            console.log(device.get_path());
-            console.log(usb.get_path());
-            console.log(hid.get_path());
-
-            //
-            var array_device_list = [];
-            var server = elpusk.framework.coffee.get_instance();
-
-            server.connect("wss").then(
-                function(s_session_number){
-                    console.log("session : " + s_session_number);
-                    return server.get_device_list("hid#vid_134b&pid_0206&mi_01");
-                }
-            )
-            .catch(
-                function(event_error){
-                    console.log("connect : " + event_error);
-                }
-            )
-            .then(
-                function(s_rx){
-                    console.log(s_rx);
-                    if( s_rx == null ){
-                        console.log("none device");
-                    }
-                    else if (Array.isArray(s_rx)) {
-                        for (var i = 0; i < s_rx.length; i++) {
-                            array_device_list.push( s_rx[i] );
-                        }
-
-                        if( array_device_list.length > 0 ){
-                            lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
-                            console.log("create : "+lpu237);
-                            return server.device_open(lpu237.get_path());
-                        }
-                    }
-                }
-            )
-            .catch(
-                function(event_error){
-                    console.log("get device list : "+event_error);
-                }
-            )
-            .then(
-                function( n_device_index ){
-                    if( typeof n_device_index !== 'undefined'){
-                        if( n_device_index!==0){
-                            lpu237.opened(n_device_index);
-
-                            var select_dev = document.getElementById("drop_get_device_list");
-                            var option = document.createElement('option');
-                            option.value = lpu237.get_device_index();
-                            option.text = lpu237.get_path();
-                            select_dev.add(option, 0);
-
-                            console.log("opened : "+n_device_index);
-                        }
-                    }
-                }
-            )
-            .catch(
-                function(event_error){
-                    console.log("open device : "+event_error);
-                }
-            );
-
-
+            fun_init();
             // 
-            console.log("the end of init");           
+            console.log("the end of init");
+            _test();          
         }
 
         window.addEventListener("load", init, false);
@@ -198,6 +159,12 @@
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML += (Message + "<br />");
         }
+        function addMultiMessage(ssMessage) {
+            var ss_msg = ssMessage.split("\n");
+            for( var i = 0; i<ss_msg.length; i++ ){
+                addMessage(ss_msg[i]);
+            }
+        }
 
         function printMessage_pre(Message)
         {
@@ -212,39 +179,279 @@
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML += (Message + "<br />");
         }
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////
 
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-        function on_button_promise_connect_server_ws()
-        {
-            var server = elpusk.framework.coffee.get_instance();
-
-            server.connect("ws").then(function (s_session_number) {
-                // server is ready here
-                addMessage("websocket connected : session number = " + s_session_number);
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : websocket connection : "+ server.get_error_message(event_error));
-            });
+        function set_progress_get_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_get_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
         }
 
-        function on_button_promise_connect_server_wss()
-        {
+        function increase_progress_get_parameters(){
+            var prog = document.getElementById("progress_get_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // callback functions
+        function cb_received_from_server( s_rx  ){
+            var b_result = false;
+            do{
+                //
+                if( !lpu237.set_rx_transaction(s_rx) ){
+                    addMessage("fail : cb_received_from_server : set_rx_transaction");
+                    addMessage("rx : "+ s_rx);
+                    continue;
+                }
+                if( !lpu237.set_from_rx() ){
+                    addMessage("fail : cb_received_from_server : set_from_rx");
+                    addMessage("rx : "+ s_rx);                    
+                    continue;
+                }
+                //
+                increase_progress_get_parameters();
+
+                var s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("no more tx data");
+                    addMultiMessage( lpu237.get_string() );
+
+                    addMessage(
+                        lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
+                    );
+                    addMessage(
+                        lpu237.get_tag_by_ascii_string(lpu237.get_private_prefix(0))
+                    );
+                    continue;
+                }
+                //addMessage( s_request );
+
+                var server = elpusk.framework.coffee.get_instance();
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : cb_received_from_server : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+                b_result = true;
+
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }
+
+        function cb_error_from_server( event_error ){
+            addMessage("fail : cb_error_from_server : "+ server.get_error_message(event_error));
+        }
+
+        function cb_received_sys_info_from_server( s_rx  ){
+            var b_result = false;
+            do{
+                //
+                if( !lpu237.set_rx_transaction(s_rx) ){
+                    addMessage("fail : cb_received_sys_info_from_server : set_rx_transaction");
+                    continue;
+                }
+                if( !lpu237.set_from_rx() ){
+                    addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
+                    continue;
+                }
+                increase_progress_get_parameters();
+
+                var s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    b_result = fun_get_parameters();
+                    continue;
+                }
+                //addMessage( s_request );
+
+                var server = elpusk.framework.coffee.get_instance();
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_sys_info_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : cb_received_sys_info_from_server : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+                b_result = true;
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // basic functions
+        function fun_init() {
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+            //
+            var device = new elpusk.device("device");
+            var usb = new elpusk.device.usb("usb");
+            var hid = new elpusk.device.usb.hid("hid");
+
+            console.log(device);
+            console.log(usb);
+            console.log(hid);
+
+            console.log(device.get_path());
+            console.log(usb.get_path());
+            console.log(hid.get_path());
+
+            //
+            var array_device_list = [];
             var server = elpusk.framework.coffee.get_instance();
 
-            server.connect("wss").then(function (s_session_number) {
-                // server is ready here
-                addMessage("security websocket connected : session number = " + s_session_number);
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : security websocket connection : "+ server.get_error_message(event_error));
-            });
+            server.connect("wss","443").then(
+                function(s_session_number){
+                    console.log("session : " + s_session_number);
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("connect : " + event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function(s_rx){
+                    console.log(s_rx);
+                    if( s_rx == null ){
+                        console.log("none device");
+                    }
+                    else if (Array.isArray(s_rx)) {
+                        for (var i = 0; i < s_rx.length; i++) {
+                            array_device_list.push( s_rx[i] );
+                        }
+
+                        if( array_device_list.length > 0 ){
+                            lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
+                            console.log("create : "+lpu237);
+                            return elpusk.framework.coffee.get_instance().device_open(lpu237.get_path());
+                        }
+                    }
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("get device list : "+event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function( n_device_index ){
+                    if( typeof n_device_index !== 'undefined'){
+                        if( n_device_index!==0){
+                            lpu237.opened(n_device_index);
+
+                            var select_dev = document.getElementById("drop_get_device_list");
+                            var option = document.createElement('option');
+                            option.value = lpu237.get_device_index();
+                            option.text = lpu237.get_path();
+                            select_dev.add(option, 0);
+
+                            console.log("opened : "+n_device_index);
+                        }
+                    }
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("open device : "+event_error);
+                }
+            );
         }
+
+        function fun_get_pre_parameter(){
+            var server = elpusk.framework.coffee.get_instance();
+            var b_result = false;
+            var s_request = null;
+            var n_req = 0;
+
+            do{
+                n_req = lpu237.generate_get_system_information();
+                if( n_req <= 0 ){
+                    addMessage("lpu237.generate_get_system_information() : " + "error");
+                    continue;
+                }
+
+                set_progress_get_parameters( 0,n_req );
+                s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("no more tx data");
+                    continue;
+                }
+                //addMessage( "tx : " + s_request );
+
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_sys_info_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }
+
+        function fun_get_parameters(){
+            var server = elpusk.framework.coffee.get_instance();
+            var b_result = false;
+            var s_request = null;
+            var n_req = 0;
+
+            do{
+                n_req = lpu237.generate_get_parameters();
+                if( n_req <= 0 ){
+                    addMessage("lpu237.generate_get_parameters() : " + "error");
+                    continue;
+                }
+
+                set_progress_get_parameters( 0,n_req );
+                s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("no more tx data");
+                    continue;
+                }
+
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+                b_result = true;
+            }while(false);
+            return b_result;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////
 
         function on_button_promise_disconnect_server() {
             var server = elpusk.framework.coffee.get_instance();
@@ -258,48 +465,9 @@
             });
         }
 
-        function on_button_promise_echo_server() {
-            var server = elpusk.framework.coffee.get_instance();
-            //elpusk.framework.coffee.promise_echo_string(["abc", "a1b1c1", "a2b2c2"]).then(function (s_rx) {
-            server.echo_string("I am echo data.").then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("echo string array data : " + s_rx);
-                }
-                else {
-                    addMessage("echo string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : echo : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_echo_server_hex() {
-            var server = elpusk.framework.coffee.get_instance();
-            //"00 01 02 03 04 05 06 07 08 09 0a 0B 0c 0D 0f"
-            server.echo_hex("000102030405060708090a0B0c0D0f").then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("echo array data : " + s_rx);
-                }
-                else{
-                    addMessage("echo data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : echo : "+ server.get_error_message(event_error));
-            });
-        }
-
-        function on_button_promise_get_device_list() {
-        }
-
-        var n_opened_device_index = 0;
-
-        function on_button_promise_device_open() {
-        }
-
         function on_button_promise_device_close() {
             var server = elpusk.framework.coffee.get_instance();
-            server.device_close(n_opened_device_index).then(function (s_rx) {
+            server.device_close(lpu237.get_device_index()).then(function (s_rx) {
                 do{
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
@@ -314,7 +482,7 @@
                         continue;
                     }
 
-                    n_opened_device_index = 0;
+                    lpu237.closed();
                     addMessage("close success");
 
                 }while(false);
@@ -325,118 +493,42 @@
             });
         }
 
-        function on_button_promise_device_send(){
-            var server = elpusk.framework.coffee.get_instance();
-            server.device_send(n_opened_device_index,0,"49 00 00").then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("error reponse : " + s_rx);
-                        continue;
-                    }
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-                    else if( s_rx != "success" ){
-                        addMessage("send failure");
-                        continue;
-                    }
+        ///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////
 
-                    addMessage("send success");
+        function on_button_get_parameters(){
 
-                }while(false);
-
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : device send : "+ server.get_error_message(event_error));
-            });
-        }
-
-        function on_button_promise_device_receive(){
-            var server = elpusk.framework.coffee.get_instance();
-            server.device_receive(n_opened_device_index,0).then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("received : " + s_rx);
-                        continue;
-                    }
-
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-
-                    addMessage("receive failure : "+s_rx);
-
-                }while(false);
-
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : device receive : "+ server.get_error_message(event_error));
-            });
-
-        }
-        function on_button_promise_device_transmit(){
-            var server = elpusk.framework.coffee.get_instance();
-            server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_request_data_field_of_get_id())
+            fun_get_pre_parameter();
+            
+            /*
+            server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_generate())
             .then(
                 function (s_rx) {
-
-
                     do{
-                        if( !lpu237.is_valid_response(s_rx) ){
-                            addMessage("received : " + "invalid");
+                        if( !lpu237.set_rx_transaction(s_rx) ){
+                            addMessage("fail : cb_received_from_server : set_rx_transaction");
                             continue;
                         }
-                        if( !lpu237.is_good_response(s_rx) ){
-                            addMessage("received : " + "error");
+                        if( !lpu237.set_from_rx() ){
+                            addMessage("fail : cb_received_from_server : set_from_rx");
                             continue;
                         }
-                        if( lpu237.is_good_negative_response(s_rx) ){
-                            addMessage("received : " + "negative");
-                            continue;
-                        }
+                        addMessage("rx : "+ s_rx);
+
 
                         var s_data = lpu237.get_data_field(s_rx);
 
                         addMessage("received ID : " + s_data);
 
                     }while(false);
-
                 }
             ).catch(function (event_error) {
                 // error here
                 addMessage("fail : device transmit : "+ server.get_error_message(event_error));
             });
+            */
 
-        }
-        function on_button_promise_device_cancel(){
-            var server = elpusk.framework.coffee.get_instance();
-            server.device_cancel(n_opened_device_index,0,0).then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("error reponse : " + s_rx);
-                        continue;
-                    }
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-                    else if( s_rx != "success" ){
-                        addMessage("cancel failure");
-                        continue;
-                    }
-
-                    addMessage("cancel success");
-
-                }while(false);
-
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : device cancel : "+ server.get_error_message(event_error));
-            });
-        }
-
+        }        
 
 
     </script>

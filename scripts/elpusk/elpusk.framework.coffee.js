@@ -1,8 +1,26 @@
 /**
- * 
- * 2020.3.5 - 
- * 2020.3.25
+ * 2020.4.10
  * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
  * @version 1.1.0
@@ -47,29 +65,31 @@
          _b_connet = false;
         _elpusk.framework.coffee = {};
 
-        /** 
-         * @class coffee class. used by singleton pattern.
+        /**
+         * @class coffee
+         * @classdesc this class support the interface to "coffee manager".
+         * <br /> this class must be used by singleton pattern.
+         * <br /> Use get_instance() method.
         */
         _elpusk.framework.coffee = (function(){
             /** 
              * instance of class
              * @private 
             */ 
-           var _instance;
+            var _instance;
             
             /** 
              * websocket instance.
              * @private 
             */ 
-           var _websocket;
+            var _websocket;
 
             /** 
              * session number
              * @private
             */ 
-           var _s_session;
+            var _s_session;
 
-            /** @constructor coffee class singleton. */
             function _constructor(){
 
                 /** 
@@ -119,6 +139,7 @@
                     ECHO: "E",
                     DEVICE_LIST: "L",
                     CONTROL_SHOW: "S",
+                    DEVICE_PLUG_IN: "P",
                     DEVICE_OPEN: "o",
                     DEVICE_CLOSE: "c",
                     DEVICE_SEND: "s",
@@ -308,7 +329,7 @@
                 /** 
                  * @private 
                  * @function _is_valid_action_code
-                 * @param {string} s_action_code
+                 * @param {string} s_action_code this code is only for client request.
                  * @returns {boolean}
                  * @description checks whether or not packet action code is valied.
                 */                
@@ -698,6 +719,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function connect
                      * @param {string} s_protocol For security Websocket. Use "wss". 
                      * <br /> For WebSocket. Use "ws".
@@ -744,6 +766,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function disconnect
                      * 
                      * @returns {Promise} if success, resolve with session number by string format.
@@ -782,6 +805,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function echo_string
                      * @param {string} s_data s_data is string type.
                      * 
@@ -796,6 +820,7 @@
 
                     /** 
                      * @public 
+                     * @async
                      * @function echo_hex
                      * @param {string} s_data s_data is hex string type.
                      * <br />  server will change this parameter to binary. 
@@ -811,6 +836,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function get_device_list
                      * @param {string} s_filter This filter is used to represent the desired USB device.
                      * <br />the filter format is “class#vid_xxxx&pid_yyyy&mi_zz".  
@@ -884,6 +910,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_open
                      * @param {string} s_path device path string
                      * 
@@ -953,6 +980,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_close
                      * @param {number} n_device_index device index number must be greater then zero.
                      * 
@@ -1018,6 +1046,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_send
                      * @param {number} n_device_index device index number.
                      * @param {number} n_out_id
@@ -1103,6 +1132,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_receive
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1184,6 +1214,7 @@
                 
                     /** 
                      * @public 
+                     * @async
                      * @function device_transmit
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1278,6 +1309,108 @@
                 
                     /** 
                      * @public 
+                     * @async
+                     * @function device_transmit_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * <br /> function cb_received( hex_string ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * <br /> function cb_error( Error object ) - return none
+                     * 
+                     * @returns {boolean} true - success of starting process.
+                     * <br /> false - failure of starting process.
+                     * 
+                     * @description run device send and receive action to server by callback function.
+                     * <br /> send a data to device and receive a data from device.
+                     * <br /> If device protocol is send-receive pair type, you must use this method.
+                    */                
+                   device_transmit_with_callback : function (
+                       n_device_index, n_in_id, n_out_id, s_hex_string,
+                       cb_received, cb_error
+                       ) {
+                           var b_result = false;
+                            do {
+                                if(typeof cb_received !== 'function' ){
+                                    continue;
+                                }
+                                if(typeof cb_error !== 'function' ){
+                                    continue;
+                                }
+
+                                if (!_b_connet) {
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.DEVICE_TRANSMIT;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    continue;
+                                }
+                                if (n_device_index === const_n_undefined_device_index) {
+                                    continue;
+                                }
+                                if (typeof n_in_id !== 'number') {
+                                    continue;
+                                }
+                                if (n_in_id < 0 || n_in_id > 0xff) {
+                                    continue;
+                                }
+                                if (typeof n_out_id !== 'number') {
+                                    continue;
+                                }
+                                if (n_out_id < 0 || n_out_id > 0xff) {
+                                    continue;
+                                }
+                
+                                if (typeof s_hex_string !== 'string') {
+                                    continue;
+                                }
+                
+                                _websocket.onmessage = function (evt) {
+                                    //recover default handler.
+                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
+                                    var json_obj = JSON.parse(evt.data);
+                                    if (json_obj.action_code == action_code) {
+                                        cb_received(json_obj.data_field);
+                                    }
+                                    else {
+                                        cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                _websocket.onerror = function(evt){
+                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                    cb_error(evt);
+                                }
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.DEVICE
+                                    , n_device_index
+                                    , action_code
+                                    , n_in_id
+                                    , n_out_id
+                                    , _type_data_field_type.HEX_STRING
+                                    , String(s_hex_string)
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                                b_result = true;
+                            } while (false);
+
+                            return b_result;
+                    },                    
+                    /** 
+                     * @public 
+                     * @async
                      * @function device_cancel
                      * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
@@ -1372,9 +1505,9 @@
             return{
                 /** 
                  * @public 
-                 * @function get_instance
+                 * @constructs get_instance
                  * 
-                 * @returns {coffee class instatnce } return coffee class instance.
+                 * @returns {object} return coffee class instance.
                  * 
                  * @description coffee class use singleton pattern. you can get the instance of coffee class.
                 */                   
@@ -1419,6 +1552,7 @@
      * <br /> the second parameter is string or string array.
      * <br /> the current system event is
      * <br /> 1. removed device : the first parameter is "c". the second parameter is the removed device path.
+     * <br /> 2. plugged in device : the first parameter is "P". the second parameter is the inserted device path.
      */
     _elpusk.framework.coffee.set_system_event_handler = function (handler) {
         _system_handler = handler;
