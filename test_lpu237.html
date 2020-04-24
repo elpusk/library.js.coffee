@@ -81,6 +81,10 @@
     <br />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
 
+    <br />
+    <input type="file" id="input_file" accept=".xml" />
+    <br />
+
     <p id="p_pre_main">
         <!-- pre main print area -->
     </p>
@@ -296,7 +300,7 @@
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // basic functions
-        function fun_init() {
+        function _fun_init_coffee_framework() {
 
             elpusk.framework.coffee.set_system_event_handler(cb_system_event);
             //
@@ -375,6 +379,36 @@
                     console.log("open device : "+event_error);
                 }
             );
+        }
+
+
+        function fun_init() {
+
+            if(!(File && FileReader && FileList && Blob)) {
+                addMessage("Not Supported File API");
+            }
+            
+            //
+            document.getElementById("input_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                var reader = new FileReader();
+        
+                reader.onload = function () {
+                    var buf = this.result;
+
+                    addMessage(buf);
+
+                };
+        
+                var blob = file.slice();
+                reader.readAsText(blob);
+                
+                //
+            };
+
+            _fun_init_coffee_framework();
         }
 
         function fun_get_pre_parameter(){

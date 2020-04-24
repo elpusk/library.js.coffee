@@ -3550,7 +3550,7 @@
 
                 // . set buzzer
                 if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
-                    if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,)){continue;}
+                    if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,this._dw_buzzer_frequency)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
