@@ -120,6 +120,7 @@
             }while(false);
         }
 
+
         function _test(){
             addMessage(" : test : ");
 
@@ -393,19 +394,14 @@
                 var file = this.files[0];
                 var name = file.name;
                 var size = file.size;
-                var reader = new FileReader();
-        
-                reader.onload = function () {
-                    var buf = this.result;
-
-                    addMessage(buf);
-
-                };
-        
-                var blob = file.slice();
-                reader.readAsText(blob);
-                
                 //
+                var parser = new DOMParser(); 
+                var xml_doc = parser.parseFromString(name,"text/xml");
+                if(xml_doc != null ){
+                    var ele = xml_doc.getElementsByTagName('common');
+                    var attr=ele.getAttributeNS(null,'interface');
+                    addMessage(attr.text);
+                }
             };
 
             _fun_init_coffee_framework();
