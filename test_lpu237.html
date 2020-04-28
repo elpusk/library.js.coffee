@@ -395,13 +395,43 @@
                 var name = file.name;
                 var size = file.size;
                 //
-                var parser = new DOMParser(); 
-                var xml_doc = parser.parseFromString(name,"text/xml");
-                if(xml_doc != null ){
-                    var ele = xml_doc.getElementsByTagName('common');
-                    var attr=ele.getAttributeNS(null,'interface');
-                    addMessage(attr.text);
-                }
+                var reader = new FileReader();
+
+                reader.onload = function(evt) {
+                    // The file's text will be printed here
+                    var s_data = evt.target.result;
+                    //console.log(s_data);
+                    //
+                    //
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(s_data,"text/xml");
+                    
+                    var array_ele_common = xmlDoc.getElementsByTagName("common");
+                    if( array_ele_common.length > 0 ){
+                        var ele_common = array_ele_common[0];
+                        if( ele_common.hasAttribute("interface1")){
+                            var s_attr = ele_common.getAttribute("interface");
+                            console.log(s_attr);
+                            addMessage(s_attr);
+                            //
+                            var array_s_at_name = ele_common.attributes
+                            for( var i=0; i<array_s_at_name.length; i++ ){
+                                addMessage(array_s_at_name[i]);
+                            }//end for
+                        }
+                        else{
+                            addMessage("none");
+                        }
+                    }
+                    else{
+                        addMessage("error");
+                    }
+
+                };
+                //
+                reader.readAsText(file);
+
+
             };
 
             _fun_init_coffee_framework();

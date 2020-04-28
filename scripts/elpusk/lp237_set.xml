@@ -12,6 +12,7 @@ common	:	iso1		: "enable" or "disable"
 common	:	iso2		: "enable" or "disable"	
 common	:	iso3		: "enable" or "disable"
 common	:	condition	: "and" or "or"
+common	:	direction	: "bidirectional", "forward" or "backward"
 common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
 
 global	:	prefix		:

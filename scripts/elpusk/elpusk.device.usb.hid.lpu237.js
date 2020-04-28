@@ -257,6 +257,54 @@
 			mf_btc : 1
 		};
 
+        /** 
+         * @private 
+         * @constant {map} 
+         *  @description error code to error message map.
+        */                
+        var _error_name_message = [
+            {name:'en_e_parameter',message:"invalied parameter"}
+        ];
+
+        /** 
+         * @private 
+         * @function _get_error_message
+         * @param {string} s_error_name
+         * @returns {string}
+         * @description get error message with error name
+        */                
+        function _get_error_message(s_error_name){
+            var s_message="";
+            do{
+                if( typeof s_error_name === 'undefined'){
+                    continue;
+                }
+                // don't use Array find method. for supporting, IE11.
+                for( var i = 0; i<_error_name_message.length; i++ ){
+                    if( _error_name_message[i].name ===  s_error_name ){
+                        s_message = _error_name_message[i].message;
+                        break;
+                    }
+                }//end for
+            }while(false);
+            return s_message;
+        }
+
+        /** 
+         * @private 
+         * @function _get_error_object
+         * @param {string} s_name
+         * @returns {object}
+         * @description get error object with error name
+        */                
+        function _get_error_object(s_name){
+            var s_message = _get_error_message(s_name);
+            var e = new Error(s_message);
+            e.name = s_name;
+            return e;
+        }
+
+
         /**
          * @private
          * @function _get_manufacturer_string
@@ -1687,6 +1735,259 @@
 			return b_result;
         }
 
+        
+        /**
+         * @private
+         * @function _get_global_pre_postfix_send_condition_from_string
+         * @param {string} s_string - "and" or "or"
+         * @returns {(null|boolean)} true - if all track is not error,global pro/postfix will be sent. 
+         * <br /> false - else case.
+         * <br /> null - error.
+         */
+		function _get_global_pre_postfix_send_condition_from_string(s_string){
+			var b_result = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "and"){
+                    b_result = true;
+                    continue;
+                }
+                if( s_string === "or"){
+                    b_result = false;
+                    continue;
+                }
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_interface_from_string
+         * @param {string} s_string - "usb_kb", "usb_hid" or "rs232".
+         * @returns {number} interface number.
+         * <br /> negative value is error.
+         */
+		function _get_interface_from_string(s_string){
+			var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "usb_kb"){
+                    n_value = _type_system_interface.system_interface_usb_keyboard;
+                    continue;
+                }
+                if( s_string === "usb_hid"){
+                    n_value = _type_system_interface.system_interface_usb_hid;
+                    continue;
+                }             
+                if( s_string === "rs232"){
+                    n_value = _type_system_interface.system_interface_uart;
+                    continue;
+                }             
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_language_from_string
+         * @param {string} s_string - "usa_english" , "spanish", "danish", "french", "german", "italian", "norwegian", "swedish", "hebrew" or "turkey"
+         * @returns {number} language number.
+         * <br /> negative value is error.
+         */
+		function _get_language_from_string(s_string){
+			var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "usa_english"){
+                    n_value = _type_keyboard_language_index.language_map_index_english;
+                    continue;
+                }
+                if( s_string === "spanish"){
+                    n_value = _type_keyboard_language_index.language_map_index_spanish;
+                    continue;
+                }
+                if( s_string === "danish"){
+                    n_value = _type_keyboard_language_index.language_map_index_danish;
+                    continue;
+                }
+                if( s_string === "french"){
+                    n_value = _type_keyboard_language_index.language_map_index_french;
+                    continue;
+                }
+                if( s_string === "german"){
+                    n_value = _type_keyboard_language_index.language_map_index_german;
+                    continue;
+                }
+                if( s_string === "italian"){
+                    n_value = _type_keyboard_language_index.language_map_index_italian;
+                    continue;
+                }
+                if( s_string === "norwegian"){
+                    n_value = _type_keyboard_language_index.language_map_index_norwegian;
+                    continue;
+                }
+                if( s_string === "swedish"){
+                    n_value = _type_keyboard_language_index.language_map_index_swedish;
+                    continue;
+                }
+                if( s_string === "hebrew"){
+                    n_value = _type_keyboard_language_index.language_map_index_israel;
+                    continue;
+                }
+                if( s_string === "turkey"){
+                    n_value = _type_keyboard_language_index.language_map_index_turkey;
+                    continue;
+                }
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_buzzer_frequency_from_string
+         * @param {string} s_string - "on" or "off"
+         * @returns {boolean} true - buzzer on,
+         * false - buzzer off
+         * <br /> null is error
+         */
+		function _get_buzzer_frequency_from_string(s_string){
+			var b_value = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "on"){
+                    b_value = true;
+                    continue;
+                }
+                if( s_string === "off"){
+                    b_value = false;
+                    continue;
+                }
+			} while (false);
+			return b_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_enable_track_from_string
+         * @param {string} s_string - "enable" or "disable"
+         * @returns {(null|boolean)} true - read track.
+         * <br /> false - don't read track.
+         * <br /> null - error.
+         */
+		function _get_enable_track_from_string(s_string){
+			var b_result = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "enable"){
+                    b_result = true;
+                    continue;
+                }
+                if( s_string === "disable"){
+                    b_result = false;
+                    continue;
+                }
+			} while (false);
+			return b_result;
+        }
+        
+        /**
+         * @private
+         * @function _get_direction_from_string
+         * @param {string} s_string - "bidirectional", "forward" or "backward"
+         * @returns {number} reading direction.
+         * <br /> negative value is error.
+         */
+		function _get_direction_from_string(s_string){
+			var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "bidirectional"){
+                    n_value = _type_direction.dir_bidectional;
+                    continue;
+                }
+                if( s_string === "forward"){
+                    n_value = _type_direction.dir_bidectional;
+                    continue;
+                }
+                if( s_string === "backward"){
+                    n_value = _type_direction.dir_bidectional;
+                    continue;
+                }
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_tag_from_string
+         * @param {string} s_string - "[][0x00][][0x01][][0x02][][0x03][][0x04][][0x05][][0x06]"
+         * @returns {(null|string)} hex string format.
+         * <br /> null - error.
+         */
+		function _get_tag_from_string(s_string){
+			var s_data = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_ibutton_mode_from_string
+         * @param {string} s_string - "zeros", "f12", "zeros7" or "addimat"
+         * @returns {number} the current i-button mode is F12.
+         * <br /> negative - error.
+         */
+		function _get_ibutton_mode_from_string(s_string){
+            var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "zeros"){
+                    n_value = _type_ibutton_mode.ibutton_zeros;
+                    continue;
+                }
+                if( s_string === "f12"){
+                    n_value = _type_ibutton_mode.ibutton_f12;
+                    continue;
+                }
+                if( s_string === "zeros7"){
+                    n_value = _type_ibutton_mode.ibutton_zeros7;
+                    continue;
+                }
+                if( s_string === "addimat"){
+                    n_value = _type_ibutton_mode.ibutton_addmit;
+                    continue;
+                }
+
+			} while (false);
+			return n_value;
+        }
     
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // generate basic IO pattern.
@@ -3939,6 +4240,196 @@
             return b_result;
         }   
         
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.set_from_file
+         * @param {File} file_xml xml file format setting file.
+         * @return {Promise} processing result.
+         * @description load from xml setting file. and set parameter with this setting.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.set_from_file = function(file_xml){
+
+            return new Promise(function (resolve, reject) {
+
+                do{
+                    if( typeof file_xml !== 'object'){
+                        reject(_get_error_object('en_e_parameter'));
+                        continue;
+                    }
+                    //
+                    var reader = new FileReader();
+
+                    reader.onload = function(evt) {
+                        var s_data = evt.target.result;
+                        //
+                        var parser = new DOMParser();
+                        var xml_doc = parser.parseFromString(s_data,"text/xml");
+                        
+                        var s_attr_name = "";
+                        var s_attr = "";
+                        var ele = null;
+                        //common element
+                        var array_ele = [];
+                        array_ele = xml_doc.getElementsByTagName("common");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+                            // interface attribute
+                            s_attr_name = "interface";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set interface here,
+                            }
+                            // buzzer attribute
+                            s_attr_name = "buzzer";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set buzzer here,
+                            }
+                            // language attribute
+                            s_attr_name = "language";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set language here,
+                            }
+                            // iso1 attribute
+                            s_attr_name = "iso1";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set iso1 here,
+                            }
+                            // iso2 attribute
+                            s_attr_name = "iso2";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set iso2 here,
+                            }
+                            // iso3 attribute
+                            s_attr_name = "iso3";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set iso3 here,
+                            }
+                            // condition attribute
+                            s_attr_name = "condition";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set condition here,
+                            }
+                            // ibutton attribute
+                            s_attr_name = "ibutton";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set ibutton here,
+                            }
+                        }//the end of common element.
+
+                        //global element
+                        array_ele = xml_doc.getElementsByTagName("global");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+
+                            // prefix attribute
+                            s_attr_name = "prefix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set prefix here,
+                            }
+                            // postfix attribute
+                            s_attr_name = "postfix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set postfix here,
+                            }
+                        }//the end of global element.
+
+                        //iso1 element
+                        array_ele = xml_doc.getElementsByTagName("iso1");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+
+                            // prefix attribute
+                            s_attr_name = "prefix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set prefix here,
+                            }
+                            // postfix attribute
+                            s_attr_name = "postfix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set postfix here,
+                            }
+                        }//the end of iso1 element.
+
+                        //iso2 element
+                        array_ele = xml_doc.getElementsByTagName("iso2");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+                            
+                            // prefix attribute
+                            s_attr_name = "prefix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set prefix here,
+                            }
+                            // postfix attribute
+                            s_attr_name = "postfix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set postfix here,
+                            }
+                        }//the end of iso2 element.
+
+                        //iso3 element
+                        array_ele = xml_doc.getElementsByTagName("iso3");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+                            
+                            // prefix attribute
+                            s_attr_name = "prefix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set prefix here,
+                            }
+                            // postfix attribute
+                            s_attr_name = "postfix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set postfix here,
+                            }
+                        }//the end of iso3 element.
+
+                        //ibutton element
+                        array_ele = xml_doc.getElementsByTagName("ibutton");
+                        if(array_ele.length>0 ){
+                            ele =  array_ele[0];
+                            
+                            // prefix attribute
+                            s_attr_name = "prefix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set prefix here,
+                            }
+                            // postfix attribute
+                            s_attr_name = "postfix";
+                            if( ele.hasAttribute(s_attr_name)){
+                                s_attr = ele.getAttribute(s_attr_name);
+                                //todo. set postfix here,
+                            }
+                        }//the end of ibutton element.
+
+                        //
+                        resolve(json_obj.data_field);
+                    };
+                    //
+                    reader.readAsText(file_xml);
+    
+                }while(false);
+                
+            });//the end of Promise definition.
+        }   
+
+
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_string
