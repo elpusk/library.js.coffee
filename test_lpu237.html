@@ -385,6 +385,8 @@
 
         function fun_init() {
 
+            _fun_init_coffee_framework();
+
             if(!(File && FileReader && FileList && Blob)) {
                 addMessage("Not Supported File API");
             }
@@ -395,46 +397,17 @@
                 var name = file.name;
                 var size = file.size;
                 //
-                var reader = new FileReader();
-
-                reader.onload = function(evt) {
-                    // The file's text will be printed here
-                    var s_data = evt.target.result;
-                    //console.log(s_data);
-                    //
-                    //
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(s_data,"text/xml");
-                    
-                    var array_ele_common = xmlDoc.getElementsByTagName("common");
-                    if( array_ele_common.length > 0 ){
-                        var ele_common = array_ele_common[0];
-                        if( ele_common.hasAttribute("interface1")){
-                            var s_attr = ele_common.getAttribute("interface");
-                            console.log(s_attr);
-                            addMessage(s_attr);
-                            //
-                            var array_s_at_name = ele_common.attributes
-                            for( var i=0; i<array_s_at_name.length; i++ ){
-                                addMessage(array_s_at_name[i]);
-                            }//end for
-                        }
-                        else{
-                            addMessage("none");
-                        }
-                    }
-                    else{
-                        addMessage("error");
-                    }
-
-                };
-                //
-                reader.readAsText(file);
-
+                
+                lpu237.set_from_file(file).then(function (b_result) {
+                    //alway true.
+                    addMessage("ok : set_from_file");
+                }).catch(function (event_error) {
+                    // error here
+                    addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
+                });
 
             };
-
-            _fun_init_coffee_framework();
+            
         }
 
         function fun_get_pre_parameter(){

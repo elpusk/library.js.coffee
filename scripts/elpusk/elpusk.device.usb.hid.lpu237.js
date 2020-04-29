@@ -1943,15 +1943,44 @@
          * <br /> null - error.
          */
 		function _get_tag_from_string(s_string){
-			var s_data = null;
+			var s_tag_hex = null;
 
 			do {
 				if (typeof s_string !== 'string'){
                     continue;
                 }
 
+                var s_data = s_string;
+                var reg_ex = /\s*(?:\]\s*\[|$)\s*/;
+
+                s_data = s_data.trim();
+                var array_token = s_data.split(reg_ex);  
+
+                s_tag_hex = "";
+
+                if( array_token.length === 0 ){
+                    continue;
+                }
+                for(var i in array_token) {
+                    if( array_token[i].length === 0 ){
+                        s_tag_hex += "00";
+                    }
+                    else if( array_token[i].trim() === '[' ){
+                        s_tag_hex += "00";
+                    }
+                    else{
+                        var array_tag = array_token[i].split(/\s*]$/);
+                        for(var j in array_tag) {
+                            array_tag[j] = array_tag[j].trim();
+                            if( array_tag[j].length > 0  ){
+                                array_tag[j] = array_tag[j].replace(/0x/,"");
+                                s_tag_hex += array_tag[j];
+                            }
+                        }
+                    }
+                }              
 			} while (false);
-			return s_data;
+			return s_tag_hex;
         }
         
         /**
@@ -4270,157 +4299,324 @@
                         var ele = null;
                         //common element
                         var array_ele = [];
-                        array_ele = xml_doc.getElementsByTagName("common");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
-                            // interface attribute
-                            s_attr_name = "interface";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set interface here,
-                            }
-                            // buzzer attribute
-                            s_attr_name = "buzzer";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set buzzer here,
-                            }
-                            // language attribute
-                            s_attr_name = "language";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set language here,
-                            }
-                            // iso1 attribute
-                            s_attr_name = "iso1";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set iso1 here,
-                            }
-                            // iso2 attribute
-                            s_attr_name = "iso2";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set iso2 here,
-                            }
-                            // iso3 attribute
-                            s_attr_name = "iso3";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set iso3 here,
-                            }
-                            // condition attribute
-                            s_attr_name = "condition";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set condition here,
-                            }
-                            // ibutton attribute
-                            s_attr_name = "ibutton";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set ibutton here,
-                            }
-                        }//the end of common element.
 
-                        //global element
-                        array_ele = xml_doc.getElementsByTagName("global");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
+                        var n_interface = null;
+                        var b_buzzer = null;
+                        var n_language = null;
+                        var array_b_enable_track = [null,null,null];
+                        var b_condition = null;
+                        var n_ibutton = null;
+                        var s_gpre = null;
+                        var s_gpost = null;
+                        var s_ppretag = [null,null,null];
+                        var s_pposttag = [null,null,null];
+                        var s_ipre = null;
+                        var s_ipost = null;
 
-                            // prefix attribute
-                            s_attr_name = "prefix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set prefix here,
-                            }
-                            // postfix attribute
-                            s_attr_name = "postfix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set postfix here,
-                            }
-                        }//the end of global element.
+                        var b_result = false;
 
-                        //iso1 element
-                        array_ele = xml_doc.getElementsByTagName("iso1");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
+                        do{
+                            array_ele = xml_doc.getElementsByTagName("common");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                // interface attribute
+                                s_attr_name = "interface";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_interface = _get_interface_from_string(s_attr);
+                                    if( n_interface < 0 ){
+                                        continue;//error
+                                    }
+                                }
+                                // buzzer attribute
+                                s_attr_name = "buzzer";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_buzzer = _get_buzzer_frequency_from_string(s_attr);
+                                    if( b_buzzer === null ){
+                                        continue;
+                                    }
+                                }
+                                // language attribute
+                                s_attr_name = "language";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_language = _get_language_from_string(s_attr);
+                                    if( n_language < 0 ){
+                                        continue;
+                                    }
+                                }
+                                // iso1 attribute
+                                s_attr_name = "iso1";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    array_b_enable_track[0] = _get_enable_track_from_string(s_attr);
+                                    if( array_b_enable_track[0] === null ){
+                                        continue;
+                                    }
+                                }
+                                // iso2 attribute
+                                s_attr_name = "iso2";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    array_b_enable_track[1] = _get_enable_track_from_string(s_attr);
+                                    if( array_b_enable_track[1] === null ){
+                                        continue;
+                                    }
+                                }
+                                // iso3 attribute
+                                s_attr_name = "iso3";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    array_b_enable_track[2] = _get_enable_track_from_string(s_attr);
+                                    if( array_b_enable_track[2] === null ){
+                                        continue;
+                                    }
+                                }
+                                // condition attribute
+                                s_attr_name = "condition";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_condition = _get_global_pre_postfix_send_condition_from_string(s_attr);
+                                    if( b_condition === null ){
+                                        continue;
+                                    }
+                                }
+                                // ibutton attribute
+                                s_attr_name = "ibutton";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_ibutton = _get_ibutton_mode_from_string(s_attr);
+                                    if( n_ibutton < 0 ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of common element.
 
-                            // prefix attribute
-                            s_attr_name = "prefix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set prefix here,
-                            }
-                            // postfix attribute
-                            s_attr_name = "postfix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set postfix here,
-                            }
-                        }//the end of iso1 element.
+                            //global element
+                            array_ele = xml_doc.getElementsByTagName("global");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
 
-                        //iso2 element
-                        array_ele = xml_doc.getElementsByTagName("iso2");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
-                            
-                            // prefix attribute
-                            s_attr_name = "prefix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set prefix here,
-                            }
-                            // postfix attribute
-                            s_attr_name = "postfix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set postfix here,
-                            }
-                        }//the end of iso2 element.
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_gpre = _get_tag_from_string(s_attr);
+                                    if( s_gpre === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_gpost = _get_tag_from_string(s_attr);
+                                    if( s_gpost === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of global element.
 
-                        //iso3 element
-                        array_ele = xml_doc.getElementsByTagName("iso3");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
-                            
-                            // prefix attribute
-                            s_attr_name = "prefix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set prefix here,
-                            }
-                            // postfix attribute
-                            s_attr_name = "postfix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set postfix here,
-                            }
-                        }//the end of iso3 element.
+                            //iso1 element
+                            array_ele = xml_doc.getElementsByTagName("iso1");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
 
-                        //ibutton element
-                        array_ele = xml_doc.getElementsByTagName("ibutton");
-                        if(array_ele.length>0 ){
-                            ele =  array_ele[0];
-                            
-                            // prefix attribute
-                            s_attr_name = "prefix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set prefix here,
-                            }
-                            // postfix attribute
-                            s_attr_name = "postfix";
-                            if( ele.hasAttribute(s_attr_name)){
-                                s_attr = ele.getAttribute(s_attr_name);
-                                //todo. set postfix here,
-                            }
-                        }//the end of ibutton element.
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ppretag[0] = _get_tag_from_string(s_attr);
+                                    if( s_ppretag[0] === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_pposttag[0] = _get_tag_from_string(s_attr);
+                                    if( s_pposttag[0] === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of iso1 element.
 
+                            //iso2 element
+                            array_ele = xml_doc.getElementsByTagName("iso2");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ppretag[1] = _get_tag_from_string(s_attr);
+                                    if( s_ppretag[1] === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_pposttag[1] = _get_tag_from_string(s_attr);
+                                    if( s_pposttag[1] === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of iso2 element.
+
+                            //iso3 element
+                            array_ele = xml_doc.getElementsByTagName("iso3");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ppretag[2] = _get_tag_from_string(s_attr);
+                                    if( s_ppretag[2] === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_pposttag[2] = _get_tag_from_string(s_attr);
+                                    if( s_pposttag[2] === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of iso3 element.
+
+                            //ibutton element
+                            array_ele = xml_doc.getElementsByTagName("ibutton");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ipre = _get_tag_from_string(s_attr);
+                                    if( s_ipre === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ipost = _get_tag_from_string(s_attr);
+                                    if( s_ipost === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of ibutton element.
+
+                            b_result = true;
+                        }while(false);
+
+                        if( b_result ){
+                            if( n_interface !== null ){
+                                if( this._n_interface !== n_interface){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Interface );
+                                    this._n_interface = n_interface;
+                                }
+                            }
+                            if( b_buzzer !== null ){
+                                if( b_buzzer ){
+                                    if( this._dw_buzzer_frequency !== _const_the_frequency_of_on_buzzer){
+                                        elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
+                                        this._dw_buzzer_frequency = _const_the_frequency_of_on_buzzer;
+                                    }
+                                }
+                                else{
+                                    if( this._dw_buzzer_frequency === _const_the_frequency_of_on_buzzer){
+                                        elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
+                                        this._dw_buzzer_frequency = _const_the_frequency_of_off_buzzer;
+                                    }
+                                }
+                            }
+                            if( n_language !== null ){
+                                if( this._n_language_index !== n_language){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Language );
+                                    this._n_language_index = n_language;
+                                }
+                            }
+                            if( b_condition !== null ){
+                                if( this._b_global_pre_postfix_send_condition !== b_condition ){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition );
+                                    this._b_global_pre_postfix_send_condition = b_condition;
+                                }
+                            }
+                            if( n_ibutton !== null ){
+                                if(this._n_ibutton_mode !== n_ibutton){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_EnableF12iButton );
+                                    this._n_ibutton_mode = n_ibutton;
+                                }
+                            }
+                            if( s_gpre !== null ){
+                                if( this._s_global_prefix !== s_gpre){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPrefix );
+                                    this._s_global_prefix = s_gpre;
+                                }
+                            }
+                            if( s_gpost !== null ){
+                                if(this._s_global_postfix !== s_gpost){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPostfix );
+                                    this._s_global_postfix = s_gpost;
+                                }
+                            }
+                            if( s_ipre !== null ){
+                                if( this._s_prefix_ibutton !== s_ipre ){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton );
+                                    this._s_prefix_ibutton = s_ipre;
+                                }
+                            }
+                            if( s_ipost !== null ){
+                                if( this._s_postfix_ibutton !== s_ipost ){
+                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Postfix_iButton );
+                                    this._s_postfix_ibutton = s_ipost; 
+                                }
+                            }
+
+                            var cp_enable = [cp_EnableISO1 ,cp_EnableISO2 ,cp_EnableISO3  ];
+                            var cp_pre = [cp_PrivatePrefix1,cp_PrivatePrefix2,cp_PrivatePrefix3 ];
+                            var cp_post = [cp_PrivatePostfix1 ,cp_PrivatePostfix2 ,cp_PrivatePostfix3  ];
+                            for( var i = 0; i<_const_the_number_of_track; i++ ){
+                                if( array_b_enable_track[i] !== null ){
+                                    if( this._b_enable_iso[i]  !== array_b_enable_track[i] ){
+                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_enable[i] );
+                                        this._b_enable_iso[i]  = array_b_enable_track[i];
+                                    }
+                                }
+                                if( s_ppretag[i] !== null ){
+                                    if(this._s_private_prefix[i] !== s_ppretag[i]){
+                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_pre[i] );
+                                        this._s_private_prefix[i] = s_ppretag[i];
+                                    }
+                                }
+                                if( s_pposttag[i] !== null ){
+                                    if( this._s_private_postfix[i] !== s_pposttag[i] ){
+                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_post[i] );
+                                        this._s_private_postfix[i] = s_pposttag[i];
+                                    }
+                                }
+                            }//end for
+    
+                            resolve(true);
+                        }
+                        else{//error
+                            reject(_get_error_object('en_e_parameter'));
+                        }
                         //
-                        resolve(json_obj.data_field);
-                    };
+                        
+                    };// the end of onload event handler.
                     //
                     reader.readAsText(file_xml);
     
