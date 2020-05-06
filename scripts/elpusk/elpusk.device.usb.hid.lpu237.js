@@ -3818,70 +3818,70 @@
                     */
 
                     // . set iButton Pretag
-                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
                         if (!_generate_set_ibutton_prefix(this._dequeu_s_tx,this._s_prefix_ibutton )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set iButton Posttag
-                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_iButton ) >= 0 ){
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_iButton ) >= 0 ){
                         if (!_generate_set_ibutton_postfix(this._dequeu_s_tx,this._s_postfix_ibutton )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set Uart Pretag
-                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Prefix_Uart ) >= 0 ){
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_Uart ) >= 0 ){
                         if (!_generate_set_uart_prefix(this._dequeu_s_tx,this._s_prefix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     // . set Uart Posttag
-                    if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
                         if (!_generate_set_uart_postfix(this._dequeu_s_tx,this._s_postfix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
 
                     do {//ibutton setting
-                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
                             if (!_generate_set_f12_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.get_enable_f12_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
                             if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
                             if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
 
-                        if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
                             if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton() )){continue;}
                             this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                         }
                     } while (false);
                 }
                 //. set globalPrePostfixSendCondition
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
                     if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,this._b_global_pre_postfix_send_condition)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . set interface
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
                     if (!_generate_set_interface(this._dequeu_s_tx,this._n_interface )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . set language
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Language ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Language ) >= 0 ){
                     if (!_generate_set_language(this._dequeu_s_tx,this._n_language_index)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
 
                     //set key map
-                    if( _b_removed_key_map_table ){
+                    if( this._b_removed_key_map_table ){
                         if( !_generate_set_key_map(this._deque_generated_tx,this._n_language_index)){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                     }
@@ -3889,100 +3889,100 @@
                 }
 
                 // . set buzzer
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
                     if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,this._dw_buzzer_frequency)){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // .enable 1
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO1 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._b_enable_iso[_type_msr_track_Numer.iso1_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
                     
                 // .enable 2
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO2 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._b_enable_iso[_type_msr_track_Numer.iso2_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // .enable 3
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_EnableISO3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO3 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._b_enable_iso[_type_msr_track_Numer.iso3_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // direction 1
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction1 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._n_direction[_type_msr_track_Numer.iso1_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction2 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._n_direction[_type_msr_track_Numer.iso2_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_Direction3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction3 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._n_direction[_type_msr_track_Numer.iso3_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
 
                 // . global prefix.............................................
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPrefix ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPrefix ) >= 0 ){
                     if (!_generate_set_global_prefix(this._dequeu_s_tx,this._s_global_prefix )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . global postfix
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_GlobalPostfix ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPostfix ) >= 0 ){
                     if (!_generate_set_global_postfix(this._dequeu_s_tx,this._s_global_postfix )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . private prefix 1
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix1 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_prefix[_type_msr_track_Numer.iso1_track] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . private postfix 1
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix1 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_postfix[_type_msr_track_Numer.iso1_track] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . private prefix 2
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix2 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_prefix[_type_msr_track_Numer.iso2_track] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
                 
                 // . private postfix 2
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
                     if (!_generate_set_private_postfix(iso2this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 // . private prefix 3
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePrefix3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix3 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_prefix[_type_msr_track_Numer.iso3_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
                 // . private postfix 3
-                if( elpusk.util.find_from_set( _set_change_parameter, _type_change_parameter.cp_PrivatePostfix3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix3 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_postfix[_type_msr_track_Numer.iso3_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
                 //
                 if (!_generate_apply_config_mode(this._dequeu_s_tx)){continue;}
-                this._deque_generated_tx.push( _type_generated_tx_type.gt_s.gt_apply_config );
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_apply_config );
 
                 if (!_generate_leave_config_mode(this._dequeu_s_tx)){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
                 //
                 b_result = true;
-                elpusk.util.clear_set(_set_change_parameter);
+                elpusk.util.clear_set(this._set_change_parameter);
             }while (false);
 
             if( !b_result ){
