@@ -1961,7 +1961,11 @@
                 if( array_token.length === 0 ){
                     continue;
                 }
+
+                var n_tag = 0;
+
                 for(var i in array_token) {
+                    n_tag++;
                     if( array_token[i].length === 0 ){
                         s_tag_hex += "00";
                     }
@@ -1978,7 +1982,13 @@
                             }
                         }
                     }
-                }              
+                }//
+                
+                var s_len = n_tag.toString(16);
+                if( s_len.length %2 !== 0 ){
+                    s_len = "0" + s_len;
+                }
+                s_tag_hex = s_len + s_tag_hex;
 			} while (false);
 			return s_tag_hex;
         }
@@ -4278,6 +4288,8 @@
          */
         _elpusk.device.usb.hid.lpu237.prototype.set_from_file = function(file_xml){
 
+            var this_device = this;
+
             return new Promise(function (resolve, reject) {
 
                 do{
@@ -4288,6 +4300,8 @@
                     //
                     var reader = new FileReader();
 
+                    reader._device = this_device;
+                    
                     reader.onload = function(evt) {
                         var s_data = evt.target.result;
                         //
@@ -4523,88 +4537,88 @@
 
                         if( b_result ){
                             if( n_interface !== null ){
-                                if( this._n_interface !== n_interface){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Interface );
-                                    this._n_interface = n_interface;
+                                if( this._device._n_interface !== n_interface){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Interface );
+                                    this._device._n_interface = n_interface;
                                 }
                             }
                             if( b_buzzer !== null ){
                                 if( b_buzzer ){
-                                    if( this._dw_buzzer_frequency !== _const_the_frequency_of_on_buzzer){
-                                        elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
-                                        this._dw_buzzer_frequency = _const_the_frequency_of_on_buzzer;
+                                    if( this._device._dw_buzzer_frequency !== _const_the_frequency_of_on_buzzer){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
+                                        this._device._dw_buzzer_frequency = _const_the_frequency_of_on_buzzer;
                                     }
                                 }
                                 else{
-                                    if( this._dw_buzzer_frequency === _const_the_frequency_of_on_buzzer){
-                                        elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
-                                        this._dw_buzzer_frequency = _const_the_frequency_of_off_buzzer;
+                                    if( this._device._dw_buzzer_frequency === _const_the_frequency_of_on_buzzer){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
+                                        this._device._dw_buzzer_frequency = _const_the_frequency_of_off_buzzer;
                                     }
                                 }
                             }
                             if( n_language !== null ){
-                                if( this._n_language_index !== n_language){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Language );
-                                    this._n_language_index = n_language;
+                                if( this._device._n_language_index !== n_language){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Language );
+                                    this._device._n_language_index = n_language;
                                 }
                             }
                             if( b_condition !== null ){
-                                if( this._b_global_pre_postfix_send_condition !== b_condition ){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition );
-                                    this._b_global_pre_postfix_send_condition = b_condition;
+                                if( this._device._b_global_pre_postfix_send_condition !== b_condition ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition );
+                                    this._device._b_global_pre_postfix_send_condition = b_condition;
                                 }
                             }
                             if( n_ibutton !== null ){
-                                if(this._n_ibutton_mode !== n_ibutton){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_EnableF12iButton );
-                                    this._n_ibutton_mode = n_ibutton;
+                                if(this._device._n_ibutton_mode !== n_ibutton){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableF12iButton );
+                                    this._device._n_ibutton_mode = n_ibutton;
                                 }
                             }
                             if( s_gpre !== null ){
-                                if( this._s_global_prefix !== s_gpre){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPrefix );
-                                    this._s_global_prefix = s_gpre;
+                                if( this._device._s_global_prefix !== s_gpre){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPrefix );
+                                    this._device._s_global_prefix = s_gpre;
                                 }
                             }
                             if( s_gpost !== null ){
-                                if(this._s_global_postfix !== s_gpost){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_GlobalPostfix );
-                                    this._s_global_postfix = s_gpost;
+                                if(this._device._s_global_postfix !== s_gpost){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPostfix );
+                                    this._device._s_global_postfix = s_gpost;
                                 }
                             }
                             if( s_ipre !== null ){
-                                if( this._s_prefix_ibutton !== s_ipre ){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton );
-                                    this._s_prefix_ibutton = s_ipre;
+                                if( this._device._s_prefix_ibutton !== s_ipre ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_iButton );
+                                    this._device._s_prefix_ibutton = s_ipre;
                                 }
                             }
                             if( s_ipost !== null ){
-                                if( this._s_postfix_ibutton !== s_ipost ){
-                                    elpusk.util.insert_to_set ( this._set_change_parameter, _type_change_parameter.cp_Postfix_iButton );
-                                    this._s_postfix_ibutton = s_ipost; 
+                                if( this._device._s_postfix_ibutton !== s_ipost ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_iButton );
+                                    this._device._s_postfix_ibutton = s_ipost; 
                                 }
                             }
 
-                            var cp_enable = [cp_EnableISO1 ,cp_EnableISO2 ,cp_EnableISO3  ];
-                            var cp_pre = [cp_PrivatePrefix1,cp_PrivatePrefix2,cp_PrivatePrefix3 ];
-                            var cp_post = [cp_PrivatePostfix1 ,cp_PrivatePostfix2 ,cp_PrivatePostfix3  ];
+                            var cp_enable = [_type_change_parameter.cp_EnableISO1 ,_type_change_parameter.cp_EnableISO2 ,_type_change_parameter.cp_EnableISO3  ];
+                            var cp_pre = [_type_change_parameter.cp_PrivatePrefix1,_type_change_parameter.cp_PrivatePrefix2,_type_change_parameter.cp_PrivatePrefix3 ];
+                            var cp_post = [_type_change_parameter.cp_PrivatePostfix1 ,_type_change_parameter.cp_PrivatePostfix2 ,_type_change_parameter.cp_PrivatePostfix3  ];
                             for( var i = 0; i<_const_the_number_of_track; i++ ){
                                 if( array_b_enable_track[i] !== null ){
-                                    if( this._b_enable_iso[i]  !== array_b_enable_track[i] ){
-                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_enable[i] );
-                                        this._b_enable_iso[i]  = array_b_enable_track[i];
+                                    if( this._device._b_enable_iso[i]  !== array_b_enable_track[i] ){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_enable[i] );
+                                        this._device._b_enable_iso[i]  = array_b_enable_track[i];
                                     }
                                 }
                                 if( s_ppretag[i] !== null ){
-                                    if(this._s_private_prefix[i] !== s_ppretag[i]){
-                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_pre[i] );
-                                        this._s_private_prefix[i] = s_ppretag[i];
+                                    if(this._device._s_private_prefix[i] !== s_ppretag[i]){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_pre[i] );
+                                        this._device._s_private_prefix[i] = s_ppretag[i];
                                     }
                                 }
                                 if( s_pposttag[i] !== null ){
-                                    if( this._s_private_postfix[i] !== s_pposttag[i] ){
-                                        elpusk.util.insert_to_set ( this._set_change_parameter, cp_post[i] );
-                                        this._s_private_postfix[i] = s_pposttag[i];
+                                    if( this._device._s_private_postfix[i] !== s_pposttag[i] ){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_post[i] );
+                                        this._device._s_private_postfix[i] = s_pposttag[i];
                                     }
                                 }
                             }//end for

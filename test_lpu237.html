@@ -401,6 +401,7 @@
                 lpu237.set_from_file(file).then(function (b_result) {
                     //alway true.
                     addMessage("ok : set_from_file");
+                    addMultiMessage(lpu237.get_string());
                 }).catch(function (event_error) {
                     // error here
                     addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
