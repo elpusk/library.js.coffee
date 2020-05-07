@@ -1943,13 +1943,18 @@
          * <br /> null - error.
          */
 		function _get_tag_from_string(s_string){
-			var s_tag_hex = null;
+            var s_tag_hex = null;
+            var b_error = false;
 
 			do {
 				if (typeof s_string !== 'string'){
                     continue;
                 }
 
+                if( s_string.length === 0 ){
+                    s_tag_hex = "000000000000000000000000000000";
+                    continue;
+                }
                 var s_data = s_string;
                 var reg_ex = /\s*(?:\]\s*\[|$)\s*/;
 
@@ -1963,27 +1968,342 @@
                 }
 
                 var n_tag = 0;
+                var s_token = "";
+                var n_modifier = 0;
+                var b_hex = false;
 
                 for(var i in array_token) {
                     n_tag++;
+                    s_token = "";
+                    b_hex = false;
+
                     if( array_token[i].length === 0 ){
-                        s_tag_hex += "00";
+                        s_token = "00";//only []
                     }
                     else if( array_token[i].trim() === '[' ){
-                        s_tag_hex += "00";
+                        s_token = "00";//the first case in only []
                     }
                     else{
                         var array_tag = array_token[i].split(/\s*]$/);
                         for(var j in array_tag) {
+                            array_tag[j] = array_tag[j].replace("[","");
                             array_tag[j] = array_tag[j].trim();
                             if( array_tag[j].length > 0  ){
-                                array_tag[j] = array_tag[j].replace(/0x/,"");
-                                s_tag_hex += array_tag[j];
+                                if( array_tag[j].indexOf("0x") !== -1 ){
+                                    b_hex = true;
+                                    array_tag[j] = array_tag[j].replace(/0x/,"");
+                                }
+                                s_token += array_tag[j];
                             }
+                        }//end for j
+                    }
+
+                    b_error = false;
+
+                    if( i%2 === 0 ){
+                        if( b_hex ){
+                            b_error = true;
+                            break;//exit for
+                        }
+                        //Modifier
+                        n_modifier = 0;
+
+                        if( s_token.indexOf("s") !== -1 ){
+                            n_modifier |= 0x02;//left shift
+                        }
+                        if( s_token.indexOf("c") !== -1 ){
+                            n_modifier |= 0x01;//left control
+                        }
+                        if( s_token.indexOf("a") !== -1 ){
+                            n_modifier |= 0x04;//left alt
+                        }
+
+                        s_token = "0" + n_modifier.toString(16);
+                    }
+                    else{
+                        //key
+                        do{
+                            if( b_hex){
+                                continue;
+                            }
+                            if( s_token === "f1" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F1;
+                                continue;
+                            }
+                            if( s_token === "f2" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F2;
+                                continue;
+                            }
+                            if( s_token === "f3" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F3;
+                                continue;
+                            }
+                            if( s_token === "f4" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F4;
+                                continue;
+                            }
+                            if( s_token === "f5" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F5;
+                                continue;
+                            }
+                            if( s_token === "f6" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F6;
+                                continue;
+                            }
+                            if( s_token === "f7" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F7;
+                                continue;
+                            }
+                            if( s_token === "f8" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F8;
+                                continue;
+                            }
+                            if( s_token === "f9" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY________F9;
+                                continue;
+                            }
+                            if( s_token === "f10" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_______F10;
+                                continue;
+                            }
+                            if( s_token === "f11" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_______F11;
+                                continue;
+                            }
+                            if( s_token === "f12" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_______F12;
+                                continue;
+                            }
+                            if( s_token === "esc" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____ESCAPE;
+                                continue;
+                            }
+                            if( s_token === "space" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_____SPACE;
+                                continue;
+                            }
+                            if( s_token === "tab" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_______TAB;
+                                continue;
+                            }
+                            if( s_token === "q" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____q____Q;
+                                continue;
+                            }
+                            if( s_token === "w" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____w____W;
+                                continue;
+                            }
+                            if( s_token === "e" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____e____E;
+                                continue;
+                            }
+                            if( s_token === "r" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____r____R;
+                                continue;
+                            }
+                            if( s_token === "t" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____t____T;
+                                continue;
+                            }
+                            if( s_token === "y" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____y____Y;
+                                continue;
+                            }
+                            if( s_token === "u" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____u____U;
+                                continue;
+                            }
+                            if( s_token === "i" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____i____I;
+                                continue;
+                            }
+                            if( s_token === "o" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____o____O;
+                                continue;
+                            }
+                            if( s_token === "p" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____p____P;
+                                continue;
+                            }
+                            if( s_token === "[" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_LBT___LBR;
+                                continue;
+                            }
+                            if( s_token === "]" ){
+                                s_token = elpusk.util.keyboard.const.board.const.HIDKEY_RBT___RBR;
+                                continue;
+                            }
+                            if( s_token === "\\" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_BSLA_VBAR;
+                                continue;
+                            }
+                            if( s_token === "del" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____DELETE;
+                                continue;
+                            }
+                            if( s_token === "z" ){
+                                s_token = elpusk.util.keyboard.const.board.const.HIDKEY____z____Z;
+                                continue;
+                            }
+                            if( s_token === "x" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____x____X;
+                                continue;
+                            }
+                            if( s_token === "c" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____c____C;
+                                continue;
+                            }
+                            if( s_token === "v" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____v____V;
+                                continue;
+                            }
+                            if( s_token === "b" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____b____B;
+                                continue;
+                            }
+                            if( s_token === "n" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____n____N;
+                                continue;
+                            }
+                            if( s_token === "m" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____m____M;
+                                continue;
+                            }
+                            if( s_token === "," ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_COMA___LT;
+                                continue;
+                            }
+                            if( s_token === "." ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_PERIOD_GT;
+                                continue;
+                            }
+                            if( s_token === "/" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_SLASH__QM;
+                                continue;
+                            }
+                            if( s_token === "`" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_GRAV_TILD;
+                                continue;
+                            }
+                            if( s_token === "1" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____1_EXCL;
+                                continue;
+                            }
+                            if( s_token === "2" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____2_QUOT;
+                                continue;
+                            }
+                            if( s_token === "3" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____3_SHAR;
+                                continue;
+                            }
+                            if( s_token === "4" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____4_DOLL;
+                                continue;
+                            }
+                            if( s_token === "5" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____5_PERC;
+                                continue;
+                            }
+                            if( s_token === "6" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____6_CIRC;
+                                continue;
+                            }
+                            if( s_token === "7" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____7_AMPE;
+                                continue;
+                            }
+                            if( s_token === "8" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____8_ASTE;
+                                continue;
+                            }
+                            if( s_token === "9" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____9_L_PA;
+                                continue;
+                            }
+                            if( s_token === "0" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____0_R_PA;
+                                continue;
+                            }
+                            if( s_token === "-" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_MIN_UNDER;
+                                continue;
+                            }
+                            if( s_token === "=" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_EQU__PLUS;
+                                continue;
+                            }
+                            if( s_token === "bs" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_BACKSPACE;
+                                continue;
+                            }
+                            if( s_token === "a" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____a____A;
+                                continue;
+                            }
+                            if( s_token === "s" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____s____S;
+                                continue;
+                            }
+                            if( s_token === "d" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____d____D;
+                                continue;
+                            }
+                            if( s_token === "f" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____f____F;
+                                continue;
+                            }
+                            if( s_token === "g" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____g____G;
+                                continue;
+                            }
+                            if( s_token === "h" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____h____H;
+                                continue;
+                            }
+                            if( s_token === "j" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____j____J;
+                                continue;
+                            }
+                            if( s_token === "k" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____k____K;
+                                continue;
+                            }
+                            if( s_token === "l" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____l____L;
+                                continue;
+                            }
+                            if( s_token === ";" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_SEMI__COL;
+                                continue;
+                            }
+                            if( s_token === "'" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY_APOS_QUOT;
+                                continue;
+                            }
+                            if( s_token === "enter" ){
+                                s_token = elpusk.util.keyboard.const.HIDKEY____RETURN;
+                                continue;
+                            }
+                            if(s_token.length === 0 ){
+                                continue;
+                            }
+                            b_error = true;
+                        }while(false);
+
+                        if( b_error ){
+                            break;//exit for
                         }
                     }
-                }//
+
+                    s_tag_hex += s_token;
+                }// end for i
                 
+                if( b_error ){
+                    s_tag_hex = null;
+                    continue;
+                }
                 var s_len = n_tag.toString(16);
                 if( s_len.length %2 !== 0 ){
                     s_len = "0" + s_len;
@@ -3959,7 +4279,7 @@
                 
                 // . private postfix 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
-                    if (!_generate_set_private_postfix(iso2this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
                 }
 
@@ -3976,7 +4296,7 @@
 
                 //
                 if (!_generate_apply_config_mode(this._dequeu_s_tx)){continue;}
-                this._deque_generated_tx.push( _type_generated_tx_type.gt_apply_config );
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_apply );
 
                 if (!_generate_leave_config_mode(this._dequeu_s_tx)){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
@@ -4320,12 +4640,15 @@
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
                         var n_ibutton = null;
+                        var n_direction = null;
                         var s_gpre = null;
                         var s_gpost = null;
                         var s_ppretag = [null,null,null];
                         var s_pposttag = [null,null,null];
                         var s_ipre = null;
                         var s_ipost = null;
+                        var s_upre = null;
+                        var s_upost = null;
 
                         var b_result = false;
 
@@ -4402,6 +4725,15 @@
                                     s_attr = ele.getAttribute(s_attr_name);
                                     n_ibutton = _get_ibutton_mode_from_string(s_attr);
                                     if( n_ibutton < 0 ){
+                                        continue;
+                                    }
+                                }
+                                // direction attribute
+                                s_attr_name = "direction";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_direction = _get_direction_from_string(s_attr);
+                                    if( n_direction < 0 ){
                                         continue;
                                     }
                                 }
@@ -4532,6 +4864,55 @@
                                 }
                             }//the end of ibutton element.
 
+                            //uart element or rs232
+                            array_ele = xml_doc.getElementsByTagName("uart");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_upre = _get_tag_from_string(s_attr);
+                                    if( s_upre === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_upost = _get_tag_from_string(s_attr);
+                                    if( s_upost === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of ibutton element.
+
+                            array_ele = xml_doc.getElementsByTagName("rs232");
+                            if(array_ele.length>0 ){
+                                ele =  array_ele[0];
+                                
+                                // prefix attribute
+                                s_attr_name = "prefix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_upre = _get_tag_from_string(s_attr);
+                                    if( s_upre === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix attribute
+                                s_attr_name = "postfix";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_upost = _get_tag_from_string(s_attr);
+                                    if( s_upost === null ){
+                                        continue;
+                                    }
+                                }
+                            }//the end of ibutton element.
+
                             b_result = true;
                         }while(false);
 
@@ -4574,6 +4955,17 @@
                                     this._device._n_ibutton_mode = n_ibutton;
                                 }
                             }
+                            if( n_direction !== null ){
+                                if(this._device._n_direction[_type_msr_track_Numer.iso1_track] !== n_direction){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction1 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction2 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction3 );
+                                    this._device._n_direction[_type_msr_track_Numer.iso1_track] = n_ibutton;
+                                    this._device._n_direction[_type_msr_track_Numer.iso2_track] = n_ibutton;
+                                    this._device._n_direction[_type_msr_track_Numer.iso3_track] = n_ibutton;
+                                }
+                            }
+
                             if( s_gpre !== null ){
                                 if( this._device._s_global_prefix !== s_gpre){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPrefix );
@@ -4596,6 +4988,18 @@
                                 if( this._device._s_postfix_ibutton !== s_ipost ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_iButton );
                                     this._device._s_postfix_ibutton = s_ipost; 
+                                }
+                            }
+                            if( s_upre !== null ){
+                                if( this._device._s_prefix_uart !== s_upre ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_Uart );
+                                    this._device._s_prefix_uart = s_upre;
+                                }
+                            }
+                            if( s_upost !== null ){
+                                if( this._device._s_prefix_uart !== s_upost ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_Uart );
+                                    this._device._s_prefix_uart = s_upost; 
                                 }
                             }
 

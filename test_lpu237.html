@@ -129,7 +129,6 @@
 
         function _test(){
             addMessage(" : test : ");
-
         }
 
 
@@ -455,14 +454,16 @@
                 var name = file.name;
                 var size = file.size;
                 //
-                
                 lpu237.set_from_file(file).then(function (b_result) {
                     //alway true.
                     addMessage("ok : set_from_file");
                     addMultiMessage(lpu237.get_string());
+
+                    //document.getElementById("input_file").value = "";
                 }).catch(function (event_error) {
                     // error here
                     addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
+                    //document.getElementById("input_file").value = "";
                 });
 
             };
