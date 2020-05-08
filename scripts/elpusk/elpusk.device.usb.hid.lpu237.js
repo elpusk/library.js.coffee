@@ -117,23 +117,37 @@
 			gt_type_ibutton : 11,
 			gt_type_device : 12,
 
-			gt_set_config : 13,
+            //get config series
+			gt_get_version : 13,
+			gt_get_name : 14,
+			gt_get_global_prepostfix_send_condition : 15,
+			gt_get_interface : 16,
+			gt_get_language : 17,
+			gt_get_buzzer_frequency : 18,
+			gt_get_boot_run_time : 19,
+			gt_get_enable_iso1 : 20, gt_get_enable_iso2 : 21, gt_get_enable_iso3 : 22,
+			gt_get_direction1 : 23, gt_get_direction2 : 24, gt_get_direction3 : 25,
+			gt_get_global_prefix : 26,  gt_get_global_postfix : 27,
+			gt_get_private_prefix1 : 28, gt_get_private_prefix2 : 29,  gt_get_private_prefix3 : 30,
+			gt_get_private_postfix1 : 31,gt_get_private_postfix2 : 32, gt_get_private_postfix3 : 33,
+			gt_get_prefix_ibutton : 34, gt_get_postfix_ibutton : 35,
+			gt_get_prefix_uart : 36, gt_get_postfix_uart : 37,
+            gt_get_f12_ibutton : 38, gt_get_zeros_ibutton : 39, gt_get_zeros7_times_ibutton : 40, gt_get_addmit_code_stick_ibutton : 41,
 
-			gt_get_version : 14,
-			gt_get_name : 15,
-			gt_get_global_prepostfix_send_condition : 16,
-			gt_get_interface : 17,
-			gt_get_language : 18,
-			gt_get_buzzer_frequency : 19,
-			gt_get_boot_run_time : 20,
-			gt_get_enable_iso1 : 21, gt_get_enable_iso2 : 22, gt_get_enable_iso3 : 23,
-			gt_get_direction1 : 24, gt_get_direction2 : 25, gt_get_direction3 : 26,
-			gt_get_global_prefix : 27,  gt_get_global_postfix : 28,
-			gt_get_private_prefix1 : 29, gt_get_private_prefix2 : 30,  gt_get_private_prefix3 : 31,
-			gt_get_private_postfix1 : 32,gt_get_private_postfix2 : 33, gt_get_private_postfix3 : 34,
-			gt_get_prefix_ibutton : 35, gt_get_postfix_ibutton : 36,
-			gt_get_prefix_uart : 37, gt_get_postfix_uart : 38,
-			gt_get_f12_ibutton : 39, gt_get_zeros_ibutton : 40, gt_get_zeros7_times_ibutton : 41, gt_get_addmit_code_stick_ibutton : 42
+            //set
+			gt_set_global_prepostfix_send_condition : 42,
+			gt_set_interface : 43,
+			gt_set_language : 44, get_set_keymap : 45,
+			gt_set_buzzer_frequency : 46,
+			gt_set_enable_iso1 : 47, gt_set_enable_iso2 : 48, gt_set_enable_iso3 : 49,
+			gt_set_direction1 : 50, gt_set_direction2 : 51, gt_set_direction3 : 52,
+			gt_set_global_prefix : 53,  gt_set_global_postfix : 54,
+			gt_set_private_prefix1 : 55, gt_set_private_prefix2 : 56,  gt_set_private_prefix3 : 57,
+			gt_set_private_postfix1 : 58,gt_set_private_postfix2 : 59, gt_set_private_postfix3 : 60,
+			gt_set_prefix_ibutton : 61, gt_set_postfix_ibutton : 62,
+			gt_set_prefix_uart : 63, gt_set_postfix_uart : 64,
+			gt_set_f12_ibutton : 65, gt_set_zeros_ibutton : 66, gt_set_zeros7_times_ibutton : 67, gt_set_addmit_code_stick_ibutton : 68
+            
         };
                 
         /**
@@ -531,6 +545,68 @@
 
         /**
          * @private
+         * @function _is_equal_tag
+         * @param {string} s_tag0 tag string with it's length in front.( all hex string format )
+         * @param {string} s_tag1 tag string with it's length in front.( all hex string format )
+         * @returns {boolean} If s_tag0 tag is equal to s_tag1 tag, return true.
+         * <br /> else return false
+         */
+        function _is_equal_tag( s_tag0, s_tag1 ){
+            var b_equal = false;
+
+            do{
+                if( typeof s_tag0 !== 'string'){
+                    continue;
+                }
+                if( typeof s_tag1 !== 'string'){
+                    continue;
+                }
+                if( s_tag0.length % 2 !== 0 ){
+                    continue;
+                }
+                if( s_tag1.length % 2 !== 0 ){
+                    continue;
+                }
+
+                if( s_tag0.length === 0 && s_tag1.length === 0 ){
+                    b_equal = true;
+                    continue;
+                }
+
+                var s_one_byte = "";
+                var array_n_len = [0,0];
+                var n_tag0 = [];
+                var n_tag1 = [];
+
+                for( var i = 0; i<s_tag0.length; i=i+2 ){
+                    s_one_byte = s_tag0.substring(i,i+2);
+                    n_tag0.push(parseInt(s_one_byte,16));
+                }//end for
+                for( var i = 0; i<s_tag1.length; i=i+2 ){
+                    s_one_byte = s_tag1.substring(i,i+2);
+                    n_tag1.push(parseInt(s_one_byte,16));
+                }//end for
+
+                array_n_len[0] = n_tag0.shift();
+                array_n_len[1] = n_tag1.shift();
+                if( array_n_len[0] !== array_n_len[1] ){
+                    continue;
+                }
+
+                b_equal = true;
+                for( var i = 0; i<array_n_len[0]; i++ ){
+                    if(n_tag0[i] !== n_tag1[i] ){
+                        b_equal = false;
+                        break;
+                    }
+                }//end for
+
+            }while(false);
+            return b_equal;
+        }
+
+        /**
+         * @private
          * @function _get_ibutton_mode_string
          * @param {number} type_ibutton_mode _type_ibutton_mode value.
          * @returns {string} i-button reading mode.
@@ -712,36 +788,6 @@
 
             }while(false);
             return b_result;
-        }
-
-
-        /**
-         * @private
-         * @function _get_15_bytes_tag_string
-         * @param {string} s_tag - hex string of tag
-         * @returns {string} hex string of tag, length 1 byte + 14 bytes tag
-         * <br /> return value bytes stream is converted to hex string.
-         */
-        function _get_15_bytes_tag_string( s_tag ){
-            var s_out = "000000000000000000000000000000";//default zeros 15 bytes
-            do{
-                if( typeof s_tag === 'undefined'){
-                    continue;
-                }
-                if(typeof s_tag !== 'string' ){
-                    continue;
-                }
-                if( s_tag.length % 2 !== 0 ){
-                    continue;
-                }
-                if( s_tag.length > (14*2) ){
-                    s_tag.length = 14*2;
-                }
-
-                var s_len = elpusk.util.get_byte_hex_string_from_number(s_tag.length / 2);
-                s_out = s_len + s_tag;
-            }while(false);
-            return s_out;
         }
 
         /**
@@ -1782,7 +1828,7 @@
                     continue;
                 }
                 if( s_string === "usb_hid"){
-                    n_value = _type_system_interface.system_interface_usb_hid;
+                    n_value = _type_system_interface.system_interface_usb_msr;
                     continue;
                 }             
                 if( s_string === "rs232"){
@@ -1924,11 +1970,11 @@
                     continue;
                 }
                 if( s_string === "forward"){
-                    n_value = _type_direction.dir_bidectional;
+                    n_value = _type_direction.dir_forward;
                     continue;
                 }
                 if( s_string === "backward"){
-                    n_value = _type_direction.dir_bidectional;
+                    n_value = _type_direction.dir_backward;
                     continue;
                 }
 			} while (false);
@@ -1939,7 +1985,7 @@
          * @private
          * @function _get_tag_from_string
          * @param {string} s_string - "[][0x00][][0x01][][0x02][][0x03][][0x04][][0x05][][0x06]"
-         * @returns {(null|string)} hex string format.
+         * @returns {(null|string)} hex string format.( included length in front. )
          * <br /> null - error.
          */
 		function _get_tag_from_string(s_string){
@@ -1971,6 +2017,7 @@
                 var s_token = "";
                 var n_modifier = 0;
                 var b_hex = false;
+                var b_all_zero = true;
 
                 for(var i in array_token) {
                     n_tag++;
@@ -1978,6 +2025,7 @@
                     b_hex = false;
 
                     if( array_token[i].length === 0 ){
+                        b_hex = true;
                         s_token = "00";//only []
                     }
                     else if( array_token[i].trim() === '[' ){
@@ -2001,10 +2049,6 @@
                     b_error = false;
 
                     if( i%2 === 0 ){
-                        if( b_hex ){
-                            b_error = true;
-                            break;//exit for
-                        }
                         //Modifier
                         n_modifier = 0;
 
@@ -2131,7 +2175,7 @@
                                 continue;
                             }
                             if( s_token === "]" ){
-                                s_token = elpusk.util.keyboard.const.board.const.HIDKEY_RBT___RBR;
+                                s_token = elpusk.util.keyboard.const.HIDKEY_RBT___RBR;
                                 continue;
                             }
                             if( s_token === "\\" ){
@@ -2143,7 +2187,7 @@
                                 continue;
                             }
                             if( s_token === "z" ){
-                                s_token = elpusk.util.keyboard.const.board.const.HIDKEY____z____Z;
+                                s_token = elpusk.util.keyboard.const.HIDKEY____z____Z;
                                 continue;
                             }
                             if( s_token === "x" ){
@@ -2287,6 +2331,7 @@
                                 continue;
                             }
                             if(s_token.length === 0 ){
+                                s_token = "00";
                                 continue;
                             }
                             b_error = true;
@@ -2298,6 +2343,10 @@
                     }
 
                     s_tag_hex += s_token;
+
+                    if( s_token !== "00" ){
+                        b_all_zero = false;
+                    }
                 }// end for i
                 
                 if( b_error ){
@@ -2308,7 +2357,12 @@
                 if( s_len.length %2 !== 0 ){
                     s_len = "0" + s_len;
                 }
-                s_tag_hex = s_len + s_tag_hex;
+                if( b_all_zero ){
+                    s_tag_hex = "000000000000000000000000000000";
+                }
+                else{
+                    s_tag_hex = s_len + s_tag_hex;
+                }
 			} while (false);
 			return s_tag_hex;
         }
@@ -2985,8 +3039,7 @@
         function _generate_set_global_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_G_PRE;
             var n_size = _type_system_size.SYS_SIZE_G_PRE;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -2999,8 +3052,7 @@
         function _generate_set_global_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_G_POST;
             var n_size = _type_system_size.SYS_SIZE_G_POST;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3013,8 +3065,7 @@
         function _generate_set_private_prefix(queue_s_tx,n_track,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
             var n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3027,8 +3078,7 @@
         function _generate_set_private_postfix(queue_s_tx,n_track,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];
             var n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3094,8 +3144,7 @@
         function _generate_set_ibutton_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_PRE;
             var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_PRE;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3108,8 +3157,7 @@
         function _generate_set_ibutton_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_POST;
             var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_POST;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3122,8 +3170,7 @@
         function _generate_set_uart_prefix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_PRE;
             var n_size = _type_system_size.SYS_SIZE_UART_G_PRE;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3136,8 +3183,7 @@
         function _generate_set_uart_postfix(queue_s_tx,s_tag){
             var n_offset = _type_system_offset.SYS_OFFSET_UART_G_POST;
             var n_size = _type_system_size.SYS_SIZE_UART_G_POST;
-            var s_data = _get_15_bytes_tag_string(s_tag);
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
         /**
@@ -3403,22 +3449,22 @@
     
             this._n_direction = [_type_direction.dir_bidectional,_type_direction.dir_bidectional,_type_direction.dir_bidectional];
     
-            this._s_global_prefix = null;
-            this._s_global_postfix = null;
+            this._s_global_prefix = null;//you must include the length in front of this array.
+            this._s_global_postfix = null;//you must include the length in front of this array.
     
-            this._s_private_prefix = [null,null,null];
-            this._s_private_postfix = [null,null,null];
+            this._s_private_prefix = [null,null,null];//you must include the length in front of this each array.
+            this._s_private_postfix = [null,null,null];//you must include the length in front of this each array.
     
             //i-button
-            this._s_prefix_ibutton = null;
-            this._s_postfix_ibutton = null;
+            this._s_prefix_ibutton = null;//you must include the length in front of this array.
+            this._s_postfix_ibutton = null;//you must include the length in front of this array.
 
             this._n_ibutton_mode = _type_ibutton_mode.ibutton_zeros;
             this._c_blank = [0,0,0,0];
     
             //rs232
-            this._s_prefix_uart = null;
-            this._s_postfix_uart = null;
+            this._s_prefix_uart = null;//you must include the length in front of this array.
+            this._s_postfix_uart = null;//you must include the length in front of this array.
             //
             this._token_format = _type_format.ef_decimal;
             this._s_name = null;            
@@ -3929,6 +3975,193 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.get_current_request_type
+         * @returns {number} greater then equal zero (_type_generated_tx_type.gt_xxx value).
+         * <br /> error negative value.
+         * @description get the current request type.
+         * <br /> It will be used for debugging. before calling set_from_rx() method.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_current_request_type = function(){
+            var n_result = -1;
+            do{
+                if( this._deque_generated_tx.length <= 0 ){
+                    continue;
+                }
+                n_result = this._deque_generated_tx[0];
+            }while(false);
+            return n_result;
+        }
+        
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_request_type_string_with_number
+         * @param {number} n_type request type number (_type_generated_tx_type.gt_xxx value).
+         * @returns {string} the description string of type number.
+         * <br /> error return null.
+         * @description get the request type description with it's number.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_request_type_string_with_number = function(n_type){
+            var s_description = null;
+            do{
+                if( typeof n_type !== 'number'){
+                    continue;
+                }
+                if( n_type < _type_generated_tx_type.gt_read_uid ){
+                    continue;
+                }
+                if( n_type > _type_generated_tx_type.gt_set_addmit_code_stick_ibutton ){
+                    continue;
+                }
+                //
+                switch (n_type) {
+                    case _type_generated_tx_type.gt_get_version:
+                        s_description = "get version"; break;
+                    case _type_generated_tx_type.gt_type_device:
+                        s_description = "get device type"; break;
+                    case _type_generated_tx_type.gt_type_ibutton:
+                        s_description = "get i-button mode"; break;
+                    case _type_generated_tx_type.gt_read_uid:
+                        s_description = "get uid"; break;
+                    case _type_generated_tx_type.gt_change_authkey:
+                        s_description = "change authentication key"; break;
+                    case _type_generated_tx_type.gt_change_status:
+                        s_description = "change status"; break;
+                    case _type_generated_tx_type.gt_change_sn:
+                        s_description = "change serial number"; break;
+                    case _type_generated_tx_type.gt_enter_config:
+                        s_description = "enter configuration"; break;
+                    case _type_generated_tx_type.gt_leave_config:
+                        s_description = "leave configuration"; break;
+                    case _type_generated_tx_type.gt_apply:
+                        s_description = "apply"; break;
+                    case _type_generated_tx_type.gt_goto_boot:
+                        s_description = "goto boot"; break;
+                    case _type_generated_tx_type.gt_enter_opos:
+                        s_description = "enter OPOS"; break;
+                    case _type_generated_tx_type.gt_leave_opos:
+                        s_description = "leave OPOS"; break;
+                    case _type_generated_tx_type.gt_support_mmd1000:
+                        s_description = "support mmd1000"; break;
+                    case _type_generated_tx_type.gt_get_name:
+                        s_description = "get name"; break;
+                    case _type_generated_tx_type.gt_get_global_prepostfix_send_condition:
+                        s_description = "get global send condition"; break;
+                    case _type_generated_tx_type.gt_get_interface:
+                        s_description = "get interface"; break;
+                    case _type_generated_tx_type.gt_get_language:
+                        s_description = "get language"; break;
+                    case _type_generated_tx_type.gt_get_buzzer_frequency:
+                        s_description = "get buzzer frequency"; break;
+                    case _type_generated_tx_type.gt_get_boot_run_time:
+                        s_description = "get MSD boot run time"; break;
+                    case _type_generated_tx_type.gt_get_enable_iso1:
+                        s_description = "get enable iso1"; break;
+                    case _type_generated_tx_type.gt_get_enable_iso2:
+                        s_description = "get enable iso2"; break;
+                    case _type_generated_tx_type.gt_get_enable_iso3:
+                        s_description = "get enable iso3"; break;
+                    case _type_generated_tx_type.gt_get_direction1:
+                        s_description = "get iso1 direction"; break;
+                    case _type_generated_tx_type.gt_get_direction2:
+                        s_description = "get iso2 direction"; break;
+                    case _type_generated_tx_type.gt_get_direction3:
+                        s_description = "get iso3 direction"; break;
+                    case _type_generated_tx_type.gt_get_global_prefix:
+                        s_description = "get global prefix"; break;
+                    case _type_generated_tx_type.gt_get_global_postfix:
+                        s_description = "get global postfix"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix1:
+                        s_description = "get private prefix1"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix2:
+                        s_description = "get private prefix2"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix3:
+                        s_description = "get private prefix3"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix1:
+                        s_description = "get private posfix1"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix2:
+                        s_description = "get private posfix2"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix3:
+                        s_description = "get private posfix3"; break;
+                    case _type_generated_tx_type.gt_get_prefix_ibutton:
+                        s_description = "get i-button prefix"; break;
+                    case _type_generated_tx_type.gt_get_postfix_ibutton:
+                        s_description = "get i-button postfix"; break;
+                    case _type_generated_tx_type.gt_get_prefix_uart:
+                        s_description = "get uart prefix"; break;
+                    case _type_generated_tx_type.gt_get_postfix_uart:
+                        s_description = "get uart postfix"; break;
+                    case _type_generated_tx_type.gt_get_f12_ibutton:
+                        s_description = "get i-button F12 mode"; break;
+                    case _type_generated_tx_type.gt_get_zeros_ibutton:
+                        s_description = "get i-button Zeros mode"; break;
+                    case _type_generated_tx_type.gt_get_zeros7_times_ibutton:
+                        s_description = "get i-button Zeros7 mode"; break;
+                    case _type_generated_tx_type.gt_get_addmit_code_stick_ibutton:
+                        s_description = "get i-button Codestick mode"; break;
+
+                    case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
+                        s_description = "set global send condition"; break;
+                    case _type_generated_tx_type.gt_set_interface:
+                        s_description = "set interface"; break;
+                    case _type_generated_tx_type.gt_set_language:
+                        s_description = "set language"; break;
+                    case _type_generated_tx_type.get_set_keymap:
+                        s_description = "set keymap"; break;
+                    case _type_generated_tx_type.gt_set_buzzer_frequency:
+                        s_description = "set buzzer frequency"; break;
+                    case _type_generated_tx_type.gt_set_enable_iso1:
+                        s_description = "set enable iso1"; break;
+                    case _type_generated_tx_type.gt_set_enable_iso2:
+                        s_description = "set enable iso2"; break;
+                    case _type_generated_tx_type.gt_set_enable_iso3:
+                        s_description = "set enable iso3"; break;
+                    case _type_generated_tx_type.gt_set_direction1:
+                        s_description = "set iso1 direction"; break;
+                    case _type_generated_tx_type.gt_set_direction2:
+                        s_description = "set iso2 direction"; break;
+                    case _type_generated_tx_type.gt_set_direction3:
+                        s_description = "set iso3 direction"; break;
+                    case _type_generated_tx_type.gt_set_global_prefix:
+                        s_description = "set global prefix"; break;
+                    case _type_generated_tx_type.gt_set_global_postfix:
+                        s_description = "set global postfix"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix1:
+                        s_description = "set private prefix1"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix2:
+                        s_description = "set private prefix2"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix3:
+                        s_description = "set private prefix3"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix1:
+                        s_description = "set private postfix1"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix2:
+                        s_description = "set private postfix2"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix3:
+                        s_description = "set private postfix3"; break;
+                    case _type_generated_tx_type.gt_set_prefix_ibutton:
+                        s_description = "set i-button prefix"; break;
+                    case _type_generated_tx_type.gt_set_postfix_ibutton:
+                        s_description = "set i-button postfix"; break;
+                    case _type_generated_tx_type.gt_set_prefix_uart:
+                        s_description = "set uart prefix"; break;
+                    case _type_generated_tx_type.gt_set_postfix_uart:
+                        s_description = "set uart postfix"; break;
+                    case _type_generated_tx_type.gt_set_f12_ibutton:
+                        s_description = "set i-button F12 mode"; break;
+                    case _type_generated_tx_type.gt_set_zeros_ibutton:
+                        s_description = "set i-button Zeros mode"; break;
+                    case _type_generated_tx_type.gt_set_zeros7_times_ibutton:
+                        s_description = "set i-button Zeros7 mode"; break;
+                    case _type_generated_tx_type.gt_set_addmit_code_stick_ibutton:
+                        s_description = "set i-button Codestick mode"; break;
+                    default:
+                        continue;
+                }//end switch
+            }while(false);
+            return s_description;
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.clear_transaction
          * @description clear transaction buffer( clear all tx , rx data and generated requests )
          */
@@ -4131,79 +4364,74 @@
 
                 //
                 if( _first_version_greater_then_second_version(this._version,[3,0,0,0])){
-                    /*
-                    // . set device type.
-                    if (!_generate_set_device_type())//dummy code
-                        continue;
-                    */
 
                     // . set iButton Pretag
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
                         if (!_generate_set_ibutton_prefix(this._dequeu_s_tx,this._s_prefix_ibutton )){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_prefix_ibutton );
                     }
 
                     // . set iButton Posttag
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_iButton ) >= 0 ){
                         if (!_generate_set_ibutton_postfix(this._dequeu_s_tx,this._s_postfix_ibutton )){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_postfix_ibutton );
                     }
 
                     // . set Uart Pretag
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_Uart ) >= 0 ){
                         if (!_generate_set_uart_prefix(this._dequeu_s_tx,this._s_prefix_uart )){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_prefix_uart );
                     }
 
                     // . set Uart Posttag
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
                         if (!_generate_set_uart_postfix(this._dequeu_s_tx,this._s_postfix_uart )){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_postfix_uart );
                     }
 
                     do {//ibutton setting
                         if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
                             if (!_generate_set_f12_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.get_enable_f12_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_f12_ibutton );
                         }
 
                         if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
                             if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_zeros_ibutton );
                         }
 
                         if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
                             if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_zeros7_times_ibutton );
                         }
 
                         if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
                             if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_addmit_code_stick_ibutton );
                         }
                     } while (false);
                 }
                 //. set globalPrePostfixSendCondition
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
                     if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,this._b_global_pre_postfix_send_condition)){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_global_prepostfix_send_condition );
                 }
 
                 // . set interface
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
                     if (!_generate_set_interface(this._dequeu_s_tx,this._n_interface )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_interface );
                 }
 
                 // . set language
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Language ) >= 0 ){
                     if (!_generate_set_language(this._dequeu_s_tx,this._n_language_index)){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_language );
 
                     //set key map
                     if( this._b_removed_key_map_table ){
                         if( !_generate_set_key_map(this._deque_generated_tx,this._n_language_index)){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                        this._deque_generated_tx.push( _type_generated_tx_type.get_set_keymap );
                     }
                     
                 }
@@ -4211,87 +4439,87 @@
                 // . set buzzer
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
                     if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,this._dw_buzzer_frequency)){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_buzzer_frequency );
                 }
 
                 // .enable 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO1 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._b_enable_iso[_type_msr_track_Numer.iso1_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_enable_iso1 );
                 }
                     
                 // .enable 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO2 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._b_enable_iso[_type_msr_track_Numer.iso2_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_enable_iso2 );
                 }
 
                 // .enable 3
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableISO3 ) >= 0 ){
                     if (!_generate_set_enable_track(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._b_enable_iso[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_enable_iso3 );
                 }
 
                 // direction 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction1 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._n_direction[_type_msr_track_Numer.iso1_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_direction1 );
                 }
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction2 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._n_direction[_type_msr_track_Numer.iso2_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_direction2 );
                 }
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Direction3 ) >= 0 ){
                     if (!_generate_set_direction(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._n_direction[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_direction3 );
                 }
 
 
                 // . global prefix.............................................
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPrefix ) >= 0 ){
                     if (!_generate_set_global_prefix(this._dequeu_s_tx,this._s_global_prefix )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_global_prefix );
                 }
 
                 // . global postfix
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPostfix ) >= 0 ){
                     if (!_generate_set_global_postfix(this._dequeu_s_tx,this._s_global_postfix )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_global_postfix );
                 }
 
                 // . private prefix 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix1 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_prefix[_type_msr_track_Numer.iso1_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix1 );
                 }
 
                 // . private postfix 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix1 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_postfix[_type_msr_track_Numer.iso1_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix1 );
                 }
 
                 // . private prefix 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix2 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_prefix[_type_msr_track_Numer.iso2_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix2 );
                 }
                 
                 // . private postfix 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix2 );
                 }
 
                 // . private prefix 3
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix3 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_prefix[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix3 );
                 }
                 // . private postfix 3
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix3 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_postfix[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_config );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix3 );
                 }
 
                 //
@@ -4589,7 +4817,33 @@
                     }
                     b_result = true;
                     break;
-                case _type_generated_tx_type.gt_set_config:
+                case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
+                case _type_generated_tx_type.gt_set_interface:
+                case _type_generated_tx_type.gt_set_language:
+                case _type_generated_tx_type.get_set_keymap:
+                case _type_generated_tx_type.gt_set_buzzer_frequency:
+                case _type_generated_tx_type.gt_set_enable_iso1:
+                case _type_generated_tx_type.gt_set_enable_iso2:
+                case _type_generated_tx_type.gt_set_enable_iso3:
+                case _type_generated_tx_type.gt_set_direction1:
+                case _type_generated_tx_type.gt_set_direction2:
+                case _type_generated_tx_type.gt_set_direction3:
+                case _type_generated_tx_type.gt_set_global_prefix:
+                case _type_generated_tx_type.gt_set_global_postfix:
+                case _type_generated_tx_type.gt_set_private_prefix1:
+                case _type_generated_tx_type.gt_set_private_prefix2:
+                case _type_generated_tx_type.gt_set_private_prefix3:
+                case _type_generated_tx_type.gt_set_private_postfix1:
+                case _type_generated_tx_type.gt_set_private_postfix2:
+                case _type_generated_tx_type.gt_set_private_postfix3:
+                case _type_generated_tx_type.gt_set_prefix_ibutton:
+                case _type_generated_tx_type.gt_set_postfix_ibutton:
+                case _type_generated_tx_type.gt_set_prefix_uart:
+                case _type_generated_tx_type.gt_set_postfix_uart:
+                case _type_generated_tx_type.gt_set_f12_ibutton:
+                case _type_generated_tx_type.gt_set_zeros_ibutton:
+                case _type_generated_tx_type.gt_set_zeros7_times_ibutton:
+                case _type_generated_tx_type.gt_set_addmit_code_stick_ibutton:
                     b_result = _is_success_response(s_response);
                     break;
                 default:
@@ -4960,44 +5214,44 @@
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction1 );
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction2 );
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Direction3 );
-                                    this._device._n_direction[_type_msr_track_Numer.iso1_track] = n_ibutton;
-                                    this._device._n_direction[_type_msr_track_Numer.iso2_track] = n_ibutton;
-                                    this._device._n_direction[_type_msr_track_Numer.iso3_track] = n_ibutton;
+                                    this._device._n_direction[_type_msr_track_Numer.iso1_track] = n_direction;
+                                    this._device._n_direction[_type_msr_track_Numer.iso2_track] = n_direction;
+                                    this._device._n_direction[_type_msr_track_Numer.iso3_track] = n_direction;
                                 }
                             }
 
                             if( s_gpre !== null ){
-                                if( this._device._s_global_prefix !== s_gpre){
+                                if( !_is_equal_tag( this._device._s_global_prefix,s_gpre) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPrefix );
                                     this._device._s_global_prefix = s_gpre;
                                 }
                             }
                             if( s_gpost !== null ){
-                                if(this._device._s_global_postfix !== s_gpost){
+                                if( !_is_equal_tag(this._device._s_global_postfix,s_gpost) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPostfix );
                                     this._device._s_global_postfix = s_gpost;
                                 }
                             }
                             if( s_ipre !== null ){
-                                if( this._device._s_prefix_ibutton !== s_ipre ){
+                                if( !_is_equal_tag( this._device._s_prefix_ibutton,s_ipre) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_iButton );
                                     this._device._s_prefix_ibutton = s_ipre;
                                 }
                             }
                             if( s_ipost !== null ){
-                                if( this._device._s_postfix_ibutton !== s_ipost ){
+                                if( !_is_equal_tag(this._device._s_postfix_ibutton,s_ipost) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_iButton );
                                     this._device._s_postfix_ibutton = s_ipost; 
                                 }
                             }
                             if( s_upre !== null ){
-                                if( this._device._s_prefix_uart !== s_upre ){
+                                if( !_is_equal_tag(this._device._s_prefix_uart,s_upre) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_Uart );
                                     this._device._s_prefix_uart = s_upre;
                                 }
                             }
                             if( s_upost !== null ){
-                                if( this._device._s_prefix_uart !== s_upost ){
+                                if( !_is_equal_tag(this._device._s_prefix_uart,s_upost) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_Uart );
                                     this._device._s_prefix_uart = s_upost; 
                                 }
@@ -5014,13 +5268,13 @@
                                     }
                                 }
                                 if( s_ppretag[i] !== null ){
-                                    if(this._device._s_private_prefix[i] !== s_ppretag[i]){
+                                    if(!_is_equal_tag(this._device._s_private_prefix[i],s_ppretag[i])){
                                         elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_pre[i] );
                                         this._device._s_private_prefix[i] = s_ppretag[i];
                                     }
                                 }
                                 if( s_pposttag[i] !== null ){
-                                    if( this._device._s_private_postfix[i] !== s_pposttag[i] ){
+                                    if( !_is_equal_tag(this._device._s_private_postfix[i],s_pposttag[i]) ){
                                         elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_post[i] );
                                         this._device._s_private_postfix[i] = s_pposttag[i];
                                     }

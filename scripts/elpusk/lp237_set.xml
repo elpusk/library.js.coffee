@@ -37,19 +37,19 @@ ibutton	:	postfix		: hex-format : use lower case.
 <lpu237>
 	<common
 		interface	="usb_kb"
-		buzzer		="on"
+		buzzer		="off"
 		language	="usa_english"
 		iso1		="enable"
 		iso2		="enable"
 		iso3		="enable"
-		condition		="and"
-		direction		="bidirectional"
+		condition	="and"
+		direction	="bidirectional"
 		ibutton		="zeros"
 	/>
 
 	<global
-		prefix		=""
-		postfix		=""
+		prefix		="[ ][ g ][ ][ []"
+		postfix		="[ ][ g ][  ][  ]]"
 	/>
 	
 	<iso1

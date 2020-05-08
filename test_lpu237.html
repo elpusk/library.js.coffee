@@ -102,7 +102,8 @@
 
     <script type="text/javascript">
         var n_system_event = 0;
-        var lpu237;
+        var lpu237=null;
+        var array_device_list = [];
 
         function cb_system_event( s_action_code,s_data_field ){
             do{
@@ -221,17 +222,17 @@
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // callback functions
-        function cb_received_from_server( s_rx  ){
+        function cb_received_get_parameter_from_server( s_rx  ){
             var b_result = false;
             do{
                 //
                 if( !lpu237.set_rx_transaction(s_rx) ){
-                    addMessage("fail : cb_received_from_server : set_rx_transaction");
+                    addMessage("fail : cb_received_get_parameter_from_server : set_rx_transaction");
                     addMessage("rx : "+ s_rx);
                     continue;
                 }
                 if( !lpu237.set_from_rx() ){
-                    addMessage("fail : cb_received_from_server : set_from_rx");
+                    addMessage("fail : cb_received_get_parameter_from_server : set_from_rx");
                     addMessage("rx : "+ s_rx);                    
                     continue;
                 }
@@ -244,7 +245,7 @@
                     addMultiMessage( lpu237.get_string() );
 
                     addMessage(
-                        lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
+                        "0x"+lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
                     );
                     addMessage(
                         lpu237.get_tag_by_ascii_string(lpu237.get_private_prefix(0))
@@ -256,11 +257,11 @@
                 var server = elpusk.framework.coffee.get_instance();
                 b_result = server.device_transmit_with_callback(
                     lpu237.get_device_index(),0,0, s_request,
-                    cb_received_from_server,
+                    cb_received_get_parameter_from_server,
                     cb_error_from_server
                     );
                 if( !b_result ){
-                    addMessage("fail : cb_received_from_server : device_transmit_with_callback transmit ");
+                    addMessage("fail : cb_received_get_parameter_from_server : device_transmit_with_callback transmit ");
                     continue;
                 }
 
@@ -319,12 +320,19 @@
 
         function cb_received_set_parameter_from_server( s_rx  ){
             var b_result = false;
+            var n_request_type = -1;
             do{
                 //
                 if( !lpu237.set_rx_transaction(s_rx) ){
                     addMessage("fail : cb_received_set_parameter_from_server : set_rx_transaction");
                     continue;
                 }
+
+                n_request_type = lpu237.get_current_request_type();
+                if( n_request_type >= 0 ){
+                    addMessage("current request is "+ lpu237.get_request_type_string_with_number(n_request_type) );
+                }
+
                 if( !lpu237.set_from_rx() ){
                     addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
                     continue;
@@ -375,7 +383,8 @@
             console.log(hid.get_path());
 
             //
-            var array_device_list = [];
+            array_device_list.length = 0;
+
             var server = elpusk.framework.coffee.get_instance();
 
             server.connect("wss","443").then(
@@ -534,7 +543,7 @@
 
                 b_result = server.device_transmit_with_callback(
                     lpu237.get_device_index(),0,0, s_request,
-                    cb_received_from_server,
+                    cb_received_get_parameter_from_server,
                     cb_error_from_server
                     );
                 if( !b_result ){
