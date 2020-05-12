@@ -48,8 +48,8 @@ ibutton	:	postfix		: hex-format : use lower case.
 	/>
 
 	<global
-		prefix		="[ ][ g ][ ][ []"
-		postfix		="[ ][ g ][  ][  ]]"
+		prefix		=""
+		postfix		="[][][][]"
 	/>
 	
 	<iso1
