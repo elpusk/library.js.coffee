@@ -3560,7 +3560,11 @@
             this._s_postfix_uart = null;//you must include the length in front of this array.
             //
             this._token_format = _type_format.ef_decimal;
-            this._s_name = null;            
+            this._s_name = null;    
+            
+            // reading operation
+            this._b_enable_msr = false;
+            this._array_s_card_data = ["","",""];//iso123 card data
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
@@ -3568,6 +3572,44 @@
 
         /////////////////////////////////////////////////////////////////////
         // getter
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.is_enable_msr
+         * @returns {boolean} true - If device read a card, transmit a card data to client.
+         * <br /> false - don't transmit a card data.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_enable_msr = function(){
+            return this._b_enable_msr;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_msr_data
+         * @param {number} n_track iso track number 0~2.
+         * @returns {null|string} card data.
+         * <br /> null - error.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_msr_data = function(n_track){
+            var s_data = null;
+
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                //
+                s_data = "";
+                s_data = this._array_s_card_data[n_track];
+            }while(false);
+            return s_data;
+        }
+
+
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_version
@@ -4441,6 +4483,20 @@
 
             return this._deque_generated_tx.length;
         }        
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.prototype.enable_msr
+         * @param {boolean} b_enable true -enable reading, false - disable reading
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.enable_msr = function(b_enable){
+            do{
+                if( typeof b_enable !== 'boolean'){
+                    continue;
+                }
+                this._b_enable_msr = b_enable;
+            }while(false);
+        }
 
         /**
          * @public
