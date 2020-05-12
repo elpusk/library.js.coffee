@@ -4,5 +4,5 @@
       "target": "es5",
       "checkJs":false
     },
-    "files":["elpusk.framework.coffee.js"],
+    "files":["elpusk/elpusk.framework.coffee.js","elpusk/elpusk.device.usb.hid.lpu237.js"],
   }

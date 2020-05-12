@@ -81,6 +81,16 @@
     <br />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
 
+    <br />
+    <input type="file" id="input_file" accept=".xml" />
+    <br />
+
+    <br />
+    <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters of lpu237" />
+    <br />
+    <progress id="progress_set_parameters" value="0" max="100"></progress>
+    <br />
+
     <p id="p_pre_main">
         <!-- pre main print area -->
     </p>
@@ -92,7 +102,8 @@
 
     <script type="text/javascript">
         var n_system_event = 0;
-        var lpu237;
+        var lpu237=null;
+        var array_device_list = [];
 
         function cb_system_event( s_action_code,s_data_field ){
             do{
@@ -116,9 +127,9 @@
             }while(false);
         }
 
+
         function _test(){
             addMessage(" : test : ");
-
         }
 
 
@@ -193,22 +204,35 @@
             prog.value = n_cur;
         }
 
+        function set_progress_set_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_set_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
+        }
+
+        function increase_progress_set_parameters(){
+            var prog = document.getElementById("progress_set_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // callback functions
-        function cb_received_from_server( s_rx  ){
+        function cb_received_get_parameter_from_server( s_rx  ){
             var b_result = false;
             do{
                 //
                 if( !lpu237.set_rx_transaction(s_rx) ){
-                    addMessage("fail : cb_received_from_server : set_rx_transaction");
+                    addMessage("fail : cb_received_get_parameter_from_server : set_rx_transaction");
                     addMessage("rx : "+ s_rx);
                     continue;
                 }
                 if( !lpu237.set_from_rx() ){
-                    addMessage("fail : cb_received_from_server : set_from_rx");
+                    addMessage("fail : cb_received_get_parameter_from_server : set_from_rx");
                     addMessage("rx : "+ s_rx);                    
                     continue;
                 }
@@ -221,7 +245,7 @@
                     addMultiMessage( lpu237.get_string() );
 
                     addMessage(
-                        lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
+                        "0x"+lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
                     );
                     addMessage(
                         lpu237.get_tag_by_ascii_string(lpu237.get_private_prefix(0))
@@ -233,11 +257,11 @@
                 var server = elpusk.framework.coffee.get_instance();
                 b_result = server.device_transmit_with_callback(
                     lpu237.get_device_index(),0,0, s_request,
-                    cb_received_from_server,
+                    cb_received_get_parameter_from_server,
                     cb_error_from_server
                     );
                 if( !b_result ){
-                    addMessage("fail : cb_received_from_server : device_transmit_with_callback transmit ");
+                    addMessage("fail : cb_received_get_parameter_from_server : device_transmit_with_callback transmit ");
                     continue;
                 }
 
@@ -294,9 +318,55 @@
             }
         }
 
+        function cb_received_set_parameter_from_server( s_rx  ){
+            var b_result = false;
+            var n_request_type = -1;
+            do{
+                //
+                if( !lpu237.set_rx_transaction(s_rx) ){
+                    addMessage("fail : cb_received_set_parameter_from_server : set_rx_transaction");
+                    continue;
+                }
+
+                n_request_type = lpu237.get_current_request_type();
+                if( n_request_type >= 0 ){
+                    addMessage("current request is "+ lpu237.get_request_type_string_with_number(n_request_type) );
+                }
+
+                if( !lpu237.set_from_rx() ){
+                    addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
+                    continue;
+                }
+                increase_progress_set_parameters();
+
+                var s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("no more tx data");
+                    continue;
+                }
+                //addMessage( s_request );
+
+                var server = elpusk.framework.coffee.get_instance();
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_set_parameter_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : cb_received_set_parameter_from_server : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+                b_result = true;                
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }        
         //////////////////////////////////////////////////////////////////////////////////////////////
         // basic functions
-        function fun_init() {
+        function _fun_init_coffee_framework() {
 
             elpusk.framework.coffee.set_system_event_handler(cb_system_event);
             //
@@ -313,7 +383,8 @@
             console.log(hid.get_path());
 
             //
-            var array_device_list = [];
+            array_device_list.length = 0;
+
             var server = elpusk.framework.coffee.get_instance();
 
             server.connect("wss","443").then(
@@ -377,6 +448,37 @@
             );
         }
 
+
+        function fun_init() {
+
+            _fun_init_coffee_framework();
+
+            if(!(File && FileReader && FileList && Blob)) {
+                addMessage("Not Supported File API");
+            }
+            
+            //
+            document.getElementById("input_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                //
+                lpu237.set_from_file(file).then(function (b_result) {
+                    //alway true.
+                    addMessage("ok : set_from_file");
+                    addMultiMessage(lpu237.get_string());
+
+                    //document.getElementById("input_file").value = "";
+                }).catch(function (event_error) {
+                    // error here
+                    addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
+                    //document.getElementById("input_file").value = "";
+                });
+
+            };
+            
+        }
+
         function fun_get_pre_parameter(){
             var server = elpusk.framework.coffee.get_instance();
             var b_result = false;
@@ -384,6 +486,8 @@
             var n_req = 0;
 
             do{
+                lpu237.clear_transaction();
+
                 n_req = lpu237.generate_get_system_information();
                 if( n_req <= 0 ){
                     addMessage("lpu237.generate_get_system_information() : " + "error");
@@ -422,6 +526,8 @@
             var n_req = 0;
 
             do{
+                lpu237.clear_transaction();
+
                 n_req = lpu237.generate_get_parameters();
                 if( n_req <= 0 ){
                     addMessage("lpu237.generate_get_parameters() : " + "error");
@@ -437,7 +543,7 @@
 
                 b_result = server.device_transmit_with_callback(
                     lpu237.get_device_index(),0,0, s_request,
-                    cb_received_from_server,
+                    cb_received_get_parameter_from_server,
                     cb_error_from_server
                     );
                 if( !b_result ){
@@ -449,6 +555,46 @@
             }while(false);
             return b_result;
         }
+
+        function fun_set_pre_parameter(){
+            var server = elpusk.framework.coffee.get_instance();
+            var b_result = false;
+            var s_request = null;
+            var n_req = 0;
+
+            do{
+                lpu237.clear_transaction();
+
+                n_req = lpu237.generate_set_parameters();
+                if( n_req <= 0 ){
+                    addMessage("lpu237.generate_set_parameters() : " + "error");
+                    continue;
+                }
+
+                set_progress_set_parameters( 0,n_req );
+                s_request = lpu237.get_tx_transaction();
+                if( s_request === null ){
+                    addMessage("no more tx data");
+                    continue;
+                }
+                //addMessage( "tx : " + s_request );
+
+                b_result = server.device_transmit_with_callback(
+                    lpu237.get_device_index(),0,0, s_request,
+                    cb_received_set_parameter_from_server,
+                    cb_error_from_server
+                    );
+                if( !b_result ){
+                    addMessage("fail : device_transmit_with_callback transmit ");
+                    continue;
+                }
+
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }        
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,39 +643,12 @@
         ///////////////////////////////////////////////////////////////////
 
         function on_button_get_parameters(){
-
             fun_get_pre_parameter();
-            
-            /*
-            server.device_transmit(lpu237.get_device_index(),0,0,lpu237.get_generate())
-            .then(
-                function (s_rx) {
-                    do{
-                        if( !lpu237.set_rx_transaction(s_rx) ){
-                            addMessage("fail : cb_received_from_server : set_rx_transaction");
-                            continue;
-                        }
-                        if( !lpu237.set_from_rx() ){
-                            addMessage("fail : cb_received_from_server : set_from_rx");
-                            continue;
-                        }
-                        addMessage("rx : "+ s_rx);
-
-
-                        var s_data = lpu237.get_data_field(s_rx);
-
-                        addMessage("received ID : " + s_data);
-
-                    }while(false);
-                }
-            ).catch(function (event_error) {
-                // error here
-                addMessage("fail : device transmit : "+ server.get_error_message(event_error));
-            });
-            */
-
         }        
 
+        function on_button_set_parameters(){
+            fun_set_pre_parameter();
+        }        
 
     </script>
 </BODY>
