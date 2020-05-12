@@ -26,6 +26,7 @@
  * @version 1.0.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />  2020.4.10 - release 1.0. 
+ * <br />  2020.5.12 - release 1.1. 
  * @namespace
  */
 'use strict';
