@@ -29,6 +29,10 @@
  * <br />  2020.3.25 - release 1.1. 
  * <br />  : change recover callback positon. from the end of function, to the first of function.
  * <br />  : release device filter limit.
+ * 
+ * <br />  2020.5.13 - release 1.2. 
+ * <br />  : fix - device_receive() function code missing.
+ * <br />  : add - device_receive_with_callback() method.
  * @namespace
  */
 
@@ -1173,11 +1177,6 @@
                                     continue;
                                 }
                 
-                                if (typeof s_hex_string !== 'string') {
-                                    reject(_get_error_object('en_e_server_data_field_format'));
-                                    continue;
-                                }
-                
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
                                     _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
@@ -1211,7 +1210,90 @@
                             } while (false);
                         });
                     },
-                
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_receive_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * <br /> function cb_received( hex_string ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * <br /> function cb_error( Error object ) - return none
+                     * 
+                     * @returns {boolean} true - success of starting process.
+                     * <br /> false - failure of starting process.
+                     * 
+                     * @description run receive action to server by callback function.
+                     * <br /> receive a data from device.
+                     * <br /> If device protocol is send-receive pair type, you must don't use this method.
+                    */                
+                    device_receive_with_callback : function ( n_device_index, n_in_id, cb_received, cb_error ) {
+                        var b_result = false;
+                         do {
+                             if(typeof cb_received !== 'function' ){
+                                 continue;
+                             }
+                             if(typeof cb_error !== 'function' ){
+                                 continue;
+                             }
+
+                             if (!_b_connet) {
+                                 continue;
+                             }
+             
+                             var action_code = _type_action_code.DEVICE_RECEIVE;
+             
+                             if (typeof n_device_index !== 'number') {
+                                 continue;
+                             }
+                             if (n_device_index === const_n_undefined_device_index) {
+                                 continue;
+                             }
+                             if (typeof n_in_id !== 'number') {
+                                 continue;
+                             }
+                             if (n_in_id < 0 || n_in_id > 0xff) {
+                                 continue;
+                             }
+             
+                             _websocket.onmessage = function (evt) {
+                                 //recover default handler.
+                                 _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
+                                 var json_obj = JSON.parse(evt.data);
+                                 if (json_obj.action_code == action_code) {
+                                     cb_received(json_obj.data_field);
+                                 }
+                                 else {
+                                     cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                 }
+                             }
+                             _websocket.onerror = function(evt){
+                                 _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                 cb_error(evt);
+                             }
+             
+                             //send request
+                             var json_packet = _generate_request_packet(
+                                 _type_packet_owner.DEVICE
+                                 , n_device_index
+                                 , action_code
+                                 , n_in_id
+                                 , 0
+                                 , _type_data_field_type.HEX_STRING
+                             );
+             
+                             var s_json_packet = JSON.stringify(json_packet);
+                             _websocket.send(s_json_packet);
+             
+                             b_result = true;
+                         } while (false);
+
+                         return b_result;
+                    },                  
                     /** 
                      * @public 
                      * @async
@@ -1528,7 +1610,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.1.0";
+        return "1.2.0";
     }
 
     /**

@@ -90,6 +90,10 @@
     <br />
     <progress id="progress_set_parameters" value="0" max="100"></progress>
     <br />
+    <input type="button" id="button_enable_read" onclick="on_button_enable_read();" value="enable read." />
+    <br />
+    <input type="button" id="button_disable_read" onclick="on_button_disable_read();" value="disable read." />
+    <br />
 
     <p id="p_pre_main">
         <!-- pre main print area -->
@@ -218,10 +222,17 @@
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////
-
-        //////////////////////////////////////////////////////////////////////////////////////////////
         // callback functions
+        function cb_received_read_from_server( s_rx  ){
+            var b_result = false;
+
+            do{
+
+
+                b_result = true;
+            }while(false);
+        }
+
         function cb_received_get_parameter_from_server( s_rx  ){
             var b_result = false;
             do{
@@ -596,6 +607,108 @@
             }
         }        
 
+        function fun_enable_read( b_enable ){
+            do{
+                var b_result = false;
+                var server = elpusk.framework.coffee.get_instance();
+
+                if( b_enable === true ){
+                    
+                    server.device_receive(lpu237.get_device_index(),0).then(function (s_rx) {
+                        do{
+                            if (!Array.isArray(s_rx)) {
+                                addMessage("read received : " + lpu237.get_data_field(s_rx));
+                                continue;
+                            }
+
+                            if (s_rx === null) {
+                                addMessage("invalied response");
+                                continue;
+                            }
+
+                            addMessage("receive failure : "+s_rx);
+
+                        }while(false);
+                    }).catch(function (event_error) {
+                        // error here
+                        addMessage("fail : device receive : "+ server.get_error_message(event_error));
+                    });
+
+                    b_result = true;
+                    continue;
+                }
+
+                //cancel read.
+                server.device_cancel(lpu237.get_device_index(),0,0).then(function (s_rx) {
+                        do{
+                            if (!Array.isArray(s_rx)) {
+                                addMessage("cancel received : " + s_rx);
+                                continue;
+                            }
+
+                            if (s_rx === null) {
+                                addMessage("invalied response");
+                                continue;
+                            }
+
+                            addMessage("receive failure : "+s_rx);
+
+                        }while(false);
+                    }).catch(function (event_error) {
+                        // error here
+                        addMessage("fail : device receive : "+ server.get_error_message(event_error));
+                    });
+
+            }while(false);
+        }
+
+        function fun_opos( b_enter ){
+            var server = elpusk.framework.coffee.get_instance();
+            var b_result = false;
+            var s_request = null;
+            var n_req = 0;
+
+            do{
+                lpu237.clear_transaction();
+
+                n_req = lpu237.generate_enable_read(b_enter);
+                if( n_req <= 0 ){
+                    addMessage("lpu237.generate_enable_read() : " + "error");
+                    continue;
+                }
+
+                s_request = lpu237.get_tx_transaction();
+
+                server.device_transmit(lpu237.get_device_index(),0,0,s_request)
+                .then(function (s_rx) {
+                    do{
+                        // s_rx is data field of coffee framework protocol.
+                        if( lpu237.is_success_enter_opos_mode(s_rx) ){
+                            addMessage("ready read :");
+                            fun_enable_read(true);
+                        }
+                        else{
+                            addMessage("error response");
+                        }
+
+                    }while(false);
+                    lpu237.clear_transaction();
+
+                }).catch(function (event_error) {
+                    // error here
+                    addMessage("fail : device transmit : "+ server.get_error_message(event_error));
+                    lpu237.clear_transaction();
+                });
+
+                b_result = true;
+            }while(false);
+
+            if( !b_result ){
+                lpu237.clear_transaction();
+            }
+        }
+
+
         //////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -648,7 +761,15 @@
 
         function on_button_set_parameters(){
             fun_set_pre_parameter();
-        }        
+        }
+        
+        function on_button_enable_read(){
+            fun_opos( true );
+        }
+
+        function on_button_disable_read(){
+            fun_opos( false );
+        }
 
     </script>
 </BODY>

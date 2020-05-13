@@ -1202,28 +1202,6 @@
 
         /**
          * @private
-         * @function _is_success_enter_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */
-        function _is_success_enter_opos_mode(s_response){
-            return _is_success_response(s_response);
-        }
-
-        /**
-         * @private
-         * @function _is_success_leave_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        function _is_success_leave_opos_mode(s_response){
-            return _is_success_response(s_response);
-        }
-
-        /**
-         * @private
          * @function _is_success_enter_config_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
@@ -1255,16 +1233,6 @@
             return _is_success_response(s_response);
         }
 
-        /**
-         * @private
-         * @function _is_success_run_boot_loader
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        function _is_success_run_boot_loader(s_response){
-            return _is_success_response(s_response);
-        }
 
         /**
          * @private
@@ -3563,7 +3531,7 @@
             this._s_name = null;    
             
             // reading operation
-            this._b_enable_msr = false;
+            this._b_enable_read = false;
             this._array_s_card_data = ["","",""];//iso123 card data
         };
 
@@ -3574,12 +3542,12 @@
         // getter
         /**
          * @public
-         * @function elpusk.device.usb.hid.lpu237.is_enable_msr
+         * @function elpusk.device.usb.hid.lpu237.is_enable_read
          * @returns {boolean} true - If device read a card, transmit a card data to client.
          * <br /> false - don't transmit a card data.
          */
-        _elpusk.device.usb.hid.lpu237.prototype.is_enable_msr = function(){
-            return this._b_enable_msr;
+        _elpusk.device.usb.hid.lpu237.prototype.is_enable_read = function(){
+            return this._b_enable_read;
         }
 
         /**
@@ -4486,20 +4454,6 @@
 
         /**
          * @public
-         * @function elpusk.device.usb.hid.lpu237.prototype.enable_msr
-         * @param {boolean} b_enable true -enable reading, false - disable reading
-         */
-        _elpusk.device.usb.hid.lpu237.prototype.enable_msr = function(b_enable){
-            do{
-                if( typeof b_enable !== 'boolean'){
-                    continue;
-                }
-                this._b_enable_msr = b_enable;
-            }while(false);
-        }
-
-        /**
-         * @public
          * @function elpusk.device.usb.hid.lpu237.generate_set_parameters
          * @return {number} the number of generated requests.
          * <br /> 0 - error
@@ -4687,8 +4641,44 @@
                 this._deque_generated_tx.length = 0;
             }
 
-            return this._deque_generated_tx.length;;           
+            return this._deque_generated_tx.length;   
        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.generate_enable_read
+         * @param {boolean} b_enable true - generates enable read requst.
+         * <br /> false - generates disable read requst.
+         * @return {number} the number of generated requests. may be 1.
+         * <br /> 0 - error
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.generate_enable_read = function( b_enable ){
+            var b_result = false;
+
+            do{
+                if( typeof b_enable !== 'boolean'){
+                    continue;
+                }
+
+                if( b_enable ){
+                    if(!_generate_enter_opos_mode(this._dequeu_s_tx) ){ continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_opos );
+                }
+                else{
+                    if(!_generate_leave_opos_mode(this._dequeu_s_tx) ){ continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_opos );
+                }
+                //
+                b_result = true;
+            }while (false);
+
+            if( !b_result ){
+                this._dequeu_s_tx.length = 0;
+                this._deque_generated_tx.length = 0;
+            }
+
+            return this._deque_generated_tx.length;         
+        }
 
         /**
          * @public
@@ -5527,7 +5517,40 @@
         }
 
         /**
-         * @private
+         * @public
+         * @function is_success_enter_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_enter_opos_mode = function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
+         * @function is_success_leave_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_leave_opos_mode= function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
+         * @function is_success_run_boot_loader
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_run_boot_loader = function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_code
          * @param {string} s_len_tag_hex this string is received from device by hex string format.
          * @returns {number[]} ASCII code array of tag.
@@ -5537,7 +5560,7 @@
         }
 
         /**
-         * @private
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_string
          * @param {string} s_len_tag_hex this string is received from device by hex string format.
          * @returns {string[]} string format of ASCII code of tag.
@@ -5547,7 +5570,7 @@
         }
 
         /** 
-         * @private 
+         * @public 
          * @function get_error_message
          * @param {string} s_error_name
          * @returns {string}
@@ -5556,8 +5579,6 @@
         _elpusk.device.usb.hid.lpu237.prototype.get_error_message = function(s_error_name){
            return _get_error_message(s_error_name);
         }
-
-
 
     }//the end of _elpusk.device.usb.hid.lpu237
 

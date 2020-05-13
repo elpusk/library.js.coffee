@@ -57,6 +57,10 @@
  * &lt;br />  2020.3.25 - release 1.1. 
  * &lt;br />  : change recover callback positon. from the end of function, to the first of function.
  * &lt;br />  : release device filter limit.
+ * 
+ * &lt;br />  2020.5.13 - release 1.2. 
+ * &lt;br />  : fix - device_receive() function code missing.
+ * &lt;br />  : add - device_receive_with_callback() method.
  * @namespace
  */
 
@@ -1201,11 +1205,6 @@
                                     continue;
                                 }
                 
-                                if (typeof s_hex_string !== 'string') {
-                                    reject(_get_error_object('en_e_server_data_field_format'));
-                                    continue;
-                                }
-                
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
                                     _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
@@ -1239,7 +1238,90 @@
                             } while (false);
                         });
                     },
-                
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_receive_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * &lt;br /> if the target device is hid class, n_out_id is in report id.
+                     * &lt;br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * &lt;br /> function cb_received( hex_string ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * &lt;br /> function cb_error( Error object ) - return none
+                     * 
+                     * @returns {boolean} true - success of starting process.
+                     * &lt;br /> false - failure of starting process.
+                     * 
+                     * @description run receive action to server by callback function.
+                     * &lt;br /> receive a data from device.
+                     * &lt;br /> If device protocol is send-receive pair type, you must don't use this method.
+                    */                
+                    device_receive_with_callback : function ( n_device_index, n_in_id, cb_received, cb_error ) {
+                        var b_result = false;
+                         do {
+                             if(typeof cb_received !== 'function' ){
+                                 continue;
+                             }
+                             if(typeof cb_error !== 'function' ){
+                                 continue;
+                             }
+
+                             if (!_b_connet) {
+                                 continue;
+                             }
+             
+                             var action_code = _type_action_code.DEVICE_RECEIVE;
+             
+                             if (typeof n_device_index !== 'number') {
+                                 continue;
+                             }
+                             if (n_device_index === const_n_undefined_device_index) {
+                                 continue;
+                             }
+                             if (typeof n_in_id !== 'number') {
+                                 continue;
+                             }
+                             if (n_in_id &lt; 0 || n_in_id > 0xff) {
+                                 continue;
+                             }
+             
+                             _websocket.onmessage = function (evt) {
+                                 //recover default handler.
+                                 _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
+                                 var json_obj = JSON.parse(evt.data);
+                                 if (json_obj.action_code == action_code) {
+                                     cb_received(json_obj.data_field);
+                                 }
+                                 else {
+                                     cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                 }
+                             }
+                             _websocket.onerror = function(evt){
+                                 _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                 cb_error(evt);
+                             }
+             
+                             //send request
+                             var json_packet = _generate_request_packet(
+                                 _type_packet_owner.DEVICE
+                                 , n_device_index
+                                 , action_code
+                                 , n_in_id
+                                 , 0
+                                 , _type_data_field_type.HEX_STRING
+                             );
+             
+                             var s_json_packet = JSON.stringify(json_packet);
+                             _websocket.send(s_json_packet);
+             
+                             b_result = true;
+                         } while (false);
+
+                         return b_result;
+                    },                  
                     /** 
                      * @public 
                      * @async
@@ -1556,7 +1638,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.1.0";
+        return "1.2.0";
     }
 
     /**
@@ -1598,13 +1680,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="coffee.html">coffee</a></li><li><a href="get_instance.html">get_instance</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_generate_request_packet">_generate_request_packet</a></li><li><a href="global.html#_get_error_message">_get_error_message</a></li><li><a href="global.html#_get_error_object">_get_error_object</a></li><li><a href="global.html#_get_server_url">_get_server_url</a></li><li><a href="global.html#_is_chrome_or_firfox_or_opera">_is_chrome_or_firfox_or_opera</a></li><li><a href="global.html#_is_valid_action_code">_is_valid_action_code</a></li><li><a href="global.html#_is_valid_data_field_type">_is_valid_data_field_type</a></li><li><a href="global.html#_is_valid_device_id">_is_valid_device_id</a></li><li><a href="global.html#_is_valid_device_index">_is_valid_device_index</a></li><li><a href="global.html#_is_valid_packet_owner">_is_valid_packet_owner</a></li><li><a href="global.html#_is_valid_request_type">_is_valid_request_type</a></li><li><a href="global.html#_is_valid_session_number">_is_valid_session_number</a></li><li><a href="global.html#_on_def_close">_on_def_close</a></li><li><a href="global.html#_on_def_error">_on_def_error</a></li><li><a href="global.html#_on_def_message_json_format">_on_def_message_json_format</a></li><li><a href="global.html#_on_def_open">_on_def_open</a></li><li><a href="global.html#_promise_echo">_promise_echo</a></li><li><a href="global.html#_system_handlersystemeventhandlercallback">_system_handler system event handler callback</a></li><li><a href="global.html#connect">connect</a></li><li><a href="global.html#device_cancel">device_cancel</a></li><li><a href="global.html#device_close">device_close</a></li><li><a href="global.html#device_open">device_open</a></li><li><a href="global.html#device_receive">device_receive</a></li><li><a href="global.html#device_send">device_send</a></li><li><a href="global.html#device_transmit">device_transmit</a></li><li><a href="global.html#device_transmit_with_callback">device_transmit_with_callback</a></li><li><a href="global.html#disconnect">disconnect</a></li><li><a href="global.html#echo_hex">echo_hex</a></li><li><a href="global.html#echo_string">echo_string</a></li><li><a href="global.html#get_device_list">get_device_list</a></li><li><a href="global.html#get_error_message">get_error_message</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="coffee.html">coffee</a></li><li><a href="get_instance.html">get_instance</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_generate_request_packet">_generate_request_packet</a></li><li><a href="global.html#_get_error_message">_get_error_message</a></li><li><a href="global.html#_get_error_object">_get_error_object</a></li><li><a href="global.html#_get_server_url">_get_server_url</a></li><li><a href="global.html#_is_chrome_or_firfox_or_opera">_is_chrome_or_firfox_or_opera</a></li><li><a href="global.html#_is_valid_action_code">_is_valid_action_code</a></li><li><a href="global.html#_is_valid_data_field_type">_is_valid_data_field_type</a></li><li><a href="global.html#_is_valid_device_id">_is_valid_device_id</a></li><li><a href="global.html#_is_valid_device_index">_is_valid_device_index</a></li><li><a href="global.html#_is_valid_packet_owner">_is_valid_packet_owner</a></li><li><a href="global.html#_is_valid_request_type">_is_valid_request_type</a></li><li><a href="global.html#_is_valid_session_number">_is_valid_session_number</a></li><li><a href="global.html#_on_def_close">_on_def_close</a></li><li><a href="global.html#_on_def_error">_on_def_error</a></li><li><a href="global.html#_on_def_message_json_format">_on_def_message_json_format</a></li><li><a href="global.html#_on_def_open">_on_def_open</a></li><li><a href="global.html#_promise_echo">_promise_echo</a></li><li><a href="global.html#_system_handlersystemeventhandlercallback">_system_handler system event handler callback</a></li><li><a href="global.html#connect">connect</a></li><li><a href="global.html#device_cancel">device_cancel</a></li><li><a href="global.html#device_close">device_close</a></li><li><a href="global.html#device_open">device_open</a></li><li><a href="global.html#device_receive">device_receive</a></li><li><a href="global.html#device_receive_with_callback">device_receive_with_callback</a></li><li><a href="global.html#device_send">device_send</a></li><li><a href="global.html#device_transmit">device_transmit</a></li><li><a href="global.html#device_transmit_with_callback">device_transmit_with_callback</a></li><li><a href="global.html#disconnect">disconnect</a></li><li><a href="global.html#echo_hex">echo_hex</a></li><li><a href="global.html#echo_string">echo_string</a></li><li><a href="global.html#get_device_list">get_device_list</a></li><li><a href="global.html#get_error_message">get_error_message</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue May 12 2020 11:16:27 GMT+0900 (GMT+09:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed May 13 2020 13:01:31 GMT+0900 (GMT+09:00)
 </footer>
 
 <script> prettyPrint(); </script>
