@@ -33,12 +33,15 @@
  * <br />  2020.5.13 - release 1.2. 
  * <br />  : fix - device_receive() function code missing.
  * <br />  : add - device_receive_with_callback() method.
+ * 
+ * <br />  2020.5.14 - release 1.3.
+ * <br />  : add - get_session_number() method.( instance function, class function get_session_number() is already existed.)
  * @namespace
  */
 
 'use strict';
 
-(function (windows, undefined) {
+(function (window, undefined) {
     /**@private */
     var _elpusk = window.elpusk;
 
@@ -707,6 +710,16 @@
                 }
 
                 return{
+
+                    /**
+                     * @public 
+                     * @function get_session_number
+                     * @return {string} the current session number.
+                     * @description get session number of connection.
+                     */
+                    get_session_number : function () {
+                        return _s_session;
+                    },
 
                     /** 
                      * @public 
@@ -1610,7 +1623,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.2.0";
+        return "1.3.0";
     }
 
     /**
@@ -1642,4 +1655,4 @@
 
     // the end of function
     window.elpusk = _elpusk;
-}(window))
+}(window));
