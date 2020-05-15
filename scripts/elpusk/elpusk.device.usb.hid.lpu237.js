@@ -3531,7 +3531,6 @@
             this._s_name = null;    
             
             // reading operation
-            this._b_enable_read = false;
             this._array_s_card_data = ["","",""];//iso123 card data
         };
 
@@ -3540,15 +3539,6 @@
 
         /////////////////////////////////////////////////////////////////////
         // getter
-        /**
-         * @public
-         * @function elpusk.device.usb.hid.lpu237.is_enable_read
-         * @returns {boolean} true - If device read a card, transmit a card data to client.
-         * <br /> false - don't transmit a card data.
-         */
-        _elpusk.device.usb.hid.lpu237.prototype.is_enable_read = function(){
-            return this._b_enable_read;
-        }
 
         /**
          * @public
@@ -5436,6 +5426,45 @@
             });//the end of Promise definition.
         }   
 
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.reset_msr_data
+         * @param {number} n_track iso track number 0~2.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.reset_msr_data = function(n_track){
+
+            do{
+                if( typeof n_track === 'undefined'){
+                    for( var i = 0; i<this._array_s_card_data.length; i++ ){
+                        this._array_s_card_data[i].length = 0;
+                    }//end for
+                }
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                this._array_s_card_data[n_track].length = 0;
+            }while(false);
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.set_msr_data_from_rx
+         * @return {boolean} processing result
+         * @description analysis and save from response.
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.set_msr_data_from_rx = function(s_rx){
+            var b_result  =false;
+            do{
+                //todo.
+            }while(false);
+            return b_result;
+        }
 
         /**
          * @public

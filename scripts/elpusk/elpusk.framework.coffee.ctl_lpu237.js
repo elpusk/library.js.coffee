@@ -78,6 +78,7 @@
                 cb_error_sys_info
                 );
             if( !b_result ){
+                device.clear_transaction();
                 continue;
             }
             //
@@ -110,6 +111,7 @@
                 cb_error_get_parameter
                 );
             if( !b_result ){
+                device.clear_transaction();
                 continue;
             }
 
@@ -118,6 +120,313 @@
         return b_result;
     }    
 
+    function _set_parameters(server, device,cb_complete_set_parameter,cb_error_set_parameter){
+        var b_result = false;
+        var s_request = null;
+        var n_req = 0;
+
+        do{
+            device.clear_transaction();
+
+            n_req = device.generate_set_parameters();
+            if( n_req <= 0 ){
+                continue;
+            }
+
+            s_request = device.get_tx_transaction();
+            if( s_request === null ){
+                continue;
+            }
+
+            b_result = server.device_transmit_with_callback(
+                device.get_device_index(),0,0, s_request,
+                cb_complete_set_parameter,
+                cb_error_set_parameter
+                );
+            if( !b_result ){
+                device.clear_transaction();
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        return b_result;
+    }    
+
+    function _read_card(server, device,cb_complete_ready_card,cb_error_ready_card,b_read){
+        var b_result = false;
+        var s_request = null;
+        var n_req = 0;
+
+        do{
+            device.clear_transaction();
+
+            n_req = device.generate_enable_read(b_read);
+            if( n_req <= 0 ){
+                continue;
+            }
+
+            s_request = device.get_tx_transaction();
+            if( s_request === null ){
+                continue;
+            }
+
+            b_result = server.device_transmit_with_callback(
+                device.get_device_index(),0,0, s_request,
+                cb_complete_ready_card,
+                cb_error_ready_card
+                );
+            if( !b_result ){
+                device.clear_transaction();
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        return b_result;
+    }    
+
+    //static variables
+    var _callback_info = null;
+
+    function _cb_error_get_parameter( event_error ){
+        if(_callback_info ){
+            _callback_info.reject(event_error);
+            _callback_info = null;
+        }
+    };
+
+    function _cb_complete_get_parameter( s_rx  ){
+        if( _callback_info === null ){
+            return;
+        }
+        var b_result = false;
+        do{
+            //
+            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !_callback_info.device.set_from_rx() ){
+                continue;
+            }
+            //
+            var s_request = _callback_info.device.get_tx_transaction();
+            if( s_request === null ){
+                //compete all response
+                _callback_info.device.clear_transaction();
+                _callback_info.resolve("success");
+                _callback_info = null;
+                b_result = true;
+                continue;
+            }
+
+            b_result = _callback_info.server.device_transmit_with_callback(
+                _callback_info.device.get_device_index(),0,0, s_request,
+                _cb_complete_get_parameter,
+                _cb_error_get_parameter
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+
+        }while(false);
+
+        if( !b_result ){
+            _callback_info.device.clear_transaction();
+            _callback_info.reject(new Error("error"));
+            _callback_info = null;
+        }
+    };
+
+    function _cb_error_sys_info( event_error ){
+        if(_callback_info){
+            _callback_info.reject(event_error);
+            _callback_info = null;
+        }
+    };
+
+    function _cb_complete_sys_info( s_rx  ){
+        if(_callback_info === null){
+            return;
+        }
+
+        var b_result = false;
+        do{
+            //
+            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !_callback_info.device.set_from_rx() ){
+                continue;
+            }
+
+            var s_request = _callback_info.device.get_tx_transaction();
+            if( s_request === null ){
+                b_result = _get_parameters(_callback_info.server,_callback_info.device,_cb_complete_get_parameter, _cb_error_get_parameter);
+                continue;
+            }
+
+            b_result = _callback_info.server.device_transmit_with_callback(
+                _callback_info.device.get_device_index(),0,0, s_request,
+                _cb_complete_sys_info,
+                _cb_error_sys_info
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+
+        if( !b_result ){
+            _callback_info.device.clear_transaction();
+            _callback_info.reject(new Error("error"));
+            _callback_info = null;
+        }
+    };
+
+    function _cb_error_set_parameter( event_error ){
+        if(_callback_info ){
+            _callback_info.reject(event_error);
+            _callback_info = null;
+        }
+    };
+
+    function _cb_complete_set_parameter( s_rx  ){
+        if( _callback_info === null ){
+            return;
+        }
+        var b_result = false;
+        do{
+            //
+            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !_callback_info.device.set_from_rx() ){
+                continue;
+            }
+            //
+            var s_request = _callback_info.device.get_tx_transaction();
+            if( s_request === null ){
+                //compete all response
+                _callback_info.device.clear_transaction();
+                _callback_info.resolve("success");
+                _callback_info = null;
+                b_result = true;
+                continue;
+            }
+
+            b_result = _callback_info.server.device_transmit_with_callback(
+                _callback_info.device.get_device_index(),0,0, s_request,
+                _cb_complete_set_parameter,
+                _cb_error_set_parameter
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+
+        }while(false);
+
+        if( !b_result ){
+            _callback_info.device.clear_transaction();
+            _callback_info.reject(new Error("error"));
+            _callback_info = null;
+        }
+    };
+
+    function _cb_error_ready_card( event_error ){
+        if(_callback_info ){
+            _callback_info.reject(event_error);
+            _callback_info = null;
+        }
+    };
+
+    function _cb_complete_ready_card( s_rx  ){
+        if( _callback_info === null ){
+            return;
+        }
+        var b_result = false;
+        do{
+            //
+            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !_callback_info.device.set_from_rx() ){
+                continue;
+            }
+            //
+            var s_request = _callback_info.device.get_tx_transaction();
+            if( s_request !== null ){
+                continue;
+            }
+
+            b_result = _callback_info.server.device_receive_with_callback(
+                _callback_info.device.get_device_index(),0,
+                _cb_complete_read_card,
+                _cb_error_read_card
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+
+        }while(false);
+
+        if( !b_result ){
+            _callback_info.device.clear_transaction();
+            _callback_info.reject(new Error("error"));
+            _callback_info = null;
+        }
+    };
+
+
+    function _cb_error_read_card( event_error ){
+        if(_callback_info ){
+            _callback_info.reject(event_error);
+            _callback_info = null;
+        }
+    };
+
+    function _cb_complete_read_card( s_rx  ){
+        if( _callback_info === null ){
+            return;
+        }
+        var b_result = false;
+        do{
+            //s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
+            _callback_info.resolve(s_rx);
+
+            if( !_callback_info.b_loop ){
+                _callback_info.device.clear_transaction();
+                _callback_info = null;
+                b_result = true;
+                continue;
+            }
+            b_result = _callback_info.server.device_receive_with_callback(
+                _callback_info.device.get_device_index(),0,
+                _cb_complete_read_card,
+                _cb_error_read_card
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+
+        }while(false);
+
+        if( !b_result ){
+            _callback_info.device.clear_transaction();
+            _callback_info.reject(new Error("error"));
+            _callback_info = null;
+        }
+    };
+
     /**
      * @constructs elpusk.framework.coffee.ctl_lpu237
     */
@@ -125,88 +434,6 @@
         //private variables
         this._server = server;
         this._device = device;
-
-        this._cb_error_get_parameter= function ( event_error ){
-            reject(event_error);
-        };
-
-        this._cb_complete_get_parameter = function ( s_rx  ){
-            var b_result = false;
-            do{
-                //
-                if( !device.set_rx_transaction(s_rx) ){
-                    continue;
-                }
-                if( !device.set_from_rx() ){
-                    continue;
-                }
-                //
-                var s_request = device.get_tx_transaction();
-                if( s_request === null ){
-                    //compete all response
-                    device.clear_transaction();
-                    resolve("success");
-                    b_result = true;
-                    continue;
-                }
-
-                b_result = server.device_transmit_with_callback(
-                    device.get_device_index(),0,0, s_request,
-                    this._cb_complete_get_parameter,
-                    this._cb_error_get_parameter
-                    );
-                if( !b_result ){
-                    continue;
-                }
-
-                b_result = true;
-
-            }while(false);
-
-            if( !b_result ){
-                device.clear_transaction();
-                reject(new Error("error"));
-            }
-        };
-
-        this._cb_error_sys_info = function ( event_error ){
-            reject(event_error);
-        };
-
-        this._cb_complete_sys_info = function( s_rx  ){
-            var b_result = false;
-            do{
-                //
-                if( !device.set_rx_transaction(s_rx) ){
-                    continue;
-                }
-                if( !device.set_from_rx() ){
-                    continue;
-                }
-
-                var s_request = device.get_tx_transaction();
-                if( s_request === null ){
-                    b_result = _get_parameters(server,device,this._cb_complete_get_parameter, this._cb_error_get_parameter);
-                    continue;
-                }
-
-                b_result = server.device_transmit_with_callback(
-                    device.get_device_index(),0,0, s_request,
-                    this._cb_complete_sys_info,
-                    this._cb_error_sys_info
-                    );
-                if( !b_result ){
-                    continue;
-                }
-
-                b_result = true;
-            }while(false);
-
-            if( !b_result ){
-                device.clear_transaction();
-                reject(new Error("error"));
-            }
-        };
 
     };
 
@@ -348,37 +575,132 @@
      * @function load_parameter_from_device_with_promise
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(){
-        var _server = this._server;
-        var _device = this._device;
-        var _cb_complete_sys_info = this._cb_complete_sys_info;
-        var _cb_error_sys_info = this._cb_error_sys_info;
+        if( _callback_info ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        var server = this._server;
+        var device = this._device;
 
         return new Promise(function (resolve, reject) {
             var b_result = false;
-            var n_req = 0;
-            var s_request = null;
 
             do{
-                if( !_server ){
+                if( !server ){
                     continue;
                 }
-                if(!_device){
+                if(!device){
                     continue;
                 }
-                if( _device.get_device_index() <= 0 ){
-                    b_result = true;
-                    resolve("success");
-                    continue;//already close
+                if( device.get_device_index() <= 0 ){
+                    continue;
                 }
 
-                b_result = _get_system_information( _server, _device,_cb_complete_sys_info, _cb_error_sys_info);
+                _callback_info = {
+                    "server" : server,
+                    "device" : device,
+                    "resolve" : resolve,
+                    "reject" : reject
+                };
+                b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_sys_info);
             }while(false);
             if( !b_result ){
                 reject(new Error("error"));
+                _callback_info = null;
             }
         });//the end promise
     };
     
+    /**
+     * @public
+     * @function save_parameter_to_device_with_promise
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(){
+        if( _callback_info ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        var server = this._server;
+        var device = this._device;
+
+        return new Promise(function (resolve, reject) {
+            var b_result = false;
+
+            do{
+                if( !server ){
+                    continue;
+                }
+                if(!device){
+                    continue;
+                }
+                if( device.get_device_index() <= 0 ){
+                    continue;
+                }
+
+                _callback_info = {
+                    "server" : server,
+                    "device" : device,
+                    "resolve" : resolve,
+                    "reject" : reject
+                };
+                b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_set_parameter);
+            }while(false);
+            if( !b_result ){
+                reject(new Error("error"));
+                _callback_info = null;
+            }
+        });//the end promise
+    };
+
+    /**
+     * @public
+     * @function read_card_from_device_with_promise
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read,b_loop){
+        if( _callback_info || typeof b_read !== 'boolean' || typeof b_loop !== 'boolean' ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        var server = this._server;
+        var device = this._device;
+
+        return new Promise(function (resolve, reject) {
+            var b_result = false;
+
+            do{
+                if( !server ){
+                    continue;
+                }
+                if(!device){
+                    continue;
+                }
+                if( device.get_device_index() <= 0 ){
+                    continue;
+                }
+
+                _callback_info = {
+                    "server" : server,
+                    "device" : device,
+                    "resolve" : resolve,
+                    "reject" : reject,
+                    "b_read" : b_read,
+                    "b_loop" : b_loop
+                };
+                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            }while(false);
+            if( !b_result ){
+                reject(new Error("error"));
+                _callback_info = null;
+            }
+        });//the end promise
+    };
+
     ////////////////////////////////////////////////////////////////////////////
     // the end of function
     window.elpusk = _elpusk;

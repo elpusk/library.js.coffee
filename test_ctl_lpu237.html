@@ -228,158 +228,7 @@
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // callback functions
-        function cb_received_read_from_server( s_rx  ){
-            var b_result = false;
 
-            do{
-
-
-                b_result = true;
-            }while(false);
-        }
-
-        function cb_received_get_parameter_from_server( s_rx  ){
-            var b_result = false;
-            do{
-                //
-                if( !lpu237.set_rx_transaction(s_rx) ){
-                    addMessage("fail : cb_received_get_parameter_from_server : set_rx_transaction");
-                    addMessage("rx : "+ s_rx);
-                    continue;
-                }
-                if( !lpu237.set_from_rx() ){
-                    addMessage("fail : cb_received_get_parameter_from_server : set_from_rx");
-                    addMessage("rx : "+ s_rx);                    
-                    continue;
-                }
-                //
-                increase_progress_get_parameters();
-
-                var s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    addMessage("no more tx data");
-                    addMultiMessage( lpu237.get_string() );
-
-                    addMessage(
-                        "0x"+lpu237.get_tag_by_ascii_hex_string(lpu237.get_private_prefix(0))
-                    );
-                    addMessage(
-                        lpu237.get_tag_by_ascii_string(lpu237.get_private_prefix(0))
-                    );
-                    continue;
-                }
-                //addMessage( s_request );
-
-                var server = elpusk.framework.coffee.get_instance();
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_get_parameter_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : cb_received_get_parameter_from_server : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-                b_result = true;
-
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }
-
-        function cb_error_from_server( event_error ){
-            addMessage("fail : cb_error_from_server : "+ server.get_error_message(event_error));
-        }
-
-        function cb_received_sys_info_from_server( s_rx  ){
-            var b_result = false;
-            do{
-                //
-                if( !lpu237.set_rx_transaction(s_rx) ){
-                    addMessage("fail : cb_received_sys_info_from_server : set_rx_transaction");
-                    continue;
-                }
-                if( !lpu237.set_from_rx() ){
-                    addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
-                    continue;
-                }
-                increase_progress_get_parameters();
-
-                var s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    b_result = fun_get_parameters();
-                    continue;
-                }
-                //addMessage( s_request );
-
-                var server = elpusk.framework.coffee.get_instance();
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_sys_info_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : cb_received_sys_info_from_server : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-                b_result = true;
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }
-
-        function cb_received_set_parameter_from_server( s_rx  ){
-            var b_result = false;
-            var n_request_type = -1;
-            do{
-                //
-                if( !lpu237.set_rx_transaction(s_rx) ){
-                    addMessage("fail : cb_received_set_parameter_from_server : set_rx_transaction");
-                    continue;
-                }
-
-                n_request_type = lpu237.get_current_request_type();
-                if( n_request_type >= 0 ){
-                    addMessage("current request is "+ lpu237.get_request_type_string_with_number(n_request_type) );
-                }
-
-                if( !lpu237.set_from_rx() ){
-                    addMessage("fail : cb_received_sys_info_from_server : set_from_rx");
-                    continue;
-                }
-                increase_progress_set_parameters();
-
-                var s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    addMessage("no more tx data");
-                    continue;
-                }
-                //addMessage( s_request );
-
-                var server = elpusk.framework.coffee.get_instance();
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_set_parameter_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : cb_received_set_parameter_from_server : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-                b_result = true;                
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }        
         //////////////////////////////////////////////////////////////////////////////////////////////
         // basic functions
         function _fun_init_coffee_framework() {
@@ -491,123 +340,6 @@
             };
             
         }
-
-        function fun_get_pre_parameter(){
-            var server = elpusk.framework.coffee.get_instance();
-            var b_result = false;
-            var s_request = null;
-            var n_req = 0;
-
-            do{
-                lpu237.clear_transaction();
-
-                n_req = lpu237.generate_get_system_information();
-                if( n_req <= 0 ){
-                    addMessage("lpu237.generate_get_system_information() : " + "error");
-                    continue;
-                }
-
-                set_progress_get_parameters( 0,n_req );
-                s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    addMessage("no more tx data");
-                    continue;
-                }
-                //addMessage( "tx : " + s_request );
-
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_sys_info_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }
-
-        function fun_get_parameters(){
-            var server = elpusk.framework.coffee.get_instance();
-            var b_result = false;
-            var s_request = null;
-            var n_req = 0;
-
-            do{
-                lpu237.clear_transaction();
-
-                n_req = lpu237.generate_get_parameters();
-                if( n_req <= 0 ){
-                    addMessage("lpu237.generate_get_parameters() : " + "error");
-                    continue;
-                }
-
-                set_progress_get_parameters( 0,n_req );
-                s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    addMessage("no more tx data");
-                    continue;
-                }
-
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_get_parameter_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-                b_result = true;
-            }while(false);
-            return b_result;
-        }
-
-        function fun_set_pre_parameter(){
-            var server = elpusk.framework.coffee.get_instance();
-            var b_result = false;
-            var s_request = null;
-            var n_req = 0;
-
-            do{
-                lpu237.clear_transaction();
-
-                n_req = lpu237.generate_set_parameters();
-                if( n_req <= 0 ){
-                    addMessage("lpu237.generate_set_parameters() : " + "error");
-                    continue;
-                }
-
-                set_progress_set_parameters( 0,n_req );
-                s_request = lpu237.get_tx_transaction();
-                if( s_request === null ){
-                    addMessage("no more tx data");
-                    continue;
-                }
-                //addMessage( "tx : " + s_request );
-
-                b_result = server.device_transmit_with_callback(
-                    lpu237.get_device_index(),0,0, s_request,
-                    cb_received_set_parameter_from_server,
-                    cb_error_from_server
-                    );
-                if( !b_result ){
-                    addMessage("fail : device_transmit_with_callback transmit ");
-                    continue;
-                }
-
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }        
 
         function fun_enable_read( b_enable ){
             do{
@@ -727,31 +459,13 @@
         }
 
         function on_button_promise_device_close() {
-            var server = elpusk.framework.coffee.get_instance();
-            server.device_close(lpu237.get_device_index()).then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("erro reponse : " + s_rx);
-                        continue;
-                    }
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-                    else if( s_rx != "success" ){
-                        addMessage("close failure");
-                        continue;
-                    }
-
-                    lpu237.closed();
-                    addMessage("close success");
-
-                }while(false);
-
+            ctl_lpu237.close_with_promise().then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : close_with_promise");
             }).catch(function (event_error) {
                 // error here
-                addMessage("fail : device close : "+ server.get_error_message(event_error));
-            });
+                addMessage("fail : close_with_promise : "+ event_error.message);
+            });            
         }
 
         ///////////////////////////////////////////////////////////////////
@@ -760,6 +474,12 @@
         function on_button_get_parameters(){
             ctl_lpu237.load_parameter_from_device_with_promise().then(function (s_message) {
                 //s_message always "success".
+                addMessage("success : load_parameter_from_device_with_promise");
+
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+
+                addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
+                addMessage(ctl_lpu237.get_device().get_tag_by_ascii_string(ctl_lpu237.get_device().get_private_prefix(0)));
 
             }).catch(function (event_error) {
                 // error here
@@ -768,11 +488,79 @@
         }        
 
         function on_button_set_parameters(){
-            fun_set_pre_parameter();
+            ctl_lpu237.save_parameter_to_device_with_promise().then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : save_parameter_to_device_with_promise");
+
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : save_parameter_to_device_with_promise : "+ event_error.message);
+            });
         }
         
         function on_button_enable_read(){
-            fun_opos( true );
+            ctl_lpu237.read_card_from_device_with_promise(true,false).then(function (s_message) {
+                //addMessage(s_message);
+                addMessage("length : "+String(s_message.length)+ " chars");
+                addMessage("length : "+String(s_message.length/2)+ " bytes");
+                //
+                var s_src = s_message;
+                var s_char = "";
+
+                var n_len = [0,0,0];
+                var n_error_code = [0,0,0];
+                var n_len_error = 0;
+
+                for( var i=0; i<3; i++ ){
+                    s_char = s_src.slice(0,2);
+                    s_src = s_src.substring(2);
+
+                    n_len_error = parseInt(s_char,16);
+                    if( n_len_error >127){
+                        n_len[i] = 0;
+                        n_error_code[i] = n_len_error - 256;
+                    }
+                    else{
+                        n_len[i] = n_len_error;
+                        n_error_code[i] = 0;
+                    }
+                }//end for
+
+                var n_track = [[],[],[]];
+                var s_track = ["","",""];
+                var s_ascii = ["","",""];
+                var s_op = "";
+                for( var i=0; i<3; i++ ){
+                    if( n_len[i] > 0 ){
+                        s_track[i] = s_src.slice(0,n_len[i]*2);
+                        s_src = s_src.substring(n_len[i]*2);
+                        //
+                        s_op = s_track[i];
+                        console.log(s_op.length);
+                        for( var j = 0; j<s_op.length/2; j++ ){
+                            if( i===0){
+                                n_track[i][j] = parseInt(s_op.slice(0,2),16) + 0x20;
+                            }
+                            else{
+                                n_track[i][j] = parseInt(s_op.slice(0,2),16) + 0x30;
+                            }
+                            s_op = s_op.substring(2);
+                        }//end for j
+                    }
+                }//end for
+
+                for( var i=0; i<3; i++ ){
+                    addMessage("iso1 length = " + String(n_len[i]));
+                    addMessage(s_track[i]);
+                    console.log(n_track[i]);
+                }
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : read_card_from_device_with_promise : "+ event_error.message);
+            });
+
         }
 
         function on_button_disable_read(){
