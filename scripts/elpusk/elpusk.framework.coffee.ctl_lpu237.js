@@ -339,9 +339,16 @@
     };
 
     function _cb_error_ready_card( event_error ){
-        if(_callback_info ){
-            _callback_info.reject(event_error);
-            _callback_info = null;
+        var cb_temp = _callback_info;
+        _callback_info = null;
+
+        if(cb_temp ){
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(event_error);
+            }
+            else{
+                cb_temp.cb_read_error(event_error);
+            }
         }
     };
 
@@ -364,6 +371,19 @@
                 continue;
             }
 
+            if( !_callback_info.b_read ){
+                //stop read
+                _callback_info.device.clear_transaction();
+                if(_callback_info.resolve!==null){
+                    _callback_info.resolve("success");
+                }
+                else{
+                    _callback_info.cb_read_done("success");
+                }
+                _callback_info = null;
+                b_result = true;
+            }
+
             b_result = _callback_info.server.device_receive_with_callback(
                 _callback_info.device.get_device_index(),0,
                 _cb_complete_read_card,
@@ -378,17 +398,31 @@
         }while(false);
 
         if( !b_result ){
-            _callback_info.device.clear_transaction();
-            _callback_info.reject(new Error("error"));
+            var cb_temp = _callback_info;
             _callback_info = null;
+
+            cb_temp.device.clear_transaction();
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(new Error("error"));
+            }
+            else{
+                cb_temp.cb_read_error(new Error("error"));
+            }
         }
     };
 
 
     function _cb_error_read_card( event_error ){
-        if(_callback_info ){
-            _callback_info.reject(event_error);
-            _callback_info = null;
+        var cb_temp = _callback_info;
+        _callback_info = null;
+
+        if(cb_temp ){
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(event_error);
+            }
+            else{
+                cb_temp.cb_read_error(event_error);
+            }
         }
     };
 
@@ -399,31 +433,35 @@
         var b_result = false;
         do{
             //s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
-            _callback_info.resolve(s_rx);
-
-            if( !_callback_info.b_loop ){
-                _callback_info.device.clear_transaction();
-                _callback_info = null;
-                b_result = true;
-                continue;
-            }
-            b_result = _callback_info.server.device_receive_with_callback(
-                _callback_info.device.get_device_index(),0,
-                _cb_complete_read_card,
-                _cb_error_read_card
-                );
-            if( !b_result ){
+            if( !_callback_info.device.set_msr_data_from_rx(s_rx)){
                 continue;
             }
 
+            var cb_temp = _callback_info;
+            _callback_info = null;
+
+            cb_temp.device.clear_transaction();
+            if( cb_temp.resolve !== null ){
+                cb_temp.resolve("success");
+            }
+            else{
+                cb_temp.cb_read_done("success");
+            }
             b_result = true;
 
         }while(false);
 
         if( !b_result ){
-            _callback_info.device.clear_transaction();
-            _callback_info.reject(new Error("error"));
+            var cb_temp = _callback_info;
             _callback_info = null;
+
+            cb_temp.device.clear_transaction();
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(new Error("error"));
+            }
+            else{
+                cb_temp.cb_read_error(new Error("error"));
+            }
         }
     };
 
@@ -660,8 +698,8 @@
      * @public
      * @function read_card_from_device_with_promise
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read,b_loop){
-        if( _callback_info || typeof b_read !== 'boolean' || typeof b_loop !== 'boolean' ){
+    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read){
+        if( _callback_info || typeof b_read !== 'boolean' ){
             return new Promise(function (resolve, reject) {
                 reject(new Error("error"));//another is running.
                 }
@@ -689,8 +727,7 @@
                     "device" : device,
                     "resolve" : resolve,
                     "reject" : reject,
-                    "b_read" : b_read,
-                    "b_loop" : b_loop
+                    "b_read" : b_read
                 };
                 b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
             }while(false);
@@ -699,6 +736,48 @@
                 _callback_info = null;
             }
         });//the end promise
+    };
+
+    /**
+     * @public
+     * @function read_card_from_device_with_callback
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
+        var b_result = false;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            if( typeof cb_read_done !=='function'){
+                continue;
+            }
+            if( typeof cb_read_error !=='function'){
+                continue;
+            }
+
+            if( !server ){
+                continue;
+            }
+            if(!device){
+                continue;
+            }
+            if( device.get_device_index() <= 0 ){
+                continue;
+            }
+
+            _callback_info = {
+                "server" : server,
+                "device" : device,
+                "resolve" : null,
+                "reject" : null,
+                "b_read" : b_read,
+                "cb_read_done" : cb_read_done,
+                "cb_read_error" : cb_read_error
+            };
+            //
+            b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+        }while(false);
+        return b_result;
     };
 
     ////////////////////////////////////////////////////////////////////////////

@@ -3531,7 +3531,8 @@
             this._s_name = null;    
             
             // reading operation
-            this._array_s_card_data = ["","",""];//iso123 card data
+            this._array_s_card_data = ["","",""];//iso123 card data ascii code string.
+            this._array_n_card_error_code = [0,0,0];//iso123 rtrack error code. 0 is none zeeor
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
@@ -3560,6 +3561,9 @@
                 if( n_track >= _const_the_number_of_track ){
                     continue;
                 }
+                if(this._array_n_card_error_code[n_track] !== 0 ){
+                    continue;//track has error.
+                }
                 //
                 s_data = "";
                 s_data = this._array_s_card_data[n_track];
@@ -3567,6 +3571,30 @@
             return s_data;
         }
 
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_msr_error_code
+         * @param {number} n_track iso track number 0~2.
+         * @returns {number|null} error code, 0 - none error.
+         * <br /> null - abused function.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_msr_error_code = function(n_track){
+            var n_data = null;
+
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                n_data = this._array_n_card_error_code[n_track];
+            }while(false);
+            return n_data;
+        }
 
         /**
          * @public
@@ -5436,7 +5464,8 @@
             do{
                 if( typeof n_track === 'undefined'){
                     for( var i = 0; i<this._array_s_card_data.length; i++ ){
-                        this._array_s_card_data[i].length = 0;
+                        this._array_s_card_data[i] = "";
+                        this._array_n_card_error_code[i] = 0;
                     }//end for
                 }
                 if( typeof n_track !== 'number'){
@@ -5448,20 +5477,77 @@
                 if( n_track >= _const_the_number_of_track ){
                     continue;
                 }
-                this._array_s_card_data[n_track].length = 0;
+                this._array_s_card_data[n_track] = "";
+                this._array_n_card_error_code[n_track] = 0;
             }while(false);
         }
 
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.set_msr_data_from_rx
+         * @param {string} s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
          * @return {boolean} processing result
          * @description analysis and save from response.
         */
         _elpusk.device.usb.hid.lpu237.prototype.set_msr_data_from_rx = function(s_rx){
             var b_result  =false;
             do{
-                //todo.
+                if( typeof s_rx !== 'string'){
+                    continue;
+                }
+                if( s_rx.length%2 !== 0 ){
+                    continue;
+                }
+                if( s_rx.length < 2*3 ){
+                    continue;
+                }
+
+                var s_src = s_rx;
+                var s_char = "";
+
+                var n_len = [0,0,0];
+                var n_len_error = 0;
+
+                for( var i=0; i<_const_the_number_of_track; i++ ){
+                    this._array_s_card_data[i] = "";//reset card data buffer.
+                    this._array_n_card_error_code[i] = 0;//reset card data error code.
+
+                    s_char = s_src.slice(0,2);
+                    s_src = s_src.substring(2);
+
+                    n_len_error = parseInt(s_char,16);
+                    if( n_len_error >127){
+                        this._array_n_card_error_code[i] = n_len_error - 256;//save error code.
+                    }
+                    else{
+                        n_len[i] = n_len_error;//save data length
+                    }
+                }//end for
+
+                var n_data = 0;
+                var s_op = "";
+                var n_op = 0;
+                for( var i=0; i<_const_the_number_of_track; i++ ){
+                    if( n_len[i] <= 0){
+                        continue;
+                    }
+                    s_op = s_src.slice(0,n_len[i]*2);
+                    s_src = s_src.substring(n_len[i]*2);
+                    //
+                    n_op = s_op.length;
+                    for( var j = 0; j<n_op/2; j++ ){
+                        if( i===0){
+                            n_data = parseInt(s_op.slice(0,2),16) + 0x20;
+                        }
+                        else{
+                            n_data = parseInt(s_op.slice(0,2),16) + 0x30;
+                        }
+                        this._array_s_card_data[i] += String.fromCharCode(n_data);
+                        s_op = s_op.substring(2);
+                    }//end for j
+                }//end for i
+                
+                b_result = true;
             }while(false);
             return b_result;
         }

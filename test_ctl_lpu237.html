@@ -94,9 +94,13 @@
     <br />
     <progress id="progress_set_parameters" value="0" max="100"></progress>
     <br />
-    <input type="button" id="button_enable_read" onclick="on_button_enable_read();" value="enable read." />
+    <input type="button" id="button_enable_read_with_promise" onclick="on_button_enable_read_with_promise();" value="enable read with promise." />
     <br />
-    <input type="button" id="button_disable_read" onclick="on_button_disable_read();" value="disable read." />
+    <input type="button" id="button_disable_read_with_promise" onclick="on_button_disable_read_with_promise();" value="disable read with promise." />
+    <br />
+    <input type="button" id="button_enable_read_with_callback" onclick="on_button_enable_read_with_callback();" value="enable read with callback." />
+    <br />
+    <input type="button" id="button_disable_read_with_callback" onclick="on_button_disable_read_with_callback();" value="disable read with callback." />
     <br />
 
     <p id="p_pre_main">
@@ -341,108 +345,6 @@
             
         }
 
-        function fun_enable_read( b_enable ){
-            do{
-                var b_result = false;
-                var server = elpusk.framework.coffee.get_instance();
-
-                if( b_enable === true ){
-                    
-                    server.device_receive(lpu237.get_device_index(),0).then(function (s_rx) {
-                        do{
-                            if (!Array.isArray(s_rx)) {
-                                addMessage("read received : " + lpu237.get_data_field(s_rx));
-                                continue;
-                            }
-
-                            if (s_rx === null) {
-                                addMessage("invalied response");
-                                continue;
-                            }
-
-                            addMessage("receive failure : "+s_rx);
-
-                        }while(false);
-                    }).catch(function (event_error) {
-                        // error here
-                        addMessage("fail : device receive : "+ server.get_error_message(event_error));
-                    });
-
-                    b_result = true;
-                    continue;
-                }
-
-                //cancel read.
-                server.device_cancel(lpu237.get_device_index(),0,0).then(function (s_rx) {
-                        do{
-                            if (!Array.isArray(s_rx)) {
-                                addMessage("cancel received : " + s_rx);
-                                continue;
-                            }
-
-                            if (s_rx === null) {
-                                addMessage("invalied response");
-                                continue;
-                            }
-
-                            addMessage("receive failure : "+s_rx);
-
-                        }while(false);
-                    }).catch(function (event_error) {
-                        // error here
-                        addMessage("fail : device receive : "+ server.get_error_message(event_error));
-                    });
-
-            }while(false);
-        }
-
-        function fun_opos( b_enter ){
-            var server = elpusk.framework.coffee.get_instance();
-            var b_result = false;
-            var s_request = null;
-            var n_req = 0;
-
-            do{
-                lpu237.clear_transaction();
-
-                n_req = lpu237.generate_enable_read(b_enter);
-                if( n_req <= 0 ){
-                    addMessage("lpu237.generate_enable_read() : " + "error");
-                    continue;
-                }
-
-                s_request = lpu237.get_tx_transaction();
-
-                server.device_transmit(lpu237.get_device_index(),0,0,s_request)
-                .then(function (s_rx) {
-                    do{
-                        // s_rx is data field of coffee framework protocol.
-                        if( lpu237.is_success_enter_opos_mode(s_rx) ){
-                            addMessage("ready read :");
-                            fun_enable_read(true);
-                        }
-                        else{
-                            addMessage("error response");
-                        }
-
-                    }while(false);
-                    lpu237.clear_transaction();
-
-                }).catch(function (event_error) {
-                    // error here
-                    addMessage("fail : device transmit : "+ server.get_error_message(event_error));
-                    lpu237.clear_transaction();
-                });
-
-                b_result = true;
-            }while(false);
-
-            if( !b_result ){
-                lpu237.clear_transaction();
-            }
-        }
-
-
         //////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -499,72 +401,76 @@
             });
         }
         
-        function on_button_enable_read(){
-            ctl_lpu237.read_card_from_device_with_promise(true,false).then(function (s_message) {
-                //addMessage(s_message);
-                addMessage("length : "+String(s_message.length)+ " chars");
-                addMessage("length : "+String(s_message.length/2)+ " bytes");
-                //
-                var s_src = s_message;
-                var s_char = "";
+        function on_button_enable_read_with_promise(){
+            ctl_lpu237.read_card_from_device_with_promise(true).then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : read_card_from_device_with_promise");
 
-                var n_len = [0,0,0];
-                var n_error_code = [0,0,0];
-                var n_len_error = 0;
-
-                for( var i=0; i<3; i++ ){
-                    s_char = s_src.slice(0,2);
-                    s_src = s_src.substring(2);
-
-                    n_len_error = parseInt(s_char,16);
-                    if( n_len_error >127){
-                        n_len[i] = 0;
-                        n_error_code[i] = n_len_error - 256;
+                for( var i = 0; i<3; i++ ){
+                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
+                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
+                        continue;
                     }
-                    else{
-                        n_len[i] = n_len_error;
-                        n_error_code[i] = 0;
-                    }
-                }//end for
-
-                var n_track = [[],[],[]];
-                var s_track = ["","",""];
-                var s_ascii = ["","",""];
-                var s_op = "";
-                for( var i=0; i<3; i++ ){
-                    if( n_len[i] > 0 ){
-                        s_track[i] = s_src.slice(0,n_len[i]*2);
-                        s_src = s_src.substring(n_len[i]*2);
-                        //
-                        s_op = s_track[i];
-                        console.log(s_op.length);
-                        for( var j = 0; j<s_op.length/2; j++ ){
-                            if( i===0){
-                                n_track[i][j] = parseInt(s_op.slice(0,2),16) + 0x20;
-                            }
-                            else{
-                                n_track[i][j] = parseInt(s_op.slice(0,2),16) + 0x30;
-                            }
-                            s_op = s_op.substring(2);
-                        }//end for j
-                    }
-                }//end for
-
-                for( var i=0; i<3; i++ ){
-                    addMessage("iso1 length = " + String(n_len[i]));
-                    addMessage(s_track[i]);
-                    console.log(n_track[i]);
+                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
                 }
 
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : read_card_from_device_with_promise : "+ event_error.message);
             });
-
         }
 
-        function on_button_disable_read(){
-            fun_opos( false );
+        function on_button_disable_read_with_promise(){
+            ctl_lpu237.read_card_from_device_with_promise(false).then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : on_button_disable_read_with_promise");
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : on_button_disable_read_with_promise : "+ event_error.message);
+            });
+        }
+
+        function cb_read_done( s_msg ){
+            //s_msg always "success"
+            addMessage("success : read_card_from_device_with_callback");
+            for( var i = 0; i<3; i++ ){
+                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
+                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
+                        continue;
+                    }
+                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
+            }
+            //
+            on_button_enable_read_with_callback();
+        }
+        function cb_read_error(event_error){
+            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
+        }
+
+        function on_button_enable_read_with_callback(){
+            if( ctl_lpu237.read_card_from_device_with_callback(true,cb_read_done,cb_read_error) ){
+                addMessage("ready : waits reading.");
+            }
+            else{
+                addMessage("not ready : failure.");
+            }
+        }
+
+        function cb_read_stop_done( s_msg ){
+            //s_msg always "success"
+            addMessage("success : read_card_from_device_with_callback : stop");
+        }
+        function cb_read_stop_error(event_error){
+            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
+        }
+
+        function on_button_disable_read_with_callback(){
+            if( ctl_lpu237.read_card_from_device_with_callback(false,cb_read_stop_done,cb_read_stop_error) ){
+                addMessage("ready : waits reading.");
+            }
+            else{
+                addMessage("not ready : failure.");
+            }
         }
 
     </script>
