@@ -36,6 +36,10 @@
  * 
  * <br />  2020.5.14 - release 1.3.
  * <br />  : add - get_session_number() method.( instance function, class function get_session_number() is already existed.)
+ * 
+ * <br />  2020.5.20 - release 1.4.
+ * <br />  : add - device_cancel_with_callback() method.
+ * 
  * @namespace
  */
 
@@ -1589,7 +1593,99 @@
                 
                             } while (false);
                         });
+                    },
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_cancel_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * <br /> function cb_received( string(maybe "success") ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * <br /> function cb_error( Error object ) - return none
+                     * 
+                     * @returns {boolean} true - success of cancel process.
+                     * <br /> false - failure of cancel process.
+                     * 
+                     * @description cancel the current pending operation of device to server.
+                     * <br /> the current process will be cancel.
+                    */                
+                    device_cancel_with_callback : function (n_device_index, n_in_id, n_out_id,cb_received, cb_error) {
+                        var b_result = false;
+                        do {
+                            if(typeof cb_received !== 'function' ){
+                                continue;
+                            }
+                            if(typeof cb_error !== 'function' ){
+                                continue;
+                            }
+                            if (!_b_connet) {
+                                continue;
+                            }
+            
+                            var action_code = _type_action_code.DEVICE_CANCEL;
+            
+                            if (typeof n_device_index !== 'number') {
+                                continue;
+                            }
+                            if (n_device_index === const_n_undefined_device_index) {
+                                continue;
+                            }
+                            if (typeof n_in_id !== 'number') {
+                                continue;
+                            }
+                            if (n_in_id < 0 || n_in_id > 0xff) {
+                                continue;
+                            }
+                            if (typeof n_out_id !== 'number') {
+                                continue;
+                            }
+                            if (n_out_id < 0 || n_out_id > 0xff) {
+                                continue;
+                            }
+            
+                            _websocket.onmessage = function (evt) {
+                                //recover default handler.
+                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+
+                                var json_obj = JSON.parse(evt.data);
+                                if (json_obj.action_code == action_code) {
+                                    cb_received(json_obj.data_field);
+                                }
+                                else {
+                                    cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                            }
+                            _websocket.onerror = function(evt){
+                                _websocket.onerror = function(evt){ _on_def_error(evt);}
+                                cb_error(evt);
+                            }
+            
+                            //send request
+                            var json_packet = _generate_request_packet(
+                                _type_packet_owner.DEVICE
+                                , n_device_index
+                                , action_code
+                                , n_in_id
+                                , n_out_id
+                                , _type_data_field_type.HEX_STRING
+                            );
+            
+                            var s_json_packet = JSON.stringify(json_packet);
+                            _websocket.send(s_json_packet);
+            
+                            b_result = true;
+                        } while (false);
+
+                        return b_result;
                     }
+
                     ////////////////////////////////////////////////////////////////////////
                     //public variables
 
@@ -1623,7 +1719,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.3.0";
+        return "1.4.0";
     }
 
     /**

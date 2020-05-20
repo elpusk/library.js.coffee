@@ -188,6 +188,7 @@
 
     //static variables
     var _callback_info = null;
+    var _callback_cancel = null;
 
     function _cb_error_get_parameter( event_error ){
         if(_callback_info ){
@@ -339,6 +340,7 @@
     };
 
     function _cb_error_ready_card( event_error ){
+        console.log("++_cb_error_ready_card");
         var cb_temp = _callback_info;
         _callback_info = null;
 
@@ -353,6 +355,7 @@
     };
 
     function _cb_complete_ready_card( s_rx  ){
+        console.log("++_cb_complete_ready_card");
         if( _callback_info === null ){
             return;
         }
@@ -413,6 +416,7 @@
 
 
     function _cb_error_read_card( event_error ){
+        console.log("++_cb_error_read_card");
         var cb_temp = _callback_info;
         _callback_info = null;
 
@@ -427,6 +431,7 @@
     };
 
     function _cb_complete_read_card( s_rx  ){
+        console.log("++_cb_complete_read_card");
         if( _callback_info === null ){
             return;
         }
@@ -464,6 +469,196 @@
             }
         }
     };
+
+    function _cb_error_cancel_card( event_error ){
+        console.log("++_cb_error_cancel_card");
+        var cb_temp = _callback_cancel;
+        _callback_cancel = null;
+
+        if(cb_temp ){
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(event_error);
+            }
+            else{
+                cb_temp.cb_cancel_error(event_error);
+            }
+        }
+    };
+
+    function _cb_complete_cancel_card( s_rx  ){
+        console.log("++_cb_complete_cancel_card");
+        if( _callback_cancel === null ){
+            return;
+        }
+
+        var b_result = false;
+        do{
+            //
+            if( s_rx[0] !== "success" ){
+                continue;
+            }
+            var server = _callback_cancel.server;
+            var device = _callback_cancel.device;
+            var resolve = _callback_cancel.resolve;
+            var reject = _callback_cancel.reject;
+            var b_read = false;
+
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            _callback_info = {
+                "command" : "read",
+                "server" : server,
+                "device" : device,
+                "resolve" : resolve,
+                "reject" : reject,
+                "b_read" : b_read
+            };
+
+            b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            if( b_result ){
+                _callback_cancel = null;
+            }
+            else{
+                _callback_info = null;
+            }
+
+        }while(false);
+
+        if( !b_result ){
+            var cb_temp = _callback_cancel;
+            _callback_cancel = null;
+
+            if( cb_temp.reject !== null ){
+                cb_temp.reject(new Error("error"));
+            }
+            else{
+                cb_temp.cb_cancel_error(new Error("error"));
+            }
+        }
+    };
+
+    function _check_server_and_device(server,device) {
+        var b_check_ok = false;
+        do{
+            if( !server ){
+                continue;
+            }
+            if(!device){
+                continue;
+            }
+            if( device.get_device_index() <= 0 ){
+                continue;
+            }
+            b_check_ok = true;
+        }while(false);
+        return b_check_ok;
+    };
+
+    function _ready_card_from_device_with_promise(server,device){
+
+        var b_error_return = true;
+        do{
+            if( _callback_info ){
+                continue;
+            }
+
+            b_error_return = false;
+        }while(false);
+
+        if( b_error_return ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+
+        var b_read = true;
+
+        return new Promise(function (resolve, reject) {
+            var b_result = false;
+
+            do{
+                if( !_check_server_and_device(server,device)){
+                    continue;
+                }
+
+                _callback_info = {
+                    "command" : "read",
+                    "server" : server,
+                    "device" : device,
+                    "resolve" : resolve,
+                    "reject" : reject,
+                    "b_read" : b_read
+                };
+                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            }while(false);
+            if( !b_result ){
+                reject(new Error("error"));
+                _callback_info = null;
+            }
+        });//the end promise
+    };    
+
+    function _cancel_card_from_device_with_promise(server,device){
+
+        if(_callback_cancel){
+            //now cancelling.......
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+
+        if( _callback_info ){
+            // need io cancel
+            return new Promise(function (resolve, reject) {
+                if( !_check_server_and_device(server,device)){
+                    reject(new Error("error"));
+                }
+                else{
+                    _callback_cancel = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject
+                    };
+
+                    if( !server.device_cancel_with_callback(device.get_device_index(),0,0,_cb_complete_cancel_card, _cb_error_cancel_card) ){
+                        _callback_cancel = null;
+                        reject(new Error("error"));
+                    }
+                }
+            });//the end promise
+        }        
+
+        var b_read = false;
+
+        return new Promise(function (resolve, reject) {
+            var b_result = false;
+
+            do{
+                if( !_check_server_and_device(server,device)){
+                    continue;
+                }
+
+                _callback_info = {
+                    "command" : "read",
+                    "server" : server,
+                    "device" : device,
+                    "resolve" : resolve,
+                    "reject" : reject,
+                    "b_read" : b_read
+                };
+                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            }while(false);
+            if( !b_result ){
+                reject(new Error("error"));
+                _callback_info = null;
+            }
+        });//the end promise
+    };    
 
     /**
      * @constructs elpusk.framework.coffee.ctl_lpu237
@@ -626,17 +821,12 @@
             var b_result = false;
 
             do{
-                if( !server ){
-                    continue;
-                }
-                if(!device){
-                    continue;
-                }
-                if( device.get_device_index() <= 0 ){
+                if( !_check_server_and_device(server,device)){
                     continue;
                 }
 
                 _callback_info = {
+                    "command" : "load",
                     "server" : server,
                     "device" : device,
                     "resolve" : resolve,
@@ -669,17 +859,12 @@
             var b_result = false;
 
             do{
-                if( !server ){
-                    continue;
-                }
-                if(!device){
-                    continue;
-                }
-                if( device.get_device_index() <= 0 ){
+                if( !_check_server_and_device(server,device)){
                     continue;
                 }
 
                 _callback_info = {
+                    "command" : "save",
                     "server" : server,
                     "device" : device,
                     "resolve" : resolve,
@@ -699,43 +884,21 @@
      * @function read_card_from_device_with_promise
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read){
-        if( _callback_info || typeof b_read !== 'boolean' ){
+
+        if( typeof b_read !== 'boolean' ){
             return new Promise(function (resolve, reject) {
                 reject(new Error("error"));//another is running.
                 }
             );//the end promise            
         }
-        var server = this._server;
-        var device = this._device;
-
-        return new Promise(function (resolve, reject) {
-            var b_result = false;
-
-            do{
-                if( !server ){
-                    continue;
-                }
-                if(!device){
-                    continue;
-                }
-                if( device.get_device_index() <= 0 ){
-                    continue;
-                }
-
-                _callback_info = {
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject,
-                    "b_read" : b_read
-                };
-                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
-            }while(false);
-            if( !b_result ){
-                reject(new Error("error"));
-                _callback_info = null;
+        else{
+            if( b_read ){
+                return _ready_card_from_device_with_promise(this._server,this._device);
             }
-        });//the end promise
+            else{
+                return _cancel_card_from_device_with_promise(this._server,this._device);
+            }
+        }
     };
 
     /**
@@ -755,17 +918,12 @@
                 continue;
             }
 
-            if( !server ){
-                continue;
-            }
-            if(!device){
-                continue;
-            }
-            if( device.get_device_index() <= 0 ){
+            if( !_check_server_and_device(server,device)){
                 continue;
             }
 
             _callback_info = {
+                "command" : "read",
                 "server" : server,
                 "device" : device,
                 "resolve" : null,
