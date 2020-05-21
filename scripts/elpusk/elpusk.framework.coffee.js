@@ -40,6 +40,8 @@
  * <br />  2020.5.20 - release 1.4.
  * <br />  : add - device_cancel_with_callback() method.
  * 
+ * <br />  2020.5. - release 1.5.
+
  * @namespace
  */
 
@@ -100,6 +102,12 @@
              * @private
             */ 
             var _s_session;
+
+            /**
+             * map of queue of promise resolve & reject.
+             * @private
+             */
+            var _map_of_queue_promise_parameter = new Map();
 
             function _constructor(){
 
@@ -182,6 +190,95 @@
                  *  @description impossible device index number
                 */                
                 var const_n_undefined_device_index = 0;
+
+                /** 
+                 * @private 
+                 * @function _push_promise_parameter
+                 * @param {number} n_device_index
+                 * @param {object} resolve resolve of promise.
+                 * @param {object} reject reject of promise.
+                 * @description push promise parameter for promise method.
+                */                
+                function _push_promise_parameter(n_device_index,resolve,reject) {
+                    var paramemter = {
+                        "resolve"   : resolve,
+                        "reject"    : reject
+                    };
+
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            var queue = [paramemter];
+                            _map_of_queue_promise_parameter.set(queue);
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        q.push(paramemter);
+
+                    }while(false);
+                }
+
+                /** 
+                 * @private 
+                 * @function _front_promise_parameter
+                 * @param {number} n_device_index
+                 * @returns {object|null} success - resolve & reject of promise.
+                 * <br /> empty - null
+                 * @description add promise parameter for promise method to queue.
+                */                
+                function _front_promise_parameter(n_device_index) {
+                    var parameter = null;
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        if( q.length <= 0 ){
+                            continue;
+                        }
+                        //
+                        parameter = q.shift();
+                        if( q.length <= 0 ){
+                            _map_of_queue_promise_parameter.delete(n_device_index);
+                        }
+                    }while(false);
+                    return parameter;
+                }
+
+                /** 
+                 * @private 
+                 * @function _is_empty_promise_parameter
+                 * @param {number} n_device_index
+                 * @returns {boolean} true - empty promise parameter queue.
+                 * <br /> false - not  empty promise parameter queue.
+                 * @description check the promise parameter queue. if it is empty or not.
+                */                
+                function _is_empty_promise_parameter(n_device_index) {
+                    var b_empty = false;
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        if( q.length <= 0 ){
+                            continue;
+                        }
+                        //
+                        b_empty = true;
+                    }while(false);
+                    return b_empty;
+                }
+               
+                /** 
+                 * @private 
+                 * @function _delete_promise_parameter
+                 * @param {number} n_device_index
+                 * @description delete the promise parameter queue.
+                */                
+                function _delete_promise_parameter(n_device_index){
+                    if( _map_of_queue_promise_parameter.has(n_device_index)){
+                        _map_of_queue_promise_parameter.delete(n_device_index);
+                    }
+                }
 
                 /** 
                  * @private 
@@ -620,7 +717,7 @@
 
                             _websocket.onmessage = function (evt) {
                                 //recover default handler.
-                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                _websocket.onmessage = _on_def_message_json_format(evt);
 
                                 var json_obj = JSON.parse(evt.data);
                                 if (json_obj.action_code == _type_action_code.ECHO) {
@@ -766,7 +863,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (!_b_connet) {
@@ -894,7 +991,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -957,14 +1054,16 @@
                                     reject(_get_error_object('en_e_server_unsupport_data'));
                                     continue;
                                 }
-                
+     
+
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
                                         if(json_obj.data_field == "success"){
+                                            _delete_promise_parameter(json_obj.device_index);
                                             resolve(json_obj.device_index);
                                         }
                                         else{
@@ -976,6 +1075,7 @@
                                         reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                 }
+                                
                                 _websocket.onerror = function(evt){
                                     _websocket.onerror = function(evt){ _on_def_error(evt);}
                                     reject(evt);
@@ -1032,10 +1132,11 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
+                                        _delete_promise_parameter(n_device_index);
                                         resolve(json_obj.data_field);
                                     }
                                     else {
@@ -1117,7 +1218,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -1196,7 +1297,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -1278,7 +1379,7 @@
              
                              _websocket.onmessage = function (evt) {
                                  //recover default handler.
-                                 _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                 _websocket.onmessage = _on_def_message_json_format(evt);
 
                                  var json_obj = JSON.parse(evt.data);
                                  if (json_obj.action_code == action_code) {
@@ -1373,7 +1474,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -1473,7 +1574,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -1563,7 +1664,7 @@
                 
                                 _websocket.onmessage = function (evt) {
                                     //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
                                     var json_obj = JSON.parse(evt.data);
                                     if (json_obj.action_code == action_code) {
@@ -1652,7 +1753,7 @@
             
                             _websocket.onmessage = function (evt) {
                                 //recover default handler.
-                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
+                                _websocket.onmessage = _on_def_message_json_format(evt);
 
                                 var json_obj = JSON.parse(evt.data);
                                 if (json_obj.action_code == action_code) {
