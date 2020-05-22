@@ -282,6 +282,15 @@
 
                 /** 
                  * @private 
+                 * @function _clear_promise_parameter
+                 * @description remove all item of map of  the promise parameter queue.
+                */                
+                function _clear_promise_parameter(){
+                    _map_of_queue_promise_parameter.clear();
+                }
+
+                /** 
+                 * @private 
                  * @function _get_error_message
                  * @param {string} s_error_name
                  * @returns {string}
