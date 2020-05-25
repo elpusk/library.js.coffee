@@ -195,20 +195,15 @@
                  * @private 
                  * @function _push_promise_parameter
                  * @param {number} n_device_index
-                 * @param {object} resolve resolve of promise.
-                 * @param {object} reject reject of promise.
+                 * @param {object} paramemter of promise.
                  * @description push promise parameter for promise method.
                 */                
-                function _push_promise_parameter(n_device_index,resolve,reject) {
-                    var paramemter = {
-                        "resolve"   : resolve,
-                        "reject"    : reject
-                    };
-
+                function _push_promise_parameter(n_device_index,paramemter) {
                     do{
                         if( !_map_of_queue_promise_parameter.has(n_device_index) ){
-                            var queue = [paramemter];
-                            _map_of_queue_promise_parameter.set(queue);
+                            var queue = [];
+                            queue.push(paramemter);
+                            _map_of_queue_promise_parameter.set(n_device_index,queue);
                             continue;
                         }
                         var q = _map_of_queue_promise_parameter.get(n_device_index);
@@ -253,7 +248,7 @@
                  * @description check the promise parameter queue. if it is empty or not.
                 */                
                 function _is_empty_promise_parameter(n_device_index) {
-                    var b_empty = false;
+                    var b_empty = true;
                     do{
                         if( !_map_of_queue_promise_parameter.has(n_device_index) ){
                             continue;
@@ -263,7 +258,7 @@
                             continue;
                         }
                         //
-                        b_empty = true;
+                        b_empty = false;
                     }while(false);
                     return b_empty;
                 }
@@ -376,7 +371,6 @@
                     if (_is_chrome_or_firfox_or_opera()) {
                         s_used_domain = "localhost";
                     }
-            
             
                     var s_uri = s_used_protocol + "://" + s_used_domain + ":" + s_used_port;//"wss://127.0.0.1:443";
                     return s_uri;
@@ -720,22 +714,20 @@
                             }
             
                             _websocket.onerror = function(evt){
-                                _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                reject(evt);
+                                _on_def_error(0,evt);
                             }
 
                             _websocket.onmessage = function (evt) {
-                                //recover default handler.
-                                _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                var json_obj = JSON.parse(evt.data);
-                                if (json_obj.action_code == _type_action_code.ECHO) {
-                                    resolve(json_obj.data_field);
-                                }
-                                else {
-                                    reject(_get_error_object('en_e_server_mismatch_action'));
-                                }
+                                _on_def_message_json_format(0,evt);
                             }
+
+                            var parameter = {
+                                "n_device_index" : 0,
+                                "method" : "_promise_echo",
+                                "resolve" : resolve,
+                                "reject" : reject
+                            };
+                            _push_promise_parameter(0,parameter);
             
                             //send request
                             var s_echo_data;
@@ -783,6 +775,17 @@
                 function _on_def_close(evt){
                     //console.log('_on_def_close');
                     _b_connet = false;
+
+                    var n_device_index = 0;
+                    var parameter = null;
+
+                    if( !_is_empty_promise_parameter(n_device_index)){
+                        //manager request.
+                        parameter = _front_promise_parameter(n_device_index);
+                        if( parameter.method === "disconnect" ){
+                            parameter.resolve(_s_session );
+                        }
+                    }//the end of manager request.
                     _s_session = "";
                 }
 
@@ -792,22 +795,151 @@
                  * @param {Event} evt
                  * @description default callback function of websocket reecive event.
                 */                
-                function _on_def_message_json_format(evt){
+                function _on_def_message_json_format(n_device_index,evt){
                     //console.log('_on_def_message_json_format');
                     do{
-                        if( typeof _system_handler === 'undefined'){
-                            continue;
-                        }
 
                         var json_obj = JSON.parse(evt.data);
 
-                        if( json_obj.request_type !== _type_request_type.SYSTEM_EVENT ){
+                        if( json_obj.request_type === _type_request_type.SYSTEM_EVENT ){
+                            if( typeof _system_handler === 'function'){
+                                _system_handler( json_obj.action_code, json_obj.data_field );
+                            }
                             continue;
                         }
-    
-                        _system_handler( json_obj.action_code, json_obj.data_field );
 
-                    }while(false);
+                        var parameter = null;
+
+                        if(_is_empty_promise_parameter(n_device_index) ){
+                            continue;
+                        }
+                        parameter = _front_promise_parameter(n_device_index);
+
+                        if( n_device_index === 0){
+                            //manager request.
+                            switch(parameter.method){
+                                case "connect":
+                                    if (!_b_connet) {
+                                        _s_session = json_obj.session_number.toString();
+                                        _b_connet = true;//reponse of open request
+                                    }
+                                    parameter.resolve(_s_session );
+                                    break;
+                                case "_promise_echo":
+                                    if (json_obj.action_code == _type_action_code.ECHO) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                case "get_device_list":
+                                    if (json_obj.action_code == _type_action_code.DEVICE_LIST) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                case "device_open":
+                                    if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
+                                        if(json_obj.data_field == "success"){
+                                            _delete_promise_parameter(json_obj.device_index);
+                                            parameter.resolve(json_obj.device_index);
+                                        }
+                                        else{
+                                            parameter.resolve(const_n_undefined_device_index);
+                                        }
+                                        
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }//end switch
+                            continue;
+                        }//the end of manager request.
+
+                        switch(parameter.method){
+                            case "device_close":
+                                if (json_obj.action_code == _type_action_code.DEVICE_CLOSE) {
+                                    _delete_promise_parameter(n_device_index);
+                                    parameter.resolve(json_obj.data_field);
+                                }
+                                else {
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                                break;
+                            case "device_send":
+                                if (json_obj.action_code == _type_action_code.DEVICE_SEND) {
+                                    parameter.resolve(json_obj.data_field);
+                                }
+                                else {
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                                break;
+                            case "device_receive":
+                                if (json_obj.action_code == _type_action_code.DEVICE_RECEIVE) {
+                                    if( parameter.resolve === null ){
+                                        parameter.cb_received(json_obj.data_field);
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            case "device_transmit":
+                                if (json_obj.action_code == _type_action_code.DEVICE_TRANSMIT) {
+                                    if( parameter.resolve === null ){
+                                        parameter.cb_received(json_obj.data_field);
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            case "device_cancel":
+                                if (json_obj.action_code == _type_action_code.DEVICE_CANCEL) {
+                                    if( parameter.resolve === null ){
+                                        parameter.cb_received(json_obj.data_field);
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }//end switch
+                        
+
+                    }while(false);//the end of 
                 }
 
                 /** 
@@ -816,7 +948,50 @@
                  * @param {Event} evt
                  * @description default callback function of websocket error event.
                 */                
-                function _on_def_error(evt){
+                function _on_def_error(n_device_index,evt){
+                    do{
+                        var parameter = null;
+
+                        if( _is_empty_promise_parameter(n_device_index)){
+                            continue;
+                        }
+                        parameter = _front_promise_parameter(n_device_index);
+
+                        if( n_device_index === 0){
+                            //manager request.
+                            switch(parameter.method){
+                                case "connect":
+                                case "disconnect":
+                                case "_promise_echo":
+                                case "get_device_list":
+                                case "device_open":
+                                    parameter.reject(evt);
+                                    break;
+                                default:
+                                    break;
+                            }//end switch
+                            continue;
+                        }//the end of manager request.
+
+                        switch(parameter.method){
+                            case "device_close":
+                            case "device_send":
+                            case "device_receive":
+                            case "device_transmit":
+                            case "device_cancel":
+                                if( parameter.reject === null ){
+                                    parameter.cb_error(evt);
+                                }
+                                else{
+                                    parameter.reject(evt);
+                                }
+                                break;
+                            default:
+                                break;
+                        }//end switch
+
+                    }while(false);
+                    var parameter;
                 }
 
                 return{
@@ -866,26 +1041,27 @@
                                 resolve(_s_session);
                             }
                             else {
+                                _clear_promise_parameter();
+
                                 _websocket = new WebSocket(s_url, "elpusk.protocol.coffee.manager");
                                 _websocket.onopen = function (evt) { _on_def_open(evt); }
                                 _websocket.onclose = function (evt) { _on_def_close(evt); }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
 
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (!_b_connet) {
-                                        _s_session = json_obj.session_number.toString();
-                                        _b_connet = true;//reponse of open request
-                                    }
-                
-                                    resolve(_s_session);
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "connect",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                             }
                         });
                 
@@ -909,22 +1085,13 @@
                                 resolve(_s_session);
                             }
                             else {
-                                _websocket.onerror = function(evt){
-                                    //recover default handler
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
-                                }
-
-                                _websocket.onclose = function (evt) {
-                                    //recover default handler
-                                    _websocket.onclose = function (evt) { _on_def_close(evt); }
-
-                                    _b_connet = false;
-                                    resolve(_s_session);
-                                    _s_session = "";
-                                }
-
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "disconnect",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                                 _websocket.close();
                             }
                         });
@@ -998,24 +1165,21 @@
                                     s_used_filter = s_filter;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    //recover default handler.
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "get_device_list",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1064,31 +1228,21 @@
                                     continue;
                                 }
      
-
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        if(json_obj.data_field == "success"){
-                                            _delete_promise_parameter(json_obj.device_index);
-                                            resolve(json_obj.device_index);
-                                        }
-                                        else{
-                                            resolve(const_n_undefined_device_index);
-                                        }
-                                        
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
-                                
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "device_open",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1138,25 +1292,21 @@
                                     reject(_get_error_object('en_e_device_index'));
                                     continue;
                                 }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        _delete_promise_parameter(n_device_index);
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_close",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1225,23 +1375,21 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_send",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1304,23 +1452,22 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
-                
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_receive",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+
                                 //send request
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
@@ -1386,22 +1533,23 @@
                                  continue;
                              }
              
-                             _websocket.onmessage = function (evt) {
-                                 //recover default handler.
-                                 _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                 var json_obj = JSON.parse(evt.data);
-                                 if (json_obj.action_code == action_code) {
-                                     cb_received(json_obj.data_field);
-                                 }
-                                 else {
-                                     cb_error(_get_error_object('en_e_server_mismatch_action'));
-                                 }
-                             }
                              _websocket.onerror = function(evt){
-                                 _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                 cb_error(evt);
-                             }
+                                _on_def_error(n_device_index,evt);
+                            }
+
+                            _websocket.onmessage = function (evt) {
+                                _on_def_message_json_format(n_device_index,evt);
+                            }
+                
+                            var parameter = {
+                                "n_device_index" : n_device_index,
+                                "method" : "device_receive",
+                                "resolve" : null,
+                                "reject" : null,
+                                "cb_received" : cb_received,
+                                "cb_error" : cb_error
+                            };
+                            _push_promise_parameter(n_device_index,parameter);
              
                              //send request
                              var json_packet = _generate_request_packet(
@@ -1481,23 +1629,22 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
-                
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_transmit",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+
                                 //send request
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
@@ -1581,22 +1728,23 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        cb_received(json_obj.data_field);
-                                    }
-                                    else {
-                                        cb_error(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    cb_error(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_transmit",
+                                    "resolve" : null,
+                                    "reject" : null,
+                                    "cb_received" : cb_received,
+                                    "cb_error" : cb_error
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1671,22 +1819,21 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_cancel",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1760,23 +1907,24 @@
                                 continue;
                             }
             
-                            _websocket.onmessage = function (evt) {
-                                //recover default handler.
-                                _websocket.onmessage = _on_def_message_json_format(evt);
-
-                                var json_obj = JSON.parse(evt.data);
-                                if (json_obj.action_code == action_code) {
-                                    cb_received(json_obj.data_field);
-                                }
-                                else {
-                                    cb_error(_get_error_object('en_e_server_mismatch_action'));
-                                }
-                            }
                             _websocket.onerror = function(evt){
-                                _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                cb_error(evt);
+                                _on_def_error(n_device_index,evt);
                             }
-            
+
+                            _websocket.onmessage = function (evt) {
+                                _on_def_message_json_format(n_device_index,evt);
+                            }
+                
+                            var parameter = {
+                                "n_device_index" : n_device_index,
+                                "method" : "device_cancel",
+                                "resolve" : null,
+                                "reject" : null,
+                                "cb_received" : cb_received,
+                                "cb_error" : cb_error
+                            };
+                            _push_promise_parameter(n_device_index,parameter);
+
                             //send request
                             var json_packet = _generate_request_packet(
                                 _type_packet_owner.DEVICE
@@ -1829,7 +1977,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.4.0";
+        return "1.5.0";
     }
 
     /**
