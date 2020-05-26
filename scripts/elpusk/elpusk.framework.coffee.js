@@ -40,7 +40,8 @@
  * <br />  2020.5.20 - release 1.4.
  * <br />  : add - device_cancel_with_callback() method.
  * 
- * <br />  2020.5. - release 1.5.
+ * <br />  2020.5.26 - release 1.5.
+ * <br />  : support - supports multi websocket callback function.
 
  * @namespace
  */
@@ -850,7 +851,6 @@
                                         else{
                                             parameter.resolve(const_n_undefined_device_index);
                                         }
-                                        
                                     }
                                     else {
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
