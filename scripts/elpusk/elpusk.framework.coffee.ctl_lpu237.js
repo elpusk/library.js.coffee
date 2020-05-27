@@ -692,6 +692,14 @@
         }
     };
 
+    /**
+     * @private
+     * @function _check_server_and_device
+     * @param {object} server coffee manager server object
+     * @param {object} device lpu237 protocol object.
+     * @returns {boolean} true - server & device object is available.
+     * <br /> false - server is invalied or device object is not openned.
+     */
     function _check_server_and_device(server,device) {
         var b_check_ok = false;
         do{
