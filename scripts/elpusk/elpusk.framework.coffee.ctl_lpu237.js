@@ -61,98 +61,6 @@
      */
     var _map_of_queue_promise_parameter = new Map();
 
-    /** 
-     * @private 
-     * @function _push_promise_parameter
-     * @param {number} n_device_index
-     * @param {object} paramemter of promise.
-     * @description push promise parameter for promise method.
-    */                
-    function _push_promise_parameter(n_device_index,paramemter) {
-        do{
-            if( !_map_of_queue_promise_parameter.has(n_device_index) ){
-                var queue = [];
-                queue.push(paramemter);
-                _map_of_queue_promise_parameter.set(n_device_index,queue);
-                continue;
-            }
-            var q = _map_of_queue_promise_parameter.get(n_device_index);
-            q.push(paramemter);
-
-        }while(false);
-    }
-
-    /** 
-     * @private 
-     * @function _front_promise_parameter
-     * @param {number} n_device_index
-     * @returns {object|null} success - resolve & reject of promise.
-     * <br /> empty - null
-     * @description add promise parameter for promise method to queue.
-    */                
-    function _front_promise_parameter(n_device_index) {
-        var parameter = null;
-        do{
-            if( !_map_of_queue_promise_parameter.has(n_device_index) ){
-                continue;
-            }
-            var q = _map_of_queue_promise_parameter.get(n_device_index);
-            if( q.length <= 0 ){
-                continue;
-            }
-            //
-            parameter = q.shift();
-            if( q.length <= 0 ){
-                _map_of_queue_promise_parameter.delete(n_device_index);
-            }
-        }while(false);
-        return parameter;
-    }
-
-    /** 
-     * @private 
-     * @function _is_empty_promise_parameter
-     * @param {number} n_device_index
-     * @returns {boolean} true - empty promise parameter queue.
-     * <br /> false - not  empty promise parameter queue.
-     * @description check the promise parameter queue. if it is empty or not.
-    */                
-    function _is_empty_promise_parameter(n_device_index) {
-        var b_empty = true;
-        do{
-            if( !_map_of_queue_promise_parameter.has(n_device_index) ){
-                continue;
-            }
-            var q = _map_of_queue_promise_parameter.get(n_device_index);
-            if( q.length <= 0 ){
-                continue;
-            }
-            //
-            b_empty = false;
-        }while(false);
-        return b_empty;
-    }
-    
-    /** 
-     * @private 
-     * @function _delete_promise_parameter
-     * @param {number} n_device_index
-     * @description delete the promise parameter queue.
-    */                
-    function _delete_promise_parameter(n_device_index){
-        if( _map_of_queue_promise_parameter.has(n_device_index)){
-            _map_of_queue_promise_parameter.delete(n_device_index);
-        }
-    }
-
-    /** 
-     * @private 
-     * @function _clear_promise_parameter
-     * @description remove all item of map of  the promise parameter queue.
-    */                
-    function _clear_promise_parameter(){
-        _map_of_queue_promise_parameter.clear();
-    }
     /**
      * @private
      * @function _get_system_information
@@ -717,109 +625,114 @@
         return b_check_ok;
     };
 
+    /**
+     * @private
+     * @function _ready_card_from_device_with_promise
+     * @param {object} server the instance of coffee class
+     * @param {object} device the instance of lpu237 class
+     * @returns {object} the instance of Promise class
+     * @description change the status of lpu237 device to ready status that waits a card reading.
+     */
     function _ready_card_from_device_with_promise(server,device){
 
-        var b_error_return = true;
+        var b_error = true;
         do{
-            if( _callback_info ){
+            if( !_check_server_and_device(server,device)){
                 continue;
             }
 
-            b_error_return = false;
+            if( !elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter,device.get_device_index()) ){
+                continue;
+            }
+
+            b_error = false;
         }while(false);
 
-        if( b_error_return ){
+        if( b_error ){
             return new Promise(function (resolve, reject) {
                 reject(new Error("error"));//another is running.
                 }
             );//the end promise            
         }
+        else{
+            var b_read = true;
 
-        var b_read = true;
-
-        return new Promise(function (resolve, reject) {
-            var b_result = false;
-
-            do{
-                if( !_check_server_and_device(server,device)){
-                    continue;
-                }
-
-                _callback_info = {
-                    "command" : "read",
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject,
-                    "b_read" : b_read
-                };
-                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
-            }while(false);
-            if( !b_result ){
-                reject(new Error("error"));
-                _callback_info = null;
-            }
-        });//the end promise
-    };    
-
-    function _cancel_card_from_device_with_promise(server,device){
-
-        if(_callback_cancel){
-            //now cancelling.......
             return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
+                var b_result = false;
 
-        if( _callback_info ){
-            // need io cancel
-            return new Promise(function (resolve, reject) {
-                if( !_check_server_and_device(server,device)){
-                    reject(new Error("error"));
-                }
-                else{
-                    _callback_cancel = {
+                do{
+                    var parameter = {
                         "server" : server,
                         "device" : device,
                         "resolve" : resolve,
                         "reject" : reject
                     };
+                    elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    if( !server.device_cancel_with_callback(device.get_device_index(),0,0,_cb_complete_cancel_card, _cb_error_cancel_card) ){
-                        _callback_cancel = null;
-                        reject(new Error("error"));
-                    }
+                    b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+                }while(false);
+                if( !b_result ){
+                    reject(new Error("error"));
+                    _callback_info = null;
                 }
             });//the end promise
-        }        
-
-        var b_read = false;
-
-        return new Promise(function (resolve, reject) {
-            var b_result = false;
-
-            do{
-                if( !_check_server_and_device(server,device)){
-                    continue;
-                }
-
-                _callback_info = {
-                    "command" : "read",
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject,
-                    "b_read" : b_read
-                };
-                b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
-            }while(false);
-            if( !b_result ){
-                reject(new Error("error"));
-                _callback_info = null;
-            }
-        });//the end promise
+        }
     };    
+
+    /**
+     * @private
+     * @function _cancel_card_from_device_with_promise
+     * @param {object} server the instance of coffee class
+     * @param {object} device the instance of lpu237 class
+     * @returns {object} the instance of Promise class
+     * @description change the status of lpu237 device to ready status that waits a card reading.
+     */
+    function _cancel_card_from_device_with_promise(server,device){
+        var b_error = true;
+        do{
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            b_error = false;
+
+            if( !elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter,device.get_device_index()) ){
+                var param = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,device.get_device_index());
+                param.reject(new Error("error"));//canceled
+                continue;
+            }
+        }while(false);
+
+        if( b_error ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        else{
+            var b_read = false;
+
+            return new Promise(function (resolve, reject) {
+                var b_result = false;
+
+                do{
+                    var parameter = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject
+                    };
+                    elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
+
+                    b_result = _read_card( server, device,_cb_complete_cancel_card, _cb_error_cancel_card,b_read);
+                }while(false);
+                if( !b_result ){
+                    reject(new Error("error"));
+                    _callback_info = null;
+                }
+            });//the end promise
+        }
+    };
 
     /**
      * @constructs elpusk.framework.coffee.ctl_lpu237
@@ -990,80 +903,118 @@
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(){
-        if( _callback_info ){
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            if( !elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter,device.get_device_index()) ){
+                continue;
+            }
+
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
             return new Promise(function (resolve, reject) {
                 reject(new Error("error"));//another is running.
                 }
             );//the end promise            
         }
-        var server = this._server;
-        var device = this._device;
+        else{
+            var b_read = true;
 
-        return new Promise(function (resolve, reject) {
-            var b_result = false;
+            return new Promise(function (resolve, reject) {
+                var b_result = false;
 
-            do{
-                if( !_check_server_and_device(server,device)){
-                    continue;
+                do{
+                    var parameter = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject
+                    };
+                    elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
+
+                    b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_sys_info);
+                }while(false);
+                if( !b_result ){
+                    reject(new Error("error"));
+                    _callback_info = null;
                 }
-
-                _callback_info = {
-                    "command" : "load",
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject
-                };
-                b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_sys_info);
-            }while(false);
-            if( !b_result ){
-                reject(new Error("error"));
-                _callback_info = null;
-            }
-        });//the end promise
+            });//the end promise
+        }
     };
     
     /**
      * @public
      * @function save_parameter_to_device_with_promise
+     * @return {object} return promise object.
+     * @description execute "set parameters" with server and lpu237 object by construcutor.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(){
-        if( _callback_info ){
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            if( !elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter,device.get_device_index()) ){
+                continue;
+            }
+
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
             return new Promise(function (resolve, reject) {
                 reject(new Error("error"));//another is running.
                 }
             );//the end promise            
         }
-        var server = this._server;
-        var device = this._device;
+        else{
+            var b_read = true;
 
-        return new Promise(function (resolve, reject) {
-            var b_result = false;
+            return new Promise(function (resolve, reject) {
+                var b_result = false;
 
-            do{
-                if( !_check_server_and_device(server,device)){
-                    continue;
+                do{
+                    var parameter = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject
+                    };
+                    elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
+
+                    b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_set_parameter);
+                }while(false);
+                if( !b_result ){
+                    reject(new Error("error"));
+                    _callback_info = null;
                 }
-
-                _callback_info = {
-                    "command" : "save",
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject
-                };
-                b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_set_parameter);
-            }while(false);
-            if( !b_result ){
-                reject(new Error("error"));
-                _callback_info = null;
-            }
-        });//the end promise
+            });//the end promise
+        }        
     };
 
     /**
      * @public
      * @function read_card_from_device_with_promise
+     * @return {object} return promise object.
+     * @description execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read){
 
@@ -1086,6 +1037,13 @@
     /**
      * @public
      * @function read_card_from_device_with_callback
+     * @param {boolean} b_read enable read.
+     * @param {function} cb_read_done called when a card reading is done. or canceled ready for reading.
+     * @param {function} cb_read_error called when a error is ocurred.
+     * @returns {boolean}   true - success processing.
+     * <br /> false - error.
+     * @description execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.
+     * <br /> the result of proccess will be given by callback function.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
         var b_result = false;
@@ -1093,27 +1051,38 @@
         var device = this._device;
 
         do{
+            if( typeof b_read !== 'boolean'){
+                continue;
+            }
             if( typeof cb_read_done !=='function'){
                 continue;
             }
             if( typeof cb_read_error !=='function'){
                 continue;
             }
+            if(!elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter) ){
+                if( b_read ){
+                    continue;
+                }
+                //
+                var cur_para = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,device.get_device_index() );
+                if( cur_para.reject ){
+                    cur_para.reject(new Error("error"));//cancel
+                }
+                //todo.
 
+            }
             if( !_check_server_and_device(server,device)){
                 continue;
             }
 
-            _callback_info = {
-                "command" : "read",
+            var parameter = {
                 "server" : server,
                 "device" : device,
                 "resolve" : null,
-                "reject" : null,
-                "b_read" : b_read,
-                "cb_read_done" : cb_read_done,
-                "cb_read_error" : cb_read_error
+                "reject" : null
             };
+            elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
             //
             b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
         }while(false);

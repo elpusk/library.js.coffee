@@ -200,7 +200,118 @@
                 n_index = target_set.indexOf(item);
             }while(false);
             return n_index;
-        }         
+        }
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_push
+         * @param {object} target_map instance of Map
+         * @param {any} key the key of map(target_map).
+         * @param {any} value the push value to queue of key in map.
+         * @description push key value pair to map(target_map).
+        */                
+        _elpusk.util.map_of_queue_push = function(target_map,key,value) {
+            do{
+                if( !(target_map instanceof Map)){
+                    continue;
+                }
+                if( !target_map.has(key) ){
+                    var queue = [];
+                    queue.push(value);
+                    target_map.set(key,queue);
+                    continue;
+                }
+                var q = target_map.get(key);
+                q.push(value);
+            }while(false);
+        }
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_front
+         * @param {object} target_map Map instance
+         * @param {any} key the key of map(target_map).
+         * @returns {object|null} success - The front value of the queue corresponding to the key in the map.
+         * <br /> error - null
+         * @description return the front value of the queue corresponding to the key in the map.
+        */                
+        _elpusk.util.map_of_queue_front =  function(target_map,key) {
+            var value = null;
+            do{
+                if( !(target_map instanceof Map)){
+                    continue;
+                }
+                if( !target_map.has(key) ){
+                    continue;
+                }
+                var q = target_map.get(key);
+                if( q.length <= 0 ){
+                    continue;
+                }
+                //
+                value = q.shift();
+                if( q.length <= 0 ){
+                    target_map.delete(key);
+                }
+            }while(false);
+            return value;
+        }
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_is_empty
+         * @param {object} target_map Map instance
+         * @param {any} key the key of map(target_map).
+         * @returns {boolean} true - It is empty that the queue corresponding to the key in the map.
+         * <br /> false - It is not empty that the queue corresponding to the key in the map.
+         * @description check the queue corresponding to the key in the map. if it is empty or not.
+        */                
+        _elpusk.util.map_of_queue_is_empty = function(target_map, key) {
+            var b_empty = true;
+            do{
+                if( !(target_map instanceof Map)){
+                    continue;
+                }
+                if( !target_map.has(key) ){
+                    continue;
+                }
+                var q = target_map.get(key);
+                if( q.length <= 0 ){
+                    continue;
+                }
+                //
+                b_empty = false;
+            }while(false);
+            return b_empty;
+        }
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_delete
+         * @param {object} target_map Map instance
+         * @param {any} key the key of map(target_map).
+         * @description delete the queue corresponding to the key in the map.
+        */                
+        _elpusk.util.map_of_queue_delete = function(target_map,key){
+            do{
+                if( !(target_map instanceof Map)){
+                    continue;
+                }
+                if( target_map.has(key)){
+                    target_map.delete(key);
+                }
+            }while(false);
+        }
+
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_clear
+         * @param {object} target_map Map instance
+         * @description remove all queue of map.
+        */                
+        _elpusk.util.map_of_queue_clear = function(target_map){
+            if(target_map instanceof Map){
+                target_map.clear();
+            }
+        }
+        ////////////////////////////////
+        ////////////////////////////////
     }//the end of _elpusk.util
 
     // the end of function
