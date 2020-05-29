@@ -92,7 +92,8 @@
             b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_sys_info,
-                cb_error_sys_info
+                cb_error_sys_info,
+                true
                 );
             if( !b_result ){
                 device.clear_transaction();
@@ -136,7 +137,8 @@
             b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_get_parameter,
-                cb_error_get_parameter
+                cb_error_get_parameter,
+                true
                 );
             if( !b_result ){
                 device.clear_transaction();
@@ -180,7 +182,8 @@
             b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_set_parameter,
-                cb_error_set_parameter
+                cb_error_set_parameter,
+                true
                 );
             if( !b_result ){
                 device.clear_transaction();
@@ -228,7 +231,8 @@
             b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_ready_card,
-                cb_error_ready_card
+                cb_error_ready_card,
+                true
                 );
             if( !b_result ){
                 device.clear_transaction();
@@ -240,362 +244,295 @@
         return b_result;
     }    
 
-    //static variables
-    var _callback_info = null;
-    var _callback_cancel = null;
-
     /**
      * @private
-     * @function _cb_error_get_parameter
+     * @function _cb_error_common
      * @param {object} Event object
      * @description local callback function.
-     * <br /> this is called when error is occured in "get parameter" request.
+     * <br /> this is called when error is occured in a  request.
      */
-    function _cb_error_get_parameter( event_error ){
-        if(_callback_info ){
-            _callback_info.reject(event_error);
-            _callback_info = null;
-        }
+    function _cb_error_common( n_device_index,event_error ){
+
+        do{
+            var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
+            if( parameter === null ){
+                continue;
+            }
+            if( parameter.reject ){
+                parameter.reject(event_error);
+                continue;
+            }
+            if(parameter.cb_error){
+                parameter.cb_error(n_device_index,event_error);
+            }
+        }while(false);
     };
 
-    function _cb_complete_get_parameter( s_rx  ){
-        if( _callback_info === null ){
-            return;
-        }
+    function _cb_complete_get_parameter( n_device_index,s_rx  ){
         var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
-            //
-            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+            if( parameter === null ){
                 continue;
             }
-            if( !_callback_info.device.set_from_rx() ){
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
                 continue;
             }
             //
-            var s_request = _callback_info.device.get_tx_transaction();
+            var s_request = parameter.device.get_tx_transaction();
             if( s_request === null ){
                 //compete all response
-                _callback_info.device.clear_transaction();
-                _callback_info.resolve("success");
-                _callback_info = null;
+                parameter.device.clear_transaction();
+                parameter.resolve("success");
+                parameter = null;
                 b_result = true;
                 continue;
             }
 
-            b_result = _callback_info.server.device_transmit_with_callback(
-                _callback_info.device.get_device_index(),0,0, s_request,
+            b_result = parameter.server.device_transmit_with_callback(
+                parameter.device.get_device_index(),0,0, s_request,
                 _cb_complete_get_parameter,
-                _cb_error_get_parameter
+                _cb_error_common,
+                true
                 );
             if( !b_result ){
                 continue;
             }
 
-            b_result = true;
-
+            b_result = true;            
         }while(false);
 
-        if( !b_result ){
-            _callback_info.device.clear_transaction();
-            _callback_info.reject(new Error("error"));
-            _callback_info = null;
-        }
-    };
-
-    function _cb_error_sys_info( event_error ){
-        if(_callback_info){
-            _callback_info.reject(event_error);
-            _callback_info = null;
-        }
-    };
-
-    function _cb_complete_sys_info( s_rx  ){
-        if(_callback_info === null){
-            return;
-        }
-
-        var b_result = false;
-        do{
-            //
-            if( !_callback_info.device.set_rx_transaction(s_rx) ){
-                continue;
-            }
-            if( !_callback_info.device.set_from_rx() ){
-                continue;
-            }
-
-            var s_request = _callback_info.device.get_tx_transaction();
-            if( s_request === null ){
-                b_result = _get_parameters(_callback_info.server,_callback_info.device,_cb_complete_get_parameter, _cb_error_get_parameter);
-                continue;
-            }
-
-            b_result = _callback_info.server.device_transmit_with_callback(
-                _callback_info.device.get_device_index(),0,0, s_request,
-                _cb_complete_sys_info,
-                _cb_error_sys_info
-                );
-            if( !b_result ){
-                continue;
-            }
-
-            b_result = true;
-        }while(false);
-
-        if( !b_result ){
-            _callback_info.device.clear_transaction();
-            _callback_info.reject(new Error("error"));
-            _callback_info = null;
-        }
-    };
-
-    function _cb_error_set_parameter( event_error ){
-        if(_callback_info ){
-            _callback_info.reject(event_error);
-            _callback_info = null;
-        }
-    };
-
-    function _cb_complete_set_parameter( s_rx  ){
-        if( _callback_info === null ){
-            return;
-        }
-        var b_result = false;
-        do{
-            //
-            if( !_callback_info.device.set_rx_transaction(s_rx) ){
-                continue;
-            }
-            if( !_callback_info.device.set_from_rx() ){
-                continue;
-            }
-            //
-            var s_request = _callback_info.device.get_tx_transaction();
-            if( s_request === null ){
-                //compete all response
-                _callback_info.device.clear_transaction();
-                _callback_info.resolve("success");
-                _callback_info = null;
-                b_result = true;
-                continue;
-            }
-
-            b_result = _callback_info.server.device_transmit_with_callback(
-                _callback_info.device.get_device_index(),0,0, s_request,
-                _cb_complete_set_parameter,
-                _cb_error_set_parameter
-                );
-            if( !b_result ){
-                continue;
-            }
-
-            b_result = true;
-
-        }while(false);
-
-        if( !b_result ){
-            _callback_info.device.clear_transaction();
-            _callback_info.reject(new Error("error"));
-            _callback_info = null;
-        }
-    };
-
-    function _cb_error_ready_card( event_error ){
-        console.log("++_cb_error_ready_card");
-        var cb_temp = _callback_info;
-        _callback_info = null;
-
-        if(cb_temp ){
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(event_error);
+        if( parameter ){
+            if(b_result){
+                elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);
             }
             else{
-                cb_temp.cb_read_error(event_error);
+                parameter.device.clear_transaction();
+                parameter.reject(new Error("error"));
             }
         }
     };
 
-    function _cb_complete_ready_card( s_rx  ){
-        console.log("++_cb_complete_ready_card");
-        if( _callback_info === null ){
-            return;
-        }
+    function _cb_complete_sys_info( n_device_index,s_rx  ){
         var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
-            //
-            if( !_callback_info.device.set_rx_transaction(s_rx) ){
+            if( parameter === null ){
                 continue;
             }
-            if( !_callback_info.device.set_from_rx() ){
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
+                continue;
+            }
+
+            var s_request = parameter.device.get_tx_transaction();
+            if( s_request === null ){
+                b_result = _get_parameters(parameter.server,parameter.device,_cb_complete_get_parameter, _cb_error_common);
+                continue;
+            }
+            
+            b_result = parameter.server.device_transmit_with_callback(
+                parameter.device.get_device_index(),0,0, s_request,
+                _cb_complete_sys_info,
+                _cb_error_common,
+                true
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+
+        }while(false);
+
+        if( parameter ){
+            if( b_result ){
+                elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);
+            }
+            else{
+                parameter.device.clear_transaction();
+                parameter.reject(new Error("error"));
+            }
+        }
+    };
+
+    function _cb_complete_set_parameter( n_device_index,s_rx  ){
+        var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
+        do{
+            if( parameter === null ){
+                continue;
+            }
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
                 continue;
             }
             //
-            var s_request = _callback_info.device.get_tx_transaction();
+            var s_request = parameter.device.get_tx_transaction();
+            if( s_request === null ){
+                //compete all response
+                parameter.device.clear_transaction();
+                parameter.resolve("success");
+                parameter = null;
+                b_result = true;
+                continue;
+            }
+
+            b_result = parameter.server.device_transmit_with_callback(
+                parameter.device.get_device_index(),0,0, s_request,
+                _cb_complete_set_parameter,
+                _cb_error_common,
+                true
+                );
+            if( !b_result ){
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        
+        if( parameter ){ 
+            if( b_result ){
+                elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);                
+            }
+            else{
+                parameter.device.clear_transaction();
+                parameter.reject(new Error("error"));
+            }
+        }
+    };
+
+    function _cb_complete_ready_card( n_device_index,s_rx  ){
+        var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
+        do{
+            if( parameter === null ){
+                continue;
+            }
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
+                continue;
+            }
+            //
+            var s_request = parameter.device.get_tx_transaction();
             if( s_request !== null ){
                 continue;
             }
 
-            if( !_callback_info.b_read ){
+            if( !parameter.b_read ){
                 //stop read
-                _callback_info.device.clear_transaction();
-                if(_callback_info.resolve!==null){
-                    _callback_info.resolve("success");
+                parameter.device.clear_transaction();
+                if(parameter.resolve!==null){
+                    parameter.resolve("success");
                 }
                 else{
-                    _callback_info.cb_read_done("success");
+                    parameter.cb_received(n_device_index,"success");
                 }
-                _callback_info = null;
+                parameter = null;
                 b_result = true;
+                continue;
             }
 
-            b_result = _callback_info.server.device_receive_with_callback(
-                _callback_info.device.get_device_index(),0,
+            b_result = parameter.server.device_receive_with_callback(
+                parameter.device.get_device_index(),0,
                 _cb_complete_read_card,
-                _cb_error_read_card
+                _cb_error_common,
+                true
                 );
             if( !b_result ){
                 continue;
             }
-
-            b_result = true;
-
+            b_result = true;            
         }while(false);
 
-        if( !b_result ){
-            var cb_temp = _callback_info;
-            _callback_info = null;
-
-            cb_temp.device.clear_transaction();
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(new Error("error"));
+        if( parameter ){
+            if( b_result ){
+                elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);
             }
             else{
-                cb_temp.cb_read_error(new Error("error"));
+                parameter.device.clear_transaction();
+                if( parameter.reject !== null ){
+                    parameter.reject(new Error("error"));
+                }
+                else{
+                    parameter.cb_error(n_device_index,new Error("error"));
+                }
             }
         }
     };
 
-
-    function _cb_error_read_card( event_error ){
-        console.log("++_cb_error_read_card");
-        var cb_temp = _callback_info;
-        _callback_info = null;
-
-        if(cb_temp ){
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(event_error);
-            }
-            else{
-                cb_temp.cb_read_error(event_error);
-            }
-        }
-    };
-
-    function _cb_complete_read_card( s_rx  ){
-        console.log("++_cb_complete_read_card");
-        if( _callback_info === null ){
-            return;
-        }
+    function _cb_complete_read_card( n_device_index,s_rx  ){
         var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
+            if( parameter === null ){
+                continue;
+            }
             //s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
-            if( !_callback_info.device.set_msr_data_from_rx(s_rx)){
+            if( !parameter.device.set_msr_data_from_rx(s_rx)){
                 continue;
             }
 
-            var cb_temp = _callback_info;
-            _callback_info = null;
-
-            cb_temp.device.clear_transaction();
-            if( cb_temp.resolve !== null ){
-                cb_temp.resolve("success");
+            parameter.device.clear_transaction();
+            if( parameter.resolve !== null ){
+                parameter.resolve("success");
             }
             else{
-                cb_temp.cb_read_done("success");
+                parameter.cb_received(n_device_index,"success");
             }
             b_result = true;
 
         }while(false);
 
-        if( !b_result ){
-            var cb_temp = _callback_info;
-            _callback_info = null;
 
-            cb_temp.device.clear_transaction();
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(new Error("error"));
+        if( parameter && !b_result ){
+            parameter.device.clear_transaction();
+            if( parameter.reject !== null ){
+                parameter.reject(new Error("error"));
             }
             else{
-                cb_temp.cb_read_error(new Error("error"));
+                parameter.cb_error(n_device_index,new Error("error"));
             }
         }
     };
 
-    function _cb_error_cancel_card( event_error ){
-        console.log("++_cb_error_cancel_card");
-        var cb_temp = _callback_cancel;
-        _callback_cancel = null;
-
-        if(cb_temp ){
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(event_error);
-            }
-            else{
-                cb_temp.cb_cancel_error(event_error);
-            }
-        }
-    };
-
-    function _cb_complete_cancel_card( s_rx  ){
-        console.log("++_cb_complete_cancel_card");
-        if( _callback_cancel === null ){
-            return;
-        }
-
+    function _cb_complete_cancel_card( n_device_index,s_rx  ){
         var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
-            //
+            if( parameter === null ){
+                continue;
+            }
             if( s_rx[0] !== "success" ){
                 continue;
             }
-            var server = _callback_cancel.server;
-            var device = _callback_cancel.device;
-            var resolve = _callback_cancel.resolve;
-            var reject = _callback_cancel.reject;
-            var b_read = false;
 
-            if( !_check_server_and_device(server,device)){
+            var b_read = false;
+            if( !_check_server_and_device(parameter.server,parameter.device)){
                 continue;
             }
 
-            _callback_info = {
-                "command" : "read",
-                "server" : server,
-                "device" : device,
-                "resolve" : resolve,
-                "reject" : reject,
-                "b_read" : b_read
-            };
-
-            b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            b_result = _read_card( parameter.server, parameter.device,_cb_complete_ready_card, _cb_error_common,b_read);
             if( b_result ){
-                _callback_cancel = null;
+                elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);                
             }
-            else{
-                _callback_info = null;
-            }
-
         }while(false);
 
-        if( !b_result ){
-            var cb_temp = _callback_cancel;
-            _callback_cancel = null;
-
-            if( cb_temp.reject !== null ){
-                cb_temp.reject(new Error("error"));
+        if( parameter && !b_result ){
+            if( parameter.reject !== null ){
+                parameter.reject(new Error("error"));
             }
             else{
-                cb_temp.cb_cancel_error(new Error("error"));
+                parameter.cb_error(new Error("error"));
             }
         }
     };
@@ -669,11 +606,10 @@
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+                    b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_common,b_read);
                 }while(false);
                 if( !b_result ){
                     reject(new Error("error"));
-                    _callback_info = null;
                 }
             });//the end promise
         }
@@ -724,11 +660,10 @@
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _read_card( server, device,_cb_complete_cancel_card, _cb_error_cancel_card,b_read);
+                    b_result = _read_card( server, device,_cb_complete_cancel_card, _cb_error_common,b_read);
                 }while(false);
                 if( !b_result ){
                     reject(new Error("error"));
-                    _callback_info = null;
                 }
             });//the end promise
         }
@@ -815,13 +750,14 @@
                     resolve("success");
                     continue;//already open
                 }
-    
+
                 _server.device_open(_device.get_path()).then(function (n_device_index) {
                     if( typeof n_device_index === 'undefined'){
                         reject(new Error("error"));
                     }
                     else{
                         if( n_device_index!==0){
+                            elpusk.util.map_of_queue_delete(_map_of_queue_promise_parameter,n_device_index);
                             _device.opened( n_device_index );
                             resolve("success");
                         }
@@ -873,6 +809,7 @@
     
                 _server.device_close(_device.get_device_index()).then(function (s_rx) {
                     if( s_rx === "success "){
+                        elpusk.util.map_of_queue_delete(_map_of_queue_promise_parameter,_device.get_device_index());
                         _device.closed();
                         resolve("success");
                     }
@@ -940,11 +877,10 @@
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_sys_info);
+                    b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_common);
                 }while(false);
                 if( !b_result ){
                     reject(new Error("error"));
-                    _callback_info = null;
                 }
             });//the end promise
         }
@@ -997,11 +933,10 @@
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_set_parameter);
+                    b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_common);
                 }while(false);
                 if( !b_result ){
                     reject(new Error("error"));
-                    _callback_info = null;
                 }
             });//the end promise
         }        
@@ -1080,11 +1015,13 @@
                 "server" : server,
                 "device" : device,
                 "resolve" : null,
-                "reject" : null
+                "reject" : null,
+                "cb_received" : cb_read_done,
+                "cb_error" : cb_read_error
             };
             elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
             //
-            b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_ready_card,b_read);
+            b_result = _read_card( server, device,_cb_complete_ready_card, _cb_error_common,b_read);
         }while(false);
         return b_result;
     };

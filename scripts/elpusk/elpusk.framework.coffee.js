@@ -42,7 +42,10 @@
  * 
  * <br />  2020.5.26 - release 1.5.
  * <br />  : support - supports multi websocket callback function.
-
+ * 
+ * <br />  2020.5.29 - release 1.6.
+ * <br />  : add - "b_need_device_index" optional parameter to x_with_callback() functions.
+ * 
  * @namespace
  */
 
@@ -883,7 +886,12 @@
                             case "device_receive":
                                 if (json_obj.action_code == _type_action_code.DEVICE_RECEIVE) {
                                     if( parameter.resolve === null ){
-                                        parameter.cb_received(json_obj.data_field);
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
                                     }
                                     else{
                                         parameter.resolve(json_obj.data_field);
@@ -891,7 +899,12 @@
                                 }
                                 else {
                                     if( parameter.reject === null ){
-                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
                                     }
                                     else{
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
@@ -901,7 +914,12 @@
                             case "device_transmit":
                                 if (json_obj.action_code == _type_action_code.DEVICE_TRANSMIT) {
                                     if( parameter.resolve === null ){
-                                        parameter.cb_received(json_obj.data_field);
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
                                     }
                                     else{
                                         parameter.resolve(json_obj.data_field);
@@ -909,7 +927,12 @@
                                 }
                                 else {
                                     if( parameter.reject === null ){
-                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
                                     }
                                     else{
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
@@ -919,7 +942,12 @@
                             case "device_cancel":
                                 if (json_obj.action_code == _type_action_code.DEVICE_CANCEL) {
                                     if( parameter.resolve === null ){
-                                        parameter.cb_received(json_obj.data_field);
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
                                     }
                                     else{
                                         parameter.resolve(json_obj.data_field);
@@ -927,7 +955,12 @@
                                 }
                                 else {
                                     if( parameter.reject === null ){
-                                        parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
                                     }
                                     else{
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
@@ -937,8 +970,6 @@
                             default:
                                 break;
                         }//end switch
-                        
-
                     }while(false);//the end of 
                 }
 
@@ -976,11 +1007,18 @@
                         switch(parameter.method){
                             case "device_close":
                             case "device_send":
+                                parameter.reject(evt);
+                                break;
                             case "device_receive":
                             case "device_transmit":
                             case "device_cancel":
                                 if( parameter.reject === null ){
-                                    parameter.cb_error(evt);
+                                    if( parameter.b_device_index ){
+                                        parameter.cb_error(n_device_index,evt);
+                                    }
+                                    else{
+                                        parameter.cb_error(evt);
+                                    }
                                 }
                                 else{
                                     parameter.reject(evt);
@@ -1496,6 +1534,9 @@
                      * <br /> function cb_received( hex_string ) - return none
                      * @param {function} cb_error this callback function will be called when received a error from server.
                      * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
                      * 
                      * @returns {boolean} true - success of starting process.
                      * <br /> false - failure of starting process.
@@ -1504,9 +1545,15 @@
                      * <br /> receive a data from device.
                      * <br /> If device protocol is send-receive pair type, you must don't use this method.
                     */                
-                    device_receive_with_callback : function ( n_device_index, n_in_id, cb_received, cb_error ) {
+                    device_receive_with_callback : function ( n_device_index, n_in_id, cb_received, cb_error,b_need_device_index ) {
                         var b_result = false;
+                        var b_device_index = false;
                          do {
+                            if( typeof b_need_device_index === 'boolean'){
+                                if( b_need_device_index === true ){
+                                    b_device_index = b_need_device_index;
+                                }
+                            }
                              if(typeof cb_received !== 'function' ){
                                  continue;
                              }
@@ -1547,7 +1594,8 @@
                                 "resolve" : null,
                                 "reject" : null,
                                 "cb_received" : cb_received,
-                                "cb_error" : cb_error
+                                "cb_error" : cb_error,
+                                "b_device_index" : b_device_index
                             };
                             _push_promise_parameter(n_device_index,parameter);
              
@@ -1678,6 +1726,9 @@
                      * <br /> function cb_received( hex_string ) - return none
                      * @param {function} cb_error this callback function will be called when received a error from server.
                      * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
                      * 
                      * @returns {boolean} true - success of starting process.
                      * <br /> false - failure of starting process.
@@ -1688,10 +1739,16 @@
                     */                
                    device_transmit_with_callback : function (
                        n_device_index, n_in_id, n_out_id, s_hex_string,
-                       cb_received, cb_error
+                       cb_received, cb_error, b_need_device_index
                        ) {
                            var b_result = false;
+                           var b_device_index = false;
                             do {
+                                if( typeof b_need_device_index === 'boolean'){
+                                    if( b_need_device_index === true ){
+                                        b_device_index = b_need_device_index;
+                                    }
+                                }
                                 if(typeof cb_received !== 'function' ){
                                     continue;
                                 }
@@ -1742,7 +1799,8 @@
                                     "resolve" : null,
                                     "reject" : null,
                                     "cb_received" : cb_received,
-                                    "cb_error" : cb_error
+                                    "cb_error" : cb_error,
+                                    "b_device_index" : b_device_index
                                 };
                                 _push_promise_parameter(n_device_index,parameter);
                 
@@ -1866,6 +1924,9 @@
                      * <br /> function cb_received( string(maybe "success") ) - return none
                      * @param {function} cb_error this callback function will be called when received a error from server.
                      * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
                      * 
                      * @returns {boolean} true - success of cancel process.
                      * <br /> false - failure of cancel process.
@@ -1873,9 +1934,15 @@
                      * @description cancel the current pending operation of device to server.
                      * <br /> the current process will be cancel.
                     */                
-                    device_cancel_with_callback : function (n_device_index, n_in_id, n_out_id,cb_received, cb_error) {
+                    device_cancel_with_callback : function (n_device_index, n_in_id, n_out_id,cb_received, cb_error, b_need_device_index) {
                         var b_result = false;
+                        var b_device_index = false;
                         do {
+                            if( typeof b_need_device_index === 'boolean'){
+                                if( b_need_device_index === true ){
+                                    b_device_index = b_need_device_index;
+                                }
+                            }
                             if(typeof cb_received !== 'function' ){
                                 continue;
                             }
@@ -1921,7 +1988,8 @@
                                 "resolve" : null,
                                 "reject" : null,
                                 "cb_received" : cb_received,
-                                "cb_error" : cb_error
+                                "cb_error" : cb_error,
+                                "b_device_index" : b_device_index
                             };
                             _push_promise_parameter(n_device_index,parameter);
 

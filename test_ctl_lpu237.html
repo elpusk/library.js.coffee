@@ -431,7 +431,7 @@
             });
         }
 
-        function cb_read_done( s_msg ){
+        function cb_read_done( n_device_index, s_msg ){
             //s_msg always "success"
             addMessage("success : read_card_from_device_with_callback");
             for( var i = 0; i<3; i++ ){
@@ -444,7 +444,8 @@
             //
             on_button_enable_read_with_callback();
         }
-        function cb_read_error(event_error){
+
+        function cb_read_error( n_device_index,event_error){
             addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
         }
 
@@ -457,11 +458,11 @@
             }
         }
 
-        function cb_read_stop_done( s_msg ){
+        function cb_read_stop_done( n_device_index,s_msg ){
             //s_msg always "success"
             addMessage("success : read_card_from_device_with_callback : stop");
         }
-        function cb_read_stop_error(event_error){
+        function cb_read_stop_error(n_device_index,event_error){
             addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
         }
 
