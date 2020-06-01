@@ -4423,7 +4423,7 @@
                 else{
                     if( _first_version_greater_then_second_version(this._version, [5,7,0,0]) ){
                         if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type._generate_get_zeros_7times_ibutton );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros7_times_ibutton );
                     }
                     if( _first_version_greater_then_second_version(this._version, [5,8,0,0]) ){
                         if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}

@@ -26,7 +26,9 @@
  * @version 1.0.0
  * @description lpu237 helper of elpusk framework coffee javascript library .
  * <br />  2020.5.14 - release 1.0.
-  * @namespace
+ * <br />  2020.6.01 - release 1.1.
+ * <br />               add get, set parameters proggress callback function.
+ * @namespace
  */
 
 'use strict';
@@ -68,12 +70,11 @@
      * @param {object} device target devuce object.
      * @param {function} cb_complete_sys_info It is called "callback function" when "get system information" is completed successfually. 
      * @param {function} cb_error_sys_info It is called "callback function" when error is occured.
-     * @return {boolean} true - request is delivered to server successfully.
-     * <br /> false - It is failed that request is delivered.
+     * @return {number} greater then zero - request is delivered to server successfully.
+     * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "get system information" to server by callback method.
      */
     function _get_system_information(server, device,cb_complete_sys_info,cb_error_sys_info) {
-        var b_result = false;
         var n_req = 0;
         var s_request = null;
 
@@ -86,23 +87,23 @@
             }
             s_request = device.get_tx_transaction();
             if( s_request === null ){
+                n_req = 0;
                 continue;
             }
 
-            b_result = server.device_transmit_with_callback(
+            var b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_sys_info,
                 cb_error_sys_info,
                 true
                 );
             if( !b_result ){
+                n_req = 0;
                 device.clear_transaction();
                 continue;
             }
-            //
-            b_result = true;
         }while(false);
-        return b_result;
+        return n_req;
     }
 
     /**
@@ -112,12 +113,11 @@
      * @param {object} device target devuce object.
      * @param {function} cb_complete_get_parameter It is called "callback function" when "get parameters" is completed successfually. 
      * @param {function} cb_error_get_parameter It is called "callback function" when error is occured.
-     * @return {boolean} true - request is delivered to server successfully.
-     * <br /> false - It is failed that request is delivered.
+     * @return {number} greater then zero - request is delivered to server successfully.
+     * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "get parameters" to server by callback method.
      */
     function _get_parameters(server, device,cb_complete_get_parameter,cb_error_get_parameter){
-        var b_result = false;
         var s_request = null;
         var n_req = 0;
 
@@ -126,15 +126,17 @@
 
             n_req = device.generate_get_parameters();
             if( n_req <= 0 ){
+                n_req = 0;
                 continue;
             }
 
             s_request = device.get_tx_transaction();
             if( s_request === null ){
+                n_req = 0;
                 continue;
             }
 
-            b_result = server.device_transmit_with_callback(
+            var b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_get_parameter,
                 cb_error_get_parameter,
@@ -142,12 +144,11 @@
                 );
             if( !b_result ){
                 device.clear_transaction();
+                n_req = 0;
                 continue;
             }
-
-            b_result = true;
         }while(false);
-        return b_result;
+        return n_req;
     }    
 
     /**
@@ -157,12 +158,11 @@
      * @param {object} device target devuce object.
      * @param {function} cb_complete_set_parameter It is called "callback function" when "set parameters" is completed successfually. 
      * @param {function} cb_error_set_parameter It is called "callback function" when error is occured.
-     * @return {boolean} true - request is delivered to server successfully.
-     * <br /> false - It is failed that request is delivered.
+     * @return {number} greater then zero - request is delivered to server successfully.
+     * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "set parameters" to server by callback method.
      */
     function _set_parameters(server, device,cb_complete_set_parameter,cb_error_set_parameter){
-        var b_result = false;
         var s_request = null;
         var n_req = 0;
 
@@ -176,10 +176,11 @@
 
             s_request = device.get_tx_transaction();
             if( s_request === null ){
+                n_req = 0;
                 continue;
             }
 
-            b_result = server.device_transmit_with_callback(
+            var b_result = server.device_transmit_with_callback(
                 device.get_device_index(),0,0, s_request,
                 cb_complete_set_parameter,
                 cb_error_set_parameter,
@@ -187,12 +188,11 @@
                 );
             if( !b_result ){
                 device.clear_transaction();
+                n_req = 0;
                 continue;
             }
-
-            b_result = true;
         }while(false);
-        return b_result;
+        return n_req;
     }    
 
     /**
@@ -256,13 +256,16 @@
         do{
             var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
             if( parameter === null ){
+                console.log("E : _cb_error_common : parameter");
                 continue;
             }
             if( parameter.reject ){
+                console.log("E : _cb_error_common : reject");
                 parameter.reject(event_error);
                 continue;
             }
             if(parameter.cb_error){
+                console.log("E : _cb_error_common : cb_error");
                 parameter.cb_error(n_device_index,event_error);
             }
         }while(false);
@@ -273,13 +276,21 @@
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_get_parameter : parameter");
                 continue;
             }
             if( !parameter.device.set_rx_transaction(s_rx) ){
+                console.log("E : _cb_complete_get_parameter : set_rx_transaction");
                 continue;
             }
             if( !parameter.device.set_from_rx() ){
+                console.log("E : _cb_complete_get_parameter : set_from_rx");
                 continue;
+            }
+            //
+            if( typeof parameter.cb_progress === 'function'){
+                parameter.stage_cur++;
+                parameter.cb_progress(n_device_index,parameter.stage_max,parameter.stage_cur );
             }
             //
             var s_request = parameter.device.get_tx_transaction();
@@ -299,6 +310,7 @@
                 true
                 );
             if( !b_result ){
+                console.log("E : _cb_complete_get_parameter : device_transmit_with_callback");
                 continue;
             }
 
@@ -318,21 +330,40 @@
 
     function _cb_complete_sys_info( n_device_index,s_rx  ){
         var b_result = false;
+        var n_request = 0;
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_sys_info : parameter");
                 continue;
             }
             if( !parameter.device.set_rx_transaction(s_rx) ){
+                console.log("E : _cb_complete_sys_info : set_rx_transaction");
                 continue;
             }
             if( !parameter.device.set_from_rx() ){
+                console.log("E : _cb_complete_sys_info : set_from_rx");
                 continue;
+            }
+
+            if( typeof parameter.cb_progress === 'function'){
+                parameter.stage_cur++;
+                parameter.cb_progress(n_device_index,parameter.stage_max,parameter.stage_cur );
             }
 
             var s_request = parameter.device.get_tx_transaction();
             if( s_request === null ){
-                b_result = _get_parameters(parameter.server,parameter.device,_cb_complete_get_parameter, _cb_error_common);
+                n_request = _get_parameters(parameter.server,parameter.device,_cb_complete_get_parameter, _cb_error_common);
+                if( n_request<=0 ){
+                    console.log("E : _cb_complete_sys_info : _get_parameters");
+                }
+                else{
+                    if( typeof parameter.cb_progress === 'function'){
+                        parameter.stage_max = n_request;
+                        parameter.stage_cur = 0;
+                    }
+                    b_result = true;
+                }
                 continue;
             }
             
@@ -343,6 +374,7 @@
                 true
                 );
             if( !b_result ){
+                console.log("E : _cb_complete_sys_info : device_transmit_with_callback");
                 continue;
             }
 
@@ -366,13 +398,20 @@
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_set_parameter : parameter");
                 continue;
             }
             if( !parameter.device.set_rx_transaction(s_rx) ){
+                console.log("E : _cb_complete_set_parameter : set_rx_transaction");
                 continue;
             }
             if( !parameter.device.set_from_rx() ){
+                console.log("E : _cb_complete_set_parameter : set_from_rx");
                 continue;
+            }
+            if( typeof parameter.cb_progress === 'function'){
+                parameter.stage_cur++;
+                parameter.cb_progress(n_device_index,parameter.stage_max,parameter.stage_cur );
             }
             //
             var s_request = parameter.device.get_tx_transaction();
@@ -392,6 +431,7 @@
                 true
                 );
             if( !b_result ){
+                console.log("E : _cb_complete_set_parameter : device_transmit_with_callback");
                 continue;
             }
 
@@ -414,17 +454,21 @@
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_ready_card : parameter");
                 continue;
             }
             if( !parameter.device.set_rx_transaction(s_rx) ){
+                console.log("E : _cb_complete_ready_card : set_rx_transaction");
                 continue;
             }
             if( !parameter.device.set_from_rx() ){
+                console.log("E : _cb_complete_ready_card : set_from_rx");
                 continue;
             }
             //
             var s_request = parameter.device.get_tx_transaction();
             if( s_request !== null ){
+                console.log("E : _cb_complete_ready_card : get_tx_transaction");
                 continue;
             }
 
@@ -449,6 +493,7 @@
                 true
                 );
             if( !b_result ){
+                console.log("E : _cb_complete_ready_card : device_transmit_with_callback");
                 continue;
             }
             b_result = true;            
@@ -475,10 +520,12 @@
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_read_card : parameter");
                 continue;
             }
             //s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
             if( !parameter.device.set_msr_data_from_rx(s_rx)){
+                console.log("E : _cb_complete_read_card : set_msr_data_from_rx");
                 continue;
             }
 
@@ -510,20 +557,26 @@
         var parameter = elpusk.util.map_of_queue_front(_map_of_queue_promise_parameter,n_device_index);
         do{
             if( parameter === null ){
+                console.log("E : _cb_complete_cancel_card : parameter");
                 continue;
             }
             if( s_rx[0] !== "success" ){
+                console.log("E : _cb_complete_cancel_card : s_rx[0] !== success");
                 continue;
             }
 
             var b_read = false;
             if( !_check_server_and_device(parameter.server,parameter.device)){
+                console.log("E : _cb_complete_cancel_card : _check_server_and_device");
                 continue;
             }
 
             b_result = _read_card( parameter.server, parameter.device,_cb_complete_ready_card, _cb_error_common,b_read);
             if( b_result ){
                 elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,n_device_index,parameter);                
+            }
+            else{
+                console.log("E : _cb_complete_cancel_card : _read_card");
             }
         }while(false);
 
@@ -833,16 +886,19 @@
     /**
      * @public
      * @function load_parameter_from_device_with_promise
+     * @param {function} cb_progress this function will be called each stage of "get system information" and "get parameters".
+     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
      * @return {object} return promise object.
      * @description execute "get system information" and "get parameters" with server and lpu237 object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(){
+    _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(cb_progress){
         var b_error = true;
         var server = this._server;
         var device = this._device;
+        var cb_progress_value = null;
 
         do{
             if( !_check_server_and_device(server,device)){
@@ -853,6 +909,9 @@
                 continue;
             }
 
+            if( typeof cb_progress === 'function'){
+                cb_progress_value = cb_progress;
+            }
             b_error = false;
         }while(false);
 
@@ -866,20 +925,27 @@
             var b_read = true;
 
             return new Promise(function (resolve, reject) {
-                var b_result = false;
+                var n_request = 0;
 
                 do{
+                    n_request = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_common);
+                    if( n_request <= 0 ){
+                        continue;
+                    }
+
                     var parameter = {
                         "server" : server,
                         "device" : device,
                         "resolve" : resolve,
-                        "reject" : reject
+                        "reject" : reject,
+                        "cb_progress" : cb_progress_value,
+                        "stage_max" : n_request,
+                        "stage_cur" : 0
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _get_system_information( server, device,_cb_complete_sys_info, _cb_error_common);
                 }while(false);
-                if( !b_result ){
+                if( n_request <= 0 ){
                     reject(new Error("error"));
                 }
             });//the end promise
@@ -889,16 +955,19 @@
     /**
      * @public
      * @function save_parameter_to_device_with_promise
+     * @param {function} cb_progress this function will be called each stage of "set parameters".
+     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
      * @return {object} return promise object.
      * @description execute "set parameters" with server and lpu237 object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(){
+    _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(cb_progress){
         var b_error = true;
         var server = this._server;
         var device = this._device;
+        var cb_progress_value = null;
 
         do{
             if( !_check_server_and_device(server,device)){
@@ -907,6 +976,10 @@
 
             if( !elpusk.util.map_of_queue_is_empty(_map_of_queue_promise_parameter,device.get_device_index()) ){
                 continue;
+            }
+
+            if( typeof cb_progress === 'function'){
+                cb_progress_value = cb_progress;
             }
 
             b_error = false;
@@ -922,20 +995,27 @@
             var b_read = true;
 
             return new Promise(function (resolve, reject) {
-                var b_result = false;
+                var n_request = 0;
 
                 do{
+                    n_request = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_common);
+                    if( n_request<=0){
+                        continue;
+                    }
+
                     var parameter = {
                         "server" : server,
                         "device" : device,
                         "resolve" : resolve,
-                        "reject" : reject
+                        "reject" : reject,
+                        "cb_progress" : cb_progress_value,
+                        "stage_max" : n_request,
+                        "stage_cur" : 0
                     };
                     elpusk.util.map_of_queue_push(_map_of_queue_promise_parameter,device.get_device_index(),parameter);
 
-                    b_result = _set_parameters( server, device,_cb_complete_set_parameter, _cb_error_common);
                 }while(false);
-                if( !b_result ){
+                if( n_request<= 0 ){
                     reject(new Error("error"));
                 }
             });//the end promise

@@ -30,7 +30,7 @@
 <HEAD>
     <meta charset="utf-8" />
 
-    <TITLE>setting system parameters of lpu237</TITLE>
+    <TITLE>test for javascript library</TITLE>
 
 </HEAD>
 <BODY>
@@ -64,20 +64,17 @@
     </script>    
 
     <!-- fixed message area -->
-    this page supports elpusk coffee JavaScript library.
+    This page supports lpu237, lpu-207, lpu-208D, lpu208 and lpu-208.<br />
+    you can change a system parameters of these devices.<br />
+    For restart, press F5 key or select refresh menu.
+    <br />
     <br />
     <!-- control area -->
     <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
 
     <br />
-    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
-    <br />
-    <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
-    <br />
     <select id="drop_get_device_list">
     </select>
-    <br />
-    <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
     <br />
 
     <br />
@@ -93,14 +90,6 @@
     <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters of lpu237" />
     <br />
     <progress id="progress_set_parameters" value="0" max="100"></progress>
-    <br />
-    <input type="button" id="button_enable_read_with_promise" onclick="on_button_enable_read_with_promise();" value="enable read with promise." />
-    <br />
-    <input type="button" id="button_disable_read_with_promise" onclick="on_button_disable_read_with_promise();" value="disable read with promise." />
-    <br />
-    <input type="button" id="button_enable_read_with_callback" onclick="on_button_enable_read_with_callback();" value="enable read with callback." />
-    <br />
-    <input type="button" id="button_disable_read_with_callback" onclick="on_button_disable_read_with_callback();" value="disable read with callback." />
     <br />
 
     <p id="p_pre_main">
@@ -142,8 +131,8 @@
 
 
         function _test(){
-            addMessage(" : test : ");
-            console.log("_test()");
+            //addMessage(" : test : ");
+            //console.log("_test()");
             //
         }
 
@@ -152,7 +141,7 @@
                 addMessage("none promise");
             }
             else{
-                addMessage("ok promise");
+                //addMessage("ok promise");
             }
 
             fun_init();
@@ -345,134 +334,55 @@
             
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////
-
-        function on_button_promise_disconnect_server() {
-            var server = elpusk.framework.coffee.get_instance();
-
-            server.disconnect().then(function (s_session_number) {
-                // server is ready here
-                addMessage("disconnected : session number = " + s_session_number);
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
-            });
-        }
-
-        function on_button_promise_device_close() {
-            ctl_lpu237.close_with_promise().then(function (s_message) {
-                //s_message always "success".
-                addMessage("success : close_with_promise");
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : close_with_promise : "+ event_error.message);
-            });            
-        }
-
         ///////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////
+        function _cb_progress_get_parameters( n_device_index, n_max_stage, n_cur_stage ){
+            if( n_cur_stage <= 1){
+                set_progress_get_parameters(n_cur_stage,n_max_stage);
+            }
+            else{
+                increase_progress_get_parameters();
+            }
+        }
 
         function on_button_get_parameters(){
-            ctl_lpu237.load_parameter_from_device_with_promise().then(function (s_message) {
+            
+            ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+                clearMessage();
                 //s_message always "success".
-                addMessage("success : load_parameter_from_device_with_promise");
-
-                //addMultiMessage( ctl_lpu237.get_device().get_string() );
-                alert(ctl_lpu237.get_device().get_string());
+                addMessage(" = system parameters");
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+                //alert(ctl_lpu237.get_device().get_string());
 
                 //addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
                 //addMessage(ctl_lpu237.get_device().get_tag_by_ascii_string(ctl_lpu237.get_device().get_private_prefix(0)));
 
             }).catch(function (event_error) {
                 // error here
-                addMessage("fail : load_parameter_from_device_with_promise : "+ event_error.message);
+                clearMessage();
+                addMessage("fail : loading system parameters : "+ event_error.message);
             });
         }        
 
+        function _cb_progress_set_parameters( n_device_index, n_max_stage, n_cur_stage ){
+            if( n_cur_stage <= 1){
+                set_progress_set_parameters(n_cur_stage,n_max_stage);
+            }
+            else{
+                increase_progress_set_parameters();
+            }
+        }
         function on_button_set_parameters(){
-            ctl_lpu237.save_parameter_to_device_with_promise().then(function (s_message) {
+            ctl_lpu237.save_parameter_to_device_with_promise(_cb_progress_set_parameters).then(function (s_message) {
                 //s_message always "success".
-                addMessage("success : save_parameter_to_device_with_promise");
+                clearMessage();
+                addMessage("success : save system parameter to device.");
 
                 addMultiMessage( ctl_lpu237.get_device().get_string() );
             }).catch(function (event_error) {
                 // error here
-                addMessage("fail : save_parameter_to_device_with_promise : "+ event_error.message);
+                clearMessage();
+                addMessage("fail : save system parameter to device : "+ event_error.message);
             });
-        }
-        
-        function on_button_enable_read_with_promise(){
-            ctl_lpu237.read_card_from_device_with_promise(true).then(function (s_message) {
-                //s_message always "success".
-                addMessage("success : read_card_from_device_with_promise");
-
-                for( var i = 0; i<3; i++ ){
-                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
-                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
-                        continue;
-                    }
-                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
-                }
-
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : read_card_from_device_with_promise : "+ event_error.message);
-            });
-        }
-
-        function on_button_disable_read_with_promise(){
-            ctl_lpu237.read_card_from_device_with_promise(false).then(function (s_message) {
-                //s_message always "success".
-                addMessage("success : on_button_disable_read_with_promise");
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : on_button_disable_read_with_promise : "+ event_error.message);
-            });
-        }
-
-        function cb_read_done( n_device_index, s_msg ){
-            //s_msg always "success"
-            addMessage("success : read_card_from_device_with_callback");
-            for( var i = 0; i<3; i++ ){
-                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
-                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
-                        continue;
-                    }
-                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
-            }
-            //
-            on_button_enable_read_with_callback();
-        }
-
-        function cb_read_error( n_device_index,event_error){
-            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
-        }
-
-        function on_button_enable_read_with_callback(){
-            if( ctl_lpu237.read_card_from_device_with_callback(true,cb_read_done,cb_read_error) ){
-                addMessage("ready : waits reading.");
-            }
-            else{
-                addMessage("not ready : failure.");
-            }
-        }
-
-        function cb_read_stop_done( n_device_index,s_msg ){
-            //s_msg always "success"
-            addMessage("success : read_card_from_device_with_callback : stop");
-        }
-        function cb_read_stop_error(n_device_index,event_error){
-            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
-        }
-
-        function on_button_disable_read_with_callback(){
-            if( ctl_lpu237.read_card_from_device_with_callback(false,cb_read_stop_done,cb_read_stop_error) ){
-                addMessage("ready : waits reading.");
-            }
-            else{
-                addMessage("not ready : failure.");
-            }
         }
 
     </script>
