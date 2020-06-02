@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>ctl_lpu237<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>ctl_lpu237<span class="signature">(server, device)</span><span class="type-signature"></span></h2>
         
     
 </header>
@@ -41,19 +41,95 @@
     
 
     
-    <h4 class="name" id="ctl_lpu237"><span class="type-signature"></span>new ctl_lpu237<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="ctl_lpu237"><span class="type-signature"></span>new ctl_lpu237<span class="signature">(server, device)</span><span class="type-signature"></span></h4>
     
 
     
 
 
 
+<div class="description">
+    constucture of lpu237 control class.
+</div>
 
 
 
 
 
 
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>server</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">coffee manager server object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>device</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">target devuce object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -89,7 +165,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line715">line 715</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line731">line 731</a>
     </li></ul></dd>
     
 
@@ -151,13 +227,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="elpusk.framework.coffee.ctl_lpu237.html">ctl_lpu237</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_get_parameters">_get_parameters</a></li><li><a href="global.html#_get_system_information">_get_system_information</a></li><li><a href="global.html#_read_card">_read_card</a></li><li><a href="global.html#_set_parameters">_set_parameters</a></li><li><a href="global.html#close_with_promise">close_with_promise</a></li><li><a href="global.html#get_device">get_device</a></li><li><a href="global.html#get_server">get_server</a></li><li><a href="global.html#load_parameter_from_device_with_promise">load_parameter_from_device_with_promise</a></li><li><a href="global.html#open_with_promise">open_with_promise</a></li><li><a href="global.html#read_card_from_device_with_callback">read_card_from_device_with_callback</a></li><li><a href="global.html#read_card_from_device_with_promise">read_card_from_device_with_promise</a></li><li><a href="global.html#save_parameter_to_device_with_promise">save_parameter_to_device_with_promise</a></li><li><a href="global.html#toString">toString</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="elpusk.framework.coffee.ctl_lpu237.html">ctl_lpu237</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_cancel_card_from_device_with_promise">_cancel_card_from_device_with_promise</a></li><li><a href="global.html#_cb_error_common">_cb_error_common</a></li><li><a href="global.html#_check_server_and_device">_check_server_and_device</a></li><li><a href="global.html#_get_parameters">_get_parameters</a></li><li><a href="global.html#_get_system_information">_get_system_information</a></li><li><a href="global.html#_read_card">_read_card</a></li><li><a href="global.html#_ready_card_from_device_with_promise">_ready_card_from_device_with_promise</a></li><li><a href="global.html#_set_parameters">_set_parameters</a></li><li><a href="global.html#close_with_promise">close_with_promise</a></li><li><a href="global.html#get_device">get_device</a></li><li><a href="global.html#get_server">get_server</a></li><li><a href="global.html#load_parameter_from_device_with_promise">load_parameter_from_device_with_promise</a></li><li><a href="global.html#open_with_promise">open_with_promise</a></li><li><a href="global.html#read_card_from_device_with_callback">read_card_from_device_with_callback</a></li><li><a href="global.html#read_card_from_device_with_promise">read_card_from_device_with_promise</a></li><li><a href="global.html#save_parameter_to_device_with_promise">save_parameter_to_device_with_promise</a></li><li><a href="global.html#toString">toString</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue May 26 2020 11:17:49 GMT+0900 (GMT+09:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 02 2020 09:44:19 GMT+0900 (GMT+09:00)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -24,10 +24,10 @@
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
  * @version 1.0.0
- * @description lpu237 helper of elpusk framework coffee javascript library .
+ * @description lpu237 controller of elpusk framework coffee javascript library .
  * <br />  2020.5.14 - release 1.0.
  * <br />  2020.6.01 - release 1.1.
- * <br />               add get, set parameters proggress callback function.
+ * <br />               add get, set parameters progress callback function.
  * @namespace
  */
 

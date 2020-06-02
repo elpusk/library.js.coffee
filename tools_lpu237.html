@@ -77,20 +77,30 @@
     </select>
     <br />
 
+    <p id="p_system">
+        <!-- pre sytem print area -->
+    </p>
+
     <br />
-    <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters of lpu237" />
+    Press for getting system parameters from device.
     <br />
+    <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters" />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
 
     <br />
+    <br />
+    Select the your system parameters files : 
     <input type="file" id="input_file" accept=".xml" />
     <br />
 
     <br />
-    <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters of lpu237" />
-    <br />
+    Press for saving the system parameters to device.
+    <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters" />
     <progress id="progress_set_parameters" value="0" max="100"></progress>
     <br />
+    <br />
+    For setting another device, press F5 key or select refresh menu.
+    <br /> 
 
     <p id="p_pre_main">
         <!-- pre main print area -->
@@ -103,7 +113,6 @@
 
     <script type="text/javascript">
         var n_system_event = 0;
-        var lpu237=null;
         var ctl_lpu237 = null;
         var array_device_list = [];
 
@@ -116,7 +125,29 @@
                 if( s_action_code === "c"){
                     //removed event
                     ++n_system_event;
-                    printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field );
+                    
+                    do{
+                        if( s_data_field.length <= 0 ){
+                            continue;
+                        }
+                        if( !ctl_lpu237 ){
+                            continue;
+                        }
+                        if( !ctl_lpu237.get_device() ){
+                            continue;
+                        }
+
+                        for( var i = 0; i<s_data_field.length; i++  ){
+
+                            if( ctl_lpu237.get_device().get_path() === s_data_field[i] ){
+                                //remove object
+                                ctl_lpu237 = null;
+                                printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field[i] );
+                                break;//exit for
+                            }
+                        }//end for
+                        
+                    }while(false);
                 }
                 if( s_action_code === "P"){
                     //plugged in event
@@ -157,6 +188,20 @@
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML ="";
+        }
+
+        function printMessage_system(Message)
+        {
+            var parag_main = document.getElementById("p_system");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage_system(Message) {
+            var parag_main = document.getElementById("p_system");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
         }
 
         function printMessage(Message)
@@ -269,9 +314,10 @@
                         }
 
                         if( array_device_list.length > 0 ){
-                            lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
-                            console.log("create device : "+lpu237.toString());
-                            ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(elpusk.framework.coffee.get_instance(),lpu237 );
+                            ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(
+                                elpusk.framework.coffee.get_instance()
+                                ,new elpusk.device.usb.hid.lpu237(array_device_list[0]) 
+                                );
                             console.log("create device controller : "+ctl_lpu237.toString());
                             return ctl_lpu237.open_with_promise();
                         }
@@ -293,6 +339,7 @@
                     option.text = ctl_lpu237.get_device().get_path();
                     select_dev.add(option, 0);
 
+                    printMessage_system(" = selected : "+ctl_lpu237.get_device().get_path());
                     console.log("opened : "+ctl_lpu237.get_device().get_device_index());
                 }
             )
@@ -318,15 +365,15 @@
                 var name = file.name;
                 var size = file.size;
                 //
-                lpu237.set_from_file(file).then(function (b_result) {
+                ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
                     //alway true.
                     addMessage("ok : set_from_file");
-                    addMultiMessage(lpu237.get_string());
+                    addMultiMessage(ctl_lpu237.get_device().get_string());
 
                     //document.getElementById("input_file").value = "";
                 }).catch(function (event_error) {
                     // error here
-                    addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
+                    addMessage("fail : set_from_file : "+ ctl_lpu237.get_device().get_error_message(event_error));
                     //document.getElementById("input_file").value = "";
                 });
 
