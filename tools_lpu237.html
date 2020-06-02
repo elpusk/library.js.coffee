@@ -1,0 +1,437 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>test for javascript library</TITLE>
+
+</HEAD>
+<BODY>
+    <script type="text/javascript">
+        if (typeof Promise === "undefined") {
+            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
+
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');
+        }
+        else{
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');            
+        }
+    </script>    
+
+    <!-- fixed message area -->
+    This page supports lpu237, lpu-207, lpu-208D, lpu208 and lpu-208.<br />
+    you can change a system parameters of these devices.<br />
+    For restart, press F5 key or select refresh menu.
+    <br />
+    <br />
+    <!-- control area -->
+    <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
+
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+
+    <p id="p_system">
+        <!-- pre sytem print area -->
+    </p>
+
+    <br />
+    Press for getting system parameters from device.
+    <br />
+    <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters" />
+    <progress id="progress_get_parameters" value="0" max="100"></progress>
+
+    <br />
+    <br />
+    Select the your system parameters files : 
+    <input type="file" id="input_file" accept=".xml" />
+    <br />
+
+    <br />
+    Press for saving the system parameters to device.
+    <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters" />
+    <progress id="progress_set_parameters" value="0" max="100"></progress>
+    <br />
+    <br />
+    For setting another device, press F5 key or select refresh menu.
+    <br /> 
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+        var ctl_lpu237 = null;
+        var array_device_list = [];
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    
+                    do{
+                        if( s_data_field.length <= 0 ){
+                            continue;
+                        }
+                        if( !ctl_lpu237 ){
+                            continue;
+                        }
+                        if( !ctl_lpu237.get_device() ){
+                            continue;
+                        }
+
+                        for( var i = 0; i<s_data_field.length; i++  ){
+
+                            if( ctl_lpu237.get_device().get_path() === s_data_field[i] ){
+                                //remove object
+                                ctl_lpu237 = null;
+                                printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field[i] );
+                                break;//exit for
+                            }
+                        }//end for
+                        
+                    }while(false);
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                //
+
+            }while(false);
+        }
+
+
+        function _test(){
+            //addMessage(" : test : ");
+            //console.log("_test()");
+            //
+        }
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                //addMessage("ok promise");
+            }
+
+            fun_init();
+            // 
+            console.log("the end of init");
+            _test();          
+        }
+
+        window.addEventListener("load", init, false);
+
+        function clearMessage() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage_system(Message)
+        {
+            var parag_main = document.getElementById("p_system");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage_system(Message) {
+            var parag_main = document.getElementById("p_system");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function printMessage(Message)
+        {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+        function addMultiMessage(ssMessage) {
+            var ss_msg = ssMessage.split("\n");
+            for( var i = 0; i<ss_msg.length; i++ ){
+                addMessage(ss_msg[i]);
+            }
+        }
+
+        function printMessage_pre(Message)
+        {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage_pre(Message) {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function set_progress_get_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_get_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
+        }
+
+        function increase_progress_get_parameters(){
+            var prog = document.getElementById("progress_get_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
+        function set_progress_set_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_set_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
+        }
+
+        function increase_progress_set_parameters(){
+            var prog = document.getElementById("progress_set_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // callback functions
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // basic functions
+        function _fun_init_coffee_framework() {
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+            //
+            var device = new elpusk.device("device");
+            var usb = new elpusk.device.usb("usb");
+            var hid = new elpusk.device.usb.hid("hid");
+
+            console.log(device);
+            console.log(usb);
+            console.log(hid);
+
+            console.log(device.get_path());
+            console.log(usb.get_path());
+            console.log(hid.get_path());
+
+            //
+            array_device_list.length = 0;
+
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss","443").then(
+                function(s_session_number){
+                    console.log("session : " + s_session_number);
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("connect : " + event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function(s_rx){
+                    console.log(s_rx);
+                    if( s_rx == null ){
+                        console.log("none device");
+                    }
+                    else if (Array.isArray(s_rx)) {
+                        for (var i = 0; i < s_rx.length; i++) {
+                            array_device_list.push( s_rx[i] );
+                        }
+
+                        if( array_device_list.length > 0 ){
+                            ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(
+                                elpusk.framework.coffee.get_instance()
+                                ,new elpusk.device.usb.hid.lpu237(array_device_list[0]) 
+                                );
+                            console.log("create device controller : "+ctl_lpu237.toString());
+                            return ctl_lpu237.open_with_promise();
+                        }
+                    }
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("get device list : "+event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function( s_message ){
+                    //s_message is always "success"
+                    var select_dev = document.getElementById("drop_get_device_list");
+                    var option = document.createElement('option');
+                    option.value = ctl_lpu237.get_device().get_device_index();
+                    option.text = ctl_lpu237.get_device().get_path();
+                    select_dev.add(option, 0);
+
+                    printMessage_system(" = selected : "+ctl_lpu237.get_device().get_path());
+                    console.log("opened : "+ctl_lpu237.get_device().get_device_index());
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("open device : "+event_error);
+                }
+            );
+        }
+
+
+        function fun_init() {
+
+            _fun_init_coffee_framework();
+
+            if(!(File && FileReader && FileList && Blob)) {
+                addMessage("Not Supported File API");
+            }
+            
+            //
+            document.getElementById("input_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                //
+                ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
+                    //alway true.
+                    addMessage("ok : set_from_file");
+                    addMultiMessage(ctl_lpu237.get_device().get_string());
+
+                    //document.getElementById("input_file").value = "";
+                }).catch(function (event_error) {
+                    // error here
+                    addMessage("fail : set_from_file : "+ ctl_lpu237.get_device().get_error_message(event_error));
+                    //document.getElementById("input_file").value = "";
+                });
+
+            };
+            
+        }
+
+        ///////////////////////////////////////////////////////////////////
+        function _cb_progress_get_parameters( n_device_index, n_max_stage, n_cur_stage ){
+            if( n_cur_stage <= 1){
+                set_progress_get_parameters(n_cur_stage,n_max_stage);
+            }
+            else{
+                increase_progress_get_parameters();
+            }
+        }
+
+        function on_button_get_parameters(){
+            
+            ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+                clearMessage();
+                //s_message always "success".
+                addMessage(" = system parameters");
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+                //alert(ctl_lpu237.get_device().get_string());
+
+                //addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
+                //addMessage(ctl_lpu237.get_device().get_tag_by_ascii_string(ctl_lpu237.get_device().get_private_prefix(0)));
+
+            }).catch(function (event_error) {
+                // error here
+                clearMessage();
+                addMessage("fail : loading system parameters : "+ event_error.message);
+            });
+        }        
+
+        function _cb_progress_set_parameters( n_device_index, n_max_stage, n_cur_stage ){
+            if( n_cur_stage <= 1){
+                set_progress_set_parameters(n_cur_stage,n_max_stage);
+            }
+            else{
+                increase_progress_set_parameters();
+            }
+        }
+        function on_button_set_parameters(){
+            ctl_lpu237.save_parameter_to_device_with_promise(_cb_progress_set_parameters).then(function (s_message) {
+                //s_message always "success".
+                clearMessage();
+                addMessage("success : save system parameter to device.");
+
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+            }).catch(function (event_error) {
+                // error here
+                clearMessage();
+                addMessage("fail : save system parameter to device : "+ event_error.message);
+            });
+        }
+
+    </script>
+</BODY>
+</HTML>

@@ -31,7 +31,7 @@
  */
 'use strict';
 
-(function (windows, undefined) {
+(function (window, undefined) {
     /**@private */
     var _elpusk = window.elpusk;
 
@@ -1202,28 +1202,6 @@
 
         /**
          * @private
-         * @function _is_success_enter_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */
-        function _is_success_enter_opos_mode(s_response){
-            return _is_success_response(s_response);
-        }
-
-        /**
-         * @private
-         * @function _is_success_leave_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        function _is_success_leave_opos_mode(s_response){
-            return _is_success_response(s_response);
-        }
-
-        /**
-         * @private
          * @function _is_success_enter_config_mode
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} true - response contains good or negative good.
@@ -1255,16 +1233,6 @@
             return _is_success_response(s_response);
         }
 
-        /**
-         * @private
-         * @function _is_success_run_boot_loader
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        function _is_success_run_boot_loader(s_response){
-            return _is_success_response(s_response);
-        }
 
         /**
          * @private
@@ -3560,7 +3528,11 @@
             this._s_postfix_uart = null;//you must include the length in front of this array.
             //
             this._token_format = _type_format.ef_decimal;
-            this._s_name = null;            
+            this._s_name = null;    
+            
+            // reading operation
+            this._array_s_card_data = ["","",""];//iso123 card data ascii code string.
+            this._array_n_card_error_code = [0,0,0];//iso123 rtrack error code. 0 is none zeeor
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
@@ -3568,6 +3540,62 @@
 
         /////////////////////////////////////////////////////////////////////
         // getter
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_msr_data
+         * @param {number} n_track iso track number 0~2.
+         * @returns {null|string} card data.
+         * <br /> null - error.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_msr_data = function(n_track){
+            var s_data = null;
+
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                if(this._array_n_card_error_code[n_track] !== 0 ){
+                    continue;//track has error.
+                }
+                //
+                s_data = "";
+                s_data = this._array_s_card_data[n_track];
+            }while(false);
+            return s_data;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_msr_error_code
+         * @param {number} n_track iso track number 0~2.
+         * @returns {number|null} error code, 0 - none error.
+         * <br /> null - abused function.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_msr_error_code = function(n_track){
+            var n_data = null;
+
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                n_data = this._array_n_card_error_code[n_track];
+            }while(false);
+            return n_data;
+        }
+
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_version
@@ -4395,7 +4423,7 @@
                 else{
                     if( _first_version_greater_then_second_version(this._version, [5,7,0,0]) ){
                         if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type._generate_get_zeros_7times_ibutton );
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros7_times_ibutton );
                     }
                     if( _first_version_greater_then_second_version(this._version, [5,8,0,0]) ){
                         if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}
@@ -4631,8 +4659,44 @@
                 this._deque_generated_tx.length = 0;
             }
 
-            return this._deque_generated_tx.length;;           
+            return this._deque_generated_tx.length;   
        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.generate_enable_read
+         * @param {boolean} b_enable true - generates enable read requst.
+         * <br /> false - generates disable read requst.
+         * @return {number} the number of generated requests. may be 1.
+         * <br /> 0 - error
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.generate_enable_read = function( b_enable ){
+            var b_result = false;
+
+            do{
+                if( typeof b_enable !== 'boolean'){
+                    continue;
+                }
+
+                if( b_enable ){
+                    if(!_generate_enter_opos_mode(this._dequeu_s_tx) ){ continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_opos );
+                }
+                else{
+                    if(!_generate_leave_opos_mode(this._dequeu_s_tx) ){ continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_opos );
+                }
+                //
+                b_result = true;
+            }while (false);
+
+            if( !b_result ){
+                this._dequeu_s_tx.length = 0;
+                this._deque_generated_tx.length = 0;
+            }
+
+            return this._deque_generated_tx.length;         
+        }
 
         /**
          * @public
@@ -5390,6 +5454,103 @@
             });//the end of Promise definition.
         }   
 
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.reset_msr_data
+         * @param {number} n_track iso track number 0~2.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.reset_msr_data = function(n_track){
+
+            do{
+                if( typeof n_track === 'undefined'){
+                    for( var i = 0; i<this._array_s_card_data.length; i++ ){
+                        this._array_s_card_data[i] = "";
+                        this._array_n_card_error_code[i] = 0;
+                    }//end for
+                }
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( n_track < 0 ){
+                    continue;
+                }
+                if( n_track >= _const_the_number_of_track ){
+                    continue;
+                }
+                this._array_s_card_data[n_track] = "";
+                this._array_n_card_error_code[n_track] = 0;
+            }while(false);
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.set_msr_data_from_rx
+         * @param {string} s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @return {boolean} processing result
+         * @description analysis and save from response.
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.set_msr_data_from_rx = function(s_rx){
+            var b_result  =false;
+            do{
+                if( typeof s_rx !== 'string'){
+                    continue;
+                }
+                if( s_rx.length%2 !== 0 ){
+                    continue;
+                }
+                if( s_rx.length < 2*3 ){
+                    continue;
+                }
+
+                var s_src = s_rx;
+                var s_char = "";
+
+                var n_len = [0,0,0];
+                var n_len_error = 0;
+
+                for( var i=0; i<_const_the_number_of_track; i++ ){
+                    this._array_s_card_data[i] = "";//reset card data buffer.
+                    this._array_n_card_error_code[i] = 0;//reset card data error code.
+
+                    s_char = s_src.slice(0,2);
+                    s_src = s_src.substring(2);
+
+                    n_len_error = parseInt(s_char,16);
+                    if( n_len_error >127){
+                        this._array_n_card_error_code[i] = n_len_error - 256;//save error code.
+                    }
+                    else{
+                        n_len[i] = n_len_error;//save data length
+                    }
+                }//end for
+
+                var n_data = 0;
+                var s_op = "";
+                var n_op = 0;
+                for( var i=0; i<_const_the_number_of_track; i++ ){
+                    if( n_len[i] <= 0){
+                        continue;
+                    }
+                    s_op = s_src.slice(0,n_len[i]*2);
+                    s_src = s_src.substring(n_len[i]*2);
+                    //
+                    n_op = s_op.length;
+                    for( var j = 0; j<n_op/2; j++ ){
+                        if( i===0){
+                            n_data = parseInt(s_op.slice(0,2),16) + 0x20;
+                        }
+                        else{
+                            n_data = parseInt(s_op.slice(0,2),16) + 0x30;
+                        }
+                        this._array_s_card_data[i] += String.fromCharCode(n_data);
+                        s_op = s_op.substring(2);
+                    }//end for j
+                }//end for i
+                
+                b_result = true;
+            }while(false);
+            return b_result;
+        }
 
         /**
          * @public
@@ -5471,7 +5632,40 @@
         }
 
         /**
-         * @private
+         * @public
+         * @function is_success_enter_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_enter_opos_mode = function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
+         * @function is_success_leave_opos_mode
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_leave_opos_mode= function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
+         * @function is_success_run_boot_loader
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - response contains good or negative good.
+         * <br /> false - else case.
+         */        
+        _elpusk.device.usb.hid.lpu237.prototype.is_success_run_boot_loader = function(s_response){
+            return _is_success_response(s_response);
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_code
          * @param {string} s_len_tag_hex this string is received from device by hex string format.
          * @returns {number[]} ASCII code array of tag.
@@ -5481,7 +5675,7 @@
         }
 
         /**
-         * @private
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_string
          * @param {string} s_len_tag_hex this string is received from device by hex string format.
          * @returns {string[]} string format of ASCII code of tag.
@@ -5491,7 +5685,7 @@
         }
 
         /** 
-         * @private 
+         * @public 
          * @function get_error_message
          * @param {string} s_error_name
          * @returns {string}
@@ -5501,11 +5695,9 @@
            return _get_error_message(s_error_name);
         }
 
-
-
     }//the end of _elpusk.device.usb.hid.lpu237
 
 
     // the end of function
     window.elpusk = _elpusk;
-}(window))
+}(window));

@@ -36,7 +36,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 
 <lpu237>
 	<common
-		interface	="usb_kb"
+		interface	="usb_hid"
 		buzzer		="off"
 		language	="usa_english"
 		iso1		="enable"

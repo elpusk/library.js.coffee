@@ -1,0 +1,26 @@
+{
+    "plugins": [],
+    "recurseDepth": 10,
+    "source": {
+        "include": [ "./scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js" ],
+        "exclude": [ "bluebirdjs/bluebird.core.min.js" ],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+   "opts": {
+        "template": "templates/default",
+        "encoding": "utf8",
+        "destination": "./docs/elpusk.framework.coffee.ctl_lpu237/",
+        "recurse": true,
+        "access":["all"]
+    },
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    }
+}

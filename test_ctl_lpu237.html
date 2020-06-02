@@ -1,0 +1,480 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>setting system parameters of lpu237</TITLE>
+
+</HEAD>
+<BODY>
+    <script type="text/javascript">
+        if (typeof Promise === "undefined") {
+            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
+
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');
+        }
+        else{
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');            
+        }
+    </script>    
+
+    <!-- fixed message area -->
+    this page supports elpusk coffee JavaScript library.
+    <br />
+    <!-- control area -->
+    <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
+
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+    <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+    <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
+    <br />
+
+    <br />
+    <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters of lpu237" />
+    <br />
+    <progress id="progress_get_parameters" value="0" max="100"></progress>
+
+    <br />
+    <input type="file" id="input_file" accept=".xml" />
+    <br />
+
+    <br />
+    <input type="button" id="button_set_parameters" onclick="on_button_set_parameters();" value="set parameters of lpu237" />
+    <br />
+    <progress id="progress_set_parameters" value="0" max="100"></progress>
+    <br />
+    <input type="button" id="button_enable_read_with_promise" onclick="on_button_enable_read_with_promise();" value="enable read with promise." />
+    <br />
+    <input type="button" id="button_disable_read_with_promise" onclick="on_button_disable_read_with_promise();" value="disable read with promise." />
+    <br />
+    <input type="button" id="button_enable_read_with_callback" onclick="on_button_enable_read_with_callback();" value="enable read with callback." />
+    <br />
+    <input type="button" id="button_disable_read_with_callback" onclick="on_button_disable_read_with_callback();" value="disable read with callback." />
+    <br />
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+        var lpu237=null;
+        var ctl_lpu237 = null;
+        var array_device_list = [];
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field );
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    printMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                //
+
+            }while(false);
+        }
+
+
+        function _test(){
+            addMessage(" : test : ");
+            console.log("_test()");
+            //
+        }
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                addMessage("ok promise");
+            }
+
+            fun_init();
+            // 
+            console.log("the end of init");
+            _test();          
+        }
+
+        window.addEventListener("load", init, false);
+
+        function clearMessage() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage(Message)
+        {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+        function addMultiMessage(ssMessage) {
+            var ss_msg = ssMessage.split("\n");
+            for( var i = 0; i<ss_msg.length; i++ ){
+                addMessage(ss_msg[i]);
+            }
+        }
+
+        function printMessage_pre(Message)
+        {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+        function addMessage_pre(Message) {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function set_progress_get_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_get_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
+        }
+
+        function increase_progress_get_parameters(){
+            var prog = document.getElementById("progress_get_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
+        function set_progress_set_parameters( n_cur, n_max ){
+            var prog = document.getElementById("progress_set_parameters");
+            prog.setAttribute("max",String(n_max));
+            prog.value = n_cur;
+        }
+
+        function increase_progress_set_parameters(){
+            var prog = document.getElementById("progress_set_parameters");
+            var n_cur = prog.value;
+            n_cur++;
+            prog.value = n_cur;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // callback functions
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // basic functions
+        function _fun_init_coffee_framework() {
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+            //
+            var device = new elpusk.device("device");
+            var usb = new elpusk.device.usb("usb");
+            var hid = new elpusk.device.usb.hid("hid");
+
+            console.log(device);
+            console.log(usb);
+            console.log(hid);
+
+            console.log(device.get_path());
+            console.log(usb.get_path());
+            console.log(hid.get_path());
+
+            //
+            array_device_list.length = 0;
+
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss","443").then(
+                function(s_session_number){
+                    console.log("session : " + s_session_number);
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("connect : " + event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function(s_rx){
+                    console.log(s_rx);
+                    if( s_rx == null ){
+                        console.log("none device");
+                    }
+                    else if (Array.isArray(s_rx)) {
+                        for (var i = 0; i < s_rx.length; i++) {
+                            array_device_list.push( s_rx[i] );
+                        }
+
+                        if( array_device_list.length > 0 ){
+                            lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
+                            console.log("create device : "+lpu237.toString());
+                            ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(elpusk.framework.coffee.get_instance(),lpu237 );
+                            console.log("create device controller : "+ctl_lpu237.toString());
+                            return ctl_lpu237.open_with_promise();
+                        }
+                    }
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("get device list : "+event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                function( s_message ){
+                    //s_message is always "success"
+                    var select_dev = document.getElementById("drop_get_device_list");
+                    var option = document.createElement('option');
+                    option.value = ctl_lpu237.get_device().get_device_index();
+                    option.text = ctl_lpu237.get_device().get_path();
+                    select_dev.add(option, 0);
+
+                    console.log("opened : "+ctl_lpu237.get_device().get_device_index());
+                }
+            )
+            .catch(
+                function(event_error){
+                    console.log("open device : "+event_error);
+                }
+            );
+        }
+
+
+        function fun_init() {
+
+            _fun_init_coffee_framework();
+
+            if(!(File && FileReader && FileList && Blob)) {
+                addMessage("Not Supported File API");
+            }
+            
+            //
+            document.getElementById("input_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                //
+                lpu237.set_from_file(file).then(function (b_result) {
+                    //alway true.
+                    addMessage("ok : set_from_file");
+                    addMultiMessage(lpu237.get_string());
+
+                    //document.getElementById("input_file").value = "";
+                }).catch(function (event_error) {
+                    // error here
+                    addMessage("fail : set_from_file : "+ lpu237.get_error_message(event_error));
+                    //document.getElementById("input_file").value = "";
+                });
+
+            };
+            
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is ready here
+                addMessage("disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_close() {
+            ctl_lpu237.close_with_promise().then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : close_with_promise");
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : close_with_promise : "+ event_error.message);
+            });            
+        }
+
+        ///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////
+
+        function on_button_get_parameters(){
+            ctl_lpu237.load_parameter_from_device_with_promise().then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : load_parameter_from_device_with_promise");
+
+                //addMultiMessage( ctl_lpu237.get_device().get_string() );
+                alert(ctl_lpu237.get_device().get_string());
+
+                //addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
+                //addMessage(ctl_lpu237.get_device().get_tag_by_ascii_string(ctl_lpu237.get_device().get_private_prefix(0)));
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : load_parameter_from_device_with_promise : "+ event_error.message);
+            });
+        }        
+
+        function on_button_set_parameters(){
+            ctl_lpu237.save_parameter_to_device_with_promise().then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : save_parameter_to_device_with_promise");
+
+                addMultiMessage( ctl_lpu237.get_device().get_string() );
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : save_parameter_to_device_with_promise : "+ event_error.message);
+            });
+        }
+        
+        function on_button_enable_read_with_promise(){
+            ctl_lpu237.read_card_from_device_with_promise(true).then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : read_card_from_device_with_promise");
+
+                for( var i = 0; i<3; i++ ){
+                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
+                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
+                        continue;
+                    }
+                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
+                }
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : read_card_from_device_with_promise : "+ event_error.message);
+            });
+        }
+
+        function on_button_disable_read_with_promise(){
+            ctl_lpu237.read_card_from_device_with_promise(false).then(function (s_message) {
+                //s_message always "success".
+                addMessage("success : on_button_disable_read_with_promise");
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : on_button_disable_read_with_promise : "+ event_error.message);
+            });
+        }
+
+        function cb_read_done( n_device_index, s_msg ){
+            //s_msg always "success"
+            addMessage("success : read_card_from_device_with_callback");
+            for( var i = 0; i<3; i++ ){
+                    if( ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
+                        addMessage("error : " + String(ctl_lpu237.get_device().get_msr_error_code(i)));
+                        continue;
+                    }
+                    addMessage(ctl_lpu237.get_device().get_msr_data(i));
+            }
+            //
+            on_button_enable_read_with_callback();
+        }
+
+        function cb_read_error( n_device_index,event_error){
+            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
+        }
+
+        function on_button_enable_read_with_callback(){
+            if( ctl_lpu237.read_card_from_device_with_callback(true,cb_read_done,cb_read_error) ){
+                addMessage("ready : waits reading.");
+            }
+            else{
+                addMessage("not ready : failure.");
+            }
+        }
+
+        function cb_read_stop_done( n_device_index,s_msg ){
+            //s_msg always "success"
+            addMessage("success : read_card_from_device_with_callback : stop");
+        }
+        function cb_read_stop_error(n_device_index,event_error){
+            addMessage("fail : read_card_from_device_with_callback : "+ event_error.message);
+        }
+
+        function on_button_disable_read_with_callback(){
+            if( ctl_lpu237.read_card_from_device_with_callback(false,cb_read_stop_done,cb_read_stop_error) ){
+                addMessage("ready : waits reading.");
+            }
+            else{
+                addMessage("not ready : failure.");
+            }
+        }
+
+    </script>
+</BODY>
+</HTML>

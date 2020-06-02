@@ -30,7 +30,7 @@
 <HEAD>
     <meta charset="utf-8" />
 
-    <TITLE>test for javascript library</TITLE>
+    <TITLE>test for lpu237 protocol library</TITLE>
 
 </HEAD>
 <BODY>
@@ -41,6 +41,7 @@
             document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
             document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
@@ -51,6 +52,7 @@
             document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
             document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
             document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
@@ -130,9 +132,9 @@
 
         function _test(){
             addMessage(" : test : ");
+            console.log("_test()");
+            //
         }
-
-
 
         function init() {
             if( typeof Promise === 'undefined'){
@@ -218,10 +220,17 @@
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////
-
-        //////////////////////////////////////////////////////////////////////////////////////////////
         // callback functions
+        function cb_received_read_from_server( s_rx  ){
+            var b_result = false;
+
+            do{
+
+
+                b_result = true;
+            }while(false);
+        }
+
         function cb_received_get_parameter_from_server( s_rx  ){
             var b_result = false;
             do{
@@ -412,7 +421,7 @@
 
                         if( array_device_list.length > 0 ){
                             lpu237 = new elpusk.device.usb.hid.lpu237(array_device_list[0]);
-                            console.log("create : "+lpu237);
+                            console.log("create device : "+lpu237.toString());
                             return elpusk.framework.coffee.get_instance().device_open(lpu237.get_path());
                         }
                     }
@@ -648,7 +657,7 @@
 
         function on_button_set_parameters(){
             fun_set_pre_parameter();
-        }        
+        }
 
     </script>
 </BODY>

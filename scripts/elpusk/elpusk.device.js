@@ -23,7 +23,7 @@
 
 'use strict';
 
-(function (windows, undefined) {
+(function (window, undefined) {
     /**@private */
     var _elpusk = window.elpusk;
 
@@ -102,4 +102,4 @@
 
     // the end of function
     window.elpusk = _elpusk;
-}(window))
+}(window));

@@ -29,12 +29,29 @@
  * <br />  2020.3.25 - release 1.1. 
  * <br />  : change recover callback positon. from the end of function, to the first of function.
  * <br />  : release device filter limit.
+ * 
+ * <br />  2020.5.13 - release 1.2. 
+ * <br />  : fix - device_receive() function code missing.
+ * <br />  : add - device_receive_with_callback() method.
+ * 
+ * <br />  2020.5.14 - release 1.3.
+ * <br />  : add - get_session_number() method.( instance function, class function get_session_number() is already existed.)
+ * 
+ * <br />  2020.5.20 - release 1.4.
+ * <br />  : add - device_cancel_with_callback() method.
+ * 
+ * <br />  2020.5.26 - release 1.5.
+ * <br />  : support - supports multi websocket callback function.
+ * 
+ * <br />  2020.5.29 - release 1.6.
+ * <br />  : add - "b_need_device_index" optional parameter to x_with_callback() functions.
+ * 
  * @namespace
  */
 
 'use strict';
 
-(function (windows, undefined) {
+(function (window, undefined) {
     /**@private */
     var _elpusk = window.elpusk;
 
@@ -89,6 +106,12 @@
              * @private
             */ 
             var _s_session;
+
+            /**
+             * map of queue of promise resolve & reject.
+             * @private
+             */
+            var _map_of_queue_promise_parameter = new Map();
 
             function _constructor(){
 
@@ -171,6 +194,99 @@
                  *  @description impossible device index number
                 */                
                 var const_n_undefined_device_index = 0;
+
+                /** 
+                 * @private 
+                 * @function _push_promise_parameter
+                 * @param {number} n_device_index
+                 * @param {object} paramemter of promise.
+                 * @description push promise parameter for promise method.
+                */                
+                function _push_promise_parameter(n_device_index,paramemter) {
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            var queue = [];
+                            queue.push(paramemter);
+                            _map_of_queue_promise_parameter.set(n_device_index,queue);
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        q.push(paramemter);
+
+                    }while(false);
+                }
+
+                /** 
+                 * @private 
+                 * @function _front_promise_parameter
+                 * @param {number} n_device_index
+                 * @returns {object|null} success - resolve & reject of promise.
+                 * <br /> empty - null
+                 * @description add promise parameter for promise method to queue.
+                */                
+                function _front_promise_parameter(n_device_index) {
+                    var parameter = null;
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        if( q.length <= 0 ){
+                            continue;
+                        }
+                        //
+                        parameter = q.shift();
+                        if( q.length <= 0 ){
+                            _map_of_queue_promise_parameter.delete(n_device_index);
+                        }
+                    }while(false);
+                    return parameter;
+                }
+
+                /** 
+                 * @private 
+                 * @function _is_empty_promise_parameter
+                 * @param {number} n_device_index
+                 * @returns {boolean} true - empty promise parameter queue.
+                 * <br /> false - not  empty promise parameter queue.
+                 * @description check the promise parameter queue. if it is empty or not.
+                */                
+                function _is_empty_promise_parameter(n_device_index) {
+                    var b_empty = true;
+                    do{
+                        if( !_map_of_queue_promise_parameter.has(n_device_index) ){
+                            continue;
+                        }
+                        var q = _map_of_queue_promise_parameter.get(n_device_index);
+                        if( q.length <= 0 ){
+                            continue;
+                        }
+                        //
+                        b_empty = false;
+                    }while(false);
+                    return b_empty;
+                }
+               
+                /** 
+                 * @private 
+                 * @function _delete_promise_parameter
+                 * @param {number} n_device_index
+                 * @description delete the promise parameter queue.
+                */                
+                function _delete_promise_parameter(n_device_index){
+                    if( _map_of_queue_promise_parameter.has(n_device_index)){
+                        _map_of_queue_promise_parameter.delete(n_device_index);
+                    }
+                }
+
+                /** 
+                 * @private 
+                 * @function _clear_promise_parameter
+                 * @description remove all item of map of  the promise parameter queue.
+                */                
+                function _clear_promise_parameter(){
+                    _map_of_queue_promise_parameter.clear();
+                }
 
                 /** 
                  * @private 
@@ -259,7 +375,6 @@
                     if (_is_chrome_or_firfox_or_opera()) {
                         s_used_domain = "localhost";
                     }
-            
             
                     var s_uri = s_used_protocol + "://" + s_used_domain + ":" + s_used_port;//"wss://127.0.0.1:443";
                     return s_uri;
@@ -603,22 +718,20 @@
                             }
             
                             _websocket.onerror = function(evt){
-                                _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                reject(evt);
+                                _on_def_error(0,evt);
                             }
 
                             _websocket.onmessage = function (evt) {
-                                //recover default handler.
-                                _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                var json_obj = JSON.parse(evt.data);
-                                if (json_obj.action_code == _type_action_code.ECHO) {
-                                    resolve(json_obj.data_field);
-                                }
-                                else {
-                                    reject(_get_error_object('en_e_server_mismatch_action'));
-                                }
+                                _on_def_message_json_format(0,evt);
                             }
+
+                            var parameter = {
+                                "n_device_index" : 0,
+                                "method" : "_promise_echo",
+                                "resolve" : resolve,
+                                "reject" : reject
+                            };
+                            _push_promise_parameter(0,parameter);
             
                             //send request
                             var s_echo_data;
@@ -666,6 +779,17 @@
                 function _on_def_close(evt){
                     //console.log('_on_def_close');
                     _b_connet = false;
+
+                    var n_device_index = 0;
+                    var parameter = null;
+
+                    if( !_is_empty_promise_parameter(n_device_index)){
+                        //manager request.
+                        parameter = _front_promise_parameter(n_device_index);
+                        if( parameter.method === "disconnect" ){
+                            parameter.resolve(_s_session );
+                        }
+                    }//the end of manager request.
                     _s_session = "";
                 }
 
@@ -675,22 +799,178 @@
                  * @param {Event} evt
                  * @description default callback function of websocket reecive event.
                 */                
-                function _on_def_message_json_format(evt){
+                function _on_def_message_json_format(n_device_index,evt){
                     //console.log('_on_def_message_json_format');
                     do{
-                        if( typeof _system_handler === 'undefined'){
-                            continue;
-                        }
 
                         var json_obj = JSON.parse(evt.data);
 
-                        if( json_obj.request_type !== _type_request_type.SYSTEM_EVENT ){
+                        if( json_obj.request_type === _type_request_type.SYSTEM_EVENT ){
+                            if( typeof _system_handler === 'function'){
+                                _system_handler( json_obj.action_code, json_obj.data_field );
+                            }
                             continue;
                         }
-    
-                        _system_handler( json_obj.action_code, json_obj.data_field );
 
-                    }while(false);
+                        var parameter = null;
+
+                        if(_is_empty_promise_parameter(n_device_index) ){
+                            continue;
+                        }
+                        parameter = _front_promise_parameter(n_device_index);
+
+                        if( n_device_index === 0){
+                            //manager request.
+                            switch(parameter.method){
+                                case "connect":
+                                    if (!_b_connet) {
+                                        _s_session = json_obj.session_number.toString();
+                                        _b_connet = true;//reponse of open request
+                                    }
+                                    parameter.resolve(_s_session );
+                                    break;
+                                case "_promise_echo":
+                                    if (json_obj.action_code == _type_action_code.ECHO) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                case "get_device_list":
+                                    if (json_obj.action_code == _type_action_code.DEVICE_LIST) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                case "device_open":
+                                    if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
+                                        if(json_obj.data_field == "success"){
+                                            _delete_promise_parameter(json_obj.device_index);
+                                            parameter.resolve(json_obj.device_index);
+                                        }
+                                        else{
+                                            parameter.resolve(const_n_undefined_device_index);
+                                        }
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }//end switch
+                            continue;
+                        }//the end of manager request.
+
+                        switch(parameter.method){
+                            case "device_close":
+                                if (json_obj.action_code == _type_action_code.DEVICE_CLOSE) {
+                                    _delete_promise_parameter(n_device_index);
+                                    parameter.resolve(json_obj.data_field);
+                                }
+                                else {
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                                break;
+                            case "device_send":
+                                if (json_obj.action_code == _type_action_code.DEVICE_SEND) {
+                                    parameter.resolve(json_obj.data_field);
+                                }
+                                else {
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                                break;
+                            case "device_receive":
+                                if (json_obj.action_code == _type_action_code.DEVICE_RECEIVE) {
+                                    if( parameter.resolve === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            case "device_transmit":
+                                if (json_obj.action_code == _type_action_code.DEVICE_TRANSMIT) {
+                                    if( parameter.resolve === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            case "device_cancel":
+                                if (json_obj.action_code == _type_action_code.DEVICE_CANCEL) {
+                                    if( parameter.resolve === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }//end switch
+                    }while(false);//the end of 
                 }
 
                 /** 
@@ -699,10 +979,70 @@
                  * @param {Event} evt
                  * @description default callback function of websocket error event.
                 */                
-                function _on_def_error(evt){
+                function _on_def_error(n_device_index,evt){
+                    do{
+                        var parameter = null;
+
+                        if( _is_empty_promise_parameter(n_device_index)){
+                            continue;
+                        }
+                        parameter = _front_promise_parameter(n_device_index);
+
+                        if( n_device_index === 0){
+                            //manager request.
+                            switch(parameter.method){
+                                case "connect":
+                                case "disconnect":
+                                case "_promise_echo":
+                                case "get_device_list":
+                                case "device_open":
+                                    parameter.reject(evt);
+                                    break;
+                                default:
+                                    break;
+                            }//end switch
+                            continue;
+                        }//the end of manager request.
+
+                        switch(parameter.method){
+                            case "device_close":
+                            case "device_send":
+                                parameter.reject(evt);
+                                break;
+                            case "device_receive":
+                            case "device_transmit":
+                            case "device_cancel":
+                                if( parameter.reject === null ){
+                                    if( parameter.b_device_index ){
+                                        parameter.cb_error(n_device_index,evt);
+                                    }
+                                    else{
+                                        parameter.cb_error(evt);
+                                    }
+                                }
+                                else{
+                                    parameter.reject(evt);
+                                }
+                                break;
+                            default:
+                                break;
+                        }//end switch
+
+                    }while(false);
+                    var parameter;
                 }
 
                 return{
+
+                    /**
+                     * @public 
+                     * @function get_session_number
+                     * @return {string} the current session number.
+                     * @description get session number of connection.
+                     */
+                    get_session_number : function () {
+                        return _s_session;
+                    },
 
                     /** 
                      * @public 
@@ -739,26 +1079,27 @@
                                 resolve(_s_session);
                             }
                             else {
+                                _clear_promise_parameter();
+
                                 _websocket = new WebSocket(s_url, "elpusk.protocol.coffee.manager");
                                 _websocket.onopen = function (evt) { _on_def_open(evt); }
                                 _websocket.onclose = function (evt) { _on_def_close(evt); }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
 
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (!_b_connet) {
-                                        _s_session = json_obj.session_number.toString();
-                                        _b_connet = true;//reponse of open request
-                                    }
-                
-                                    resolve(_s_session);
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "connect",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                             }
                         });
                 
@@ -782,22 +1123,13 @@
                                 resolve(_s_session);
                             }
                             else {
-                                _websocket.onerror = function(evt){
-                                    //recover default handler
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
-                                }
-
-                                _websocket.onclose = function (evt) {
-                                    //recover default handler
-                                    _websocket.onclose = function (evt) { _on_def_close(evt); }
-
-                                    _b_connet = false;
-                                    resolve(_s_session);
-                                    _s_session = "";
-                                }
-
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "disconnect",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                                 _websocket.close();
                             }
                         });
@@ -871,24 +1203,21 @@
                                     s_used_filter = s_filter;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    //recover default handler.
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "get_device_list",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -936,29 +1265,22 @@
                                     reject(_get_error_object('en_e_server_unsupport_data'));
                                     continue;
                                 }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        if(json_obj.data_field == "success"){
-                                            resolve(json_obj.device_index);
-                                        }
-                                        else{
-                                            resolve(const_n_undefined_device_index);
-                                        }
-                                        
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
+     
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(0,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "device_open",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1008,24 +1330,21 @@
                                     reject(_get_error_object('en_e_device_index'));
                                     continue;
                                 }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_close",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1094,23 +1413,21 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_send",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1173,28 +1490,22 @@
                                     continue;
                                 }
                 
-                                if (typeof s_hex_string !== 'string') {
-                                    reject(_get_error_object('en_e_server_data_field_format'));
-                                    continue;
-                                }
-                
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
-                
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_receive",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+
                                 //send request
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
@@ -1211,7 +1522,101 @@
                             } while (false);
                         });
                     },
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_receive_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * <br /> function cb_received( hex_string ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
+                     * 
+                     * @returns {boolean} true - success of starting process.
+                     * <br /> false - failure of starting process.
+                     * 
+                     * @description run receive action to server by callback function.
+                     * <br /> receive a data from device.
+                     * <br /> If device protocol is send-receive pair type, you must don't use this method.
+                    */                
+                    device_receive_with_callback : function ( n_device_index, n_in_id, cb_received, cb_error,b_need_device_index ) {
+                        var b_result = false;
+                        var b_device_index = false;
+                         do {
+                            if( typeof b_need_device_index === 'boolean'){
+                                if( b_need_device_index === true ){
+                                    b_device_index = b_need_device_index;
+                                }
+                            }
+                             if(typeof cb_received !== 'function' ){
+                                 continue;
+                             }
+                             if(typeof cb_error !== 'function' ){
+                                 continue;
+                             }
+
+                             if (!_b_connet) {
+                                 continue;
+                             }
+             
+                             var action_code = _type_action_code.DEVICE_RECEIVE;
+             
+                             if (typeof n_device_index !== 'number') {
+                                 continue;
+                             }
+                             if (n_device_index === const_n_undefined_device_index) {
+                                 continue;
+                             }
+                             if (typeof n_in_id !== 'number') {
+                                 continue;
+                             }
+                             if (n_in_id < 0 || n_in_id > 0xff) {
+                                 continue;
+                             }
+             
+                             _websocket.onerror = function(evt){
+                                _on_def_error(n_device_index,evt);
+                            }
+
+                            _websocket.onmessage = function (evt) {
+                                _on_def_message_json_format(n_device_index,evt);
+                            }
                 
+                            var parameter = {
+                                "n_device_index" : n_device_index,
+                                "method" : "device_receive",
+                                "resolve" : null,
+                                "reject" : null,
+                                "cb_received" : cb_received,
+                                "cb_error" : cb_error,
+                                "b_device_index" : b_device_index
+                            };
+                            _push_promise_parameter(n_device_index,parameter);
+             
+                             //send request
+                             var json_packet = _generate_request_packet(
+                                 _type_packet_owner.DEVICE
+                                 , n_device_index
+                                 , action_code
+                                 , n_in_id
+                                 , 0
+                                 , _type_data_field_type.HEX_STRING
+                             );
+             
+                             var s_json_packet = JSON.stringify(json_packet);
+                             _websocket.send(s_json_packet);
+             
+                             b_result = true;
+                         } while (false);
+
+                         return b_result;
+                    },                  
                     /** 
                      * @public 
                      * @async
@@ -1272,23 +1677,22 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
-                
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_transmit",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+
                                 //send request
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
@@ -1322,6 +1726,9 @@
                      * <br /> function cb_received( hex_string ) - return none
                      * @param {function} cb_error this callback function will be called when received a error from server.
                      * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
                      * 
                      * @returns {boolean} true - success of starting process.
                      * <br /> false - failure of starting process.
@@ -1332,10 +1739,16 @@
                     */                
                    device_transmit_with_callback : function (
                        n_device_index, n_in_id, n_out_id, s_hex_string,
-                       cb_received, cb_error
+                       cb_received, cb_error, b_need_device_index
                        ) {
                            var b_result = false;
+                           var b_device_index = false;
                             do {
+                                if( typeof b_need_device_index === 'boolean'){
+                                    if( b_need_device_index === true ){
+                                        b_device_index = b_need_device_index;
+                                    }
+                                }
                                 if(typeof cb_received !== 'function' ){
                                     continue;
                                 }
@@ -1372,22 +1785,24 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        cb_received(json_obj.data_field);
-                                    }
-                                    else {
-                                        cb_error(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    cb_error(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_transmit",
+                                    "resolve" : null,
+                                    "reject" : null,
+                                    "cb_received" : cb_received,
+                                    "cb_error" : cb_error,
+                                    "b_device_index" : b_device_index
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1462,22 +1877,21 @@
                                     continue;
                                 }
                 
-                                _websocket.onmessage = function (evt) {
-                                    //recover default handler.
-                                    _websocket.onmessage = function (evt) { _on_def_message_json_format(evt); }
-
-                                    var json_obj = JSON.parse(evt.data);
-                                    if (json_obj.action_code == action_code) {
-                                        resolve(json_obj.data_field);
-                                    }
-                                    else {
-                                        reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
-                                }
                                 _websocket.onerror = function(evt){
-                                    _websocket.onerror = function(evt){ _on_def_error(evt);}
-                                    reject(evt);
+                                    _on_def_error(n_device_index,evt);
                                 }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_cancel",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
                                 var json_packet = _generate_request_packet(
@@ -1494,7 +1908,110 @@
                 
                             } while (false);
                         });
+                    },
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_cancel_with_callback
+                     * @param {number} n_device_index device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {function} cb_received this callback function will be called when received a data from server.
+                     * <br /> function cb_received( string(maybe "success") ) - return none
+                     * @param {function} cb_error this callback function will be called when received a error from server.
+                     * <br /> function cb_error( Error object ) - return none
+                     * @param {boolean} b_need_device_index option parameter.
+                     * <br /> undefined or false - n_device_index is not used by the parameter of cb_received, cb_error callback.
+                     * <br /> true - the first parameter of cb_received, cb_error callback is n_device_index.
+                     * 
+                     * @returns {boolean} true - success of cancel process.
+                     * <br /> false - failure of cancel process.
+                     * 
+                     * @description cancel the current pending operation of device to server.
+                     * <br /> the current process will be cancel.
+                    */                
+                    device_cancel_with_callback : function (n_device_index, n_in_id, n_out_id,cb_received, cb_error, b_need_device_index) {
+                        var b_result = false;
+                        var b_device_index = false;
+                        do {
+                            if( typeof b_need_device_index === 'boolean'){
+                                if( b_need_device_index === true ){
+                                    b_device_index = b_need_device_index;
+                                }
+                            }
+                            if(typeof cb_received !== 'function' ){
+                                continue;
+                            }
+                            if(typeof cb_error !== 'function' ){
+                                continue;
+                            }
+                            if (!_b_connet) {
+                                continue;
+                            }
+            
+                            var action_code = _type_action_code.DEVICE_CANCEL;
+            
+                            if (typeof n_device_index !== 'number') {
+                                continue;
+                            }
+                            if (n_device_index === const_n_undefined_device_index) {
+                                continue;
+                            }
+                            if (typeof n_in_id !== 'number') {
+                                continue;
+                            }
+                            if (n_in_id < 0 || n_in_id > 0xff) {
+                                continue;
+                            }
+                            if (typeof n_out_id !== 'number') {
+                                continue;
+                            }
+                            if (n_out_id < 0 || n_out_id > 0xff) {
+                                continue;
+                            }
+            
+                            _websocket.onerror = function(evt){
+                                _on_def_error(n_device_index,evt);
+                            }
+
+                            _websocket.onmessage = function (evt) {
+                                _on_def_message_json_format(n_device_index,evt);
+                            }
+                
+                            var parameter = {
+                                "n_device_index" : n_device_index,
+                                "method" : "device_cancel",
+                                "resolve" : null,
+                                "reject" : null,
+                                "cb_received" : cb_received,
+                                "cb_error" : cb_error,
+                                "b_device_index" : b_device_index
+                            };
+                            _push_promise_parameter(n_device_index,parameter);
+
+                            //send request
+                            var json_packet = _generate_request_packet(
+                                _type_packet_owner.DEVICE
+                                , n_device_index
+                                , action_code
+                                , n_in_id
+                                , n_out_id
+                                , _type_data_field_type.HEX_STRING
+                            );
+            
+                            var s_json_packet = JSON.stringify(json_packet);
+                            _websocket.send(s_json_packet);
+            
+                            b_result = true;
+                        } while (false);
+
+                        return b_result;
                     }
+
                     ////////////////////////////////////////////////////////////////////////
                     //public variables
 
@@ -1528,7 +2045,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.1.0";
+        return "1.5.0";
     }
 
     /**
@@ -1560,4 +2077,4 @@
 
     // the end of function
     window.elpusk = _elpusk;
-}(window))
+}(window));
