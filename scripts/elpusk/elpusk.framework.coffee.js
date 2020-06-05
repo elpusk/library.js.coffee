@@ -69,14 +69,17 @@
      * boolean, connected to server or not.
      * @private 
     */
-   var _b_connet = false;
+    var _b_connet = false;
 
     /**
      * 
      * @private 
      * @function _system_handler system event handler callback
+     * @param {string} first  string type, action code.
+     * @param {array} second string array type , device path list.
+     * @returns {undefined} none
     */
-   var _system_handler;//void(string, string) type
+    var _system_handler;//void(string, array string) type
 
     if (!_elpusk.framework.coffee) {
          _b_connet = false;
