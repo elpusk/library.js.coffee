@@ -460,6 +460,20 @@
         return b_result;
     }
 
+    function _is_event_rsp_cancel(s_rx) {
+        var b_result = false;
+        do{
+            if( !Array.isArray(s_rx) ){
+                continue;
+            }
+            if(s_rx[0]!=="cancel"){
+                continue;
+            }
+            b_result = true;
+        }while(false);
+        return b_result;
+    }
+
     function _process_event_in_wait_rsp(n_device_index,s_rx){
         do{
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
@@ -495,7 +509,15 @@
         _set_status(n_device_index,_type_status.ST_IDLE);
     }
     function _process_event_in_wait_card(n_device_index,s_rx){
+
         do{
+            if( _is_event_rsp_cancel(s_rx) ){
+                //event e_rsp_cancel
+                _notifiy_error(elpusk.util.map_of_queue_front(_map_q_para,n_device_index));
+                _set_status(n_device_index,_type_status.ST_WAIT_CANCEL);
+                return;
+            }
+
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
             if( !para ){
                 continue;
@@ -503,6 +525,7 @@
             if( !para.device.set_msr_data_from_rx(s_rx) ){
                 continue;
             }
+            //event e_rsp_card
             _notifiy_received(para);
             var b_result = para.server.device_receive_with_callback(
                 n_device_index,0,
@@ -531,11 +554,11 @@
             }
 
             //e_rsp_good
-            b_result = _gen_opos_start_io( para.server, para.device,_cb_complete_rsp, _cb_error_frame,false);
+            var b_result = _gen_opos_start_io( para.server, para.device,_cb_complete_rsp, _cb_error_frame,false);
             if( !b_result ){
                 continue;
             }
-            _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
+            _set_status(para.device.get_device_index(),_type_status.ST_WAIT_RSP);
             return;
         }while(false);
 
@@ -1119,9 +1142,6 @@
                         break;
                     }
                      b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
-                    if( b_result ){
-                        _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
-                    }
                     break;
                 default:
                     break;
@@ -1187,9 +1207,6 @@
                         break;
                     }
                      b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
-                    if( b_result ){
-                        _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
-                    }
                     break;
                 default:
                     break;
