@@ -527,6 +527,13 @@
             }
             //event e_rsp_card
             _notifiy_received(para);
+            if( para.resolve ){
+                //the end of waiting for promise type
+                para = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);//remove requesst from queue.
+                _set_status(n_device_index,_type_status.ST_IDLE);
+                return;
+            }
+            //re-waiting card data for callback type
             var b_result = para.server.device_receive_with_callback(
                 n_device_index,0,
                 _cb_complete_rsp,
@@ -1122,32 +1129,29 @@
         var b_result = false;
         var server = this._server;
         var device = this._device;
+        var st = _type_status.ST_IDLE;
         do{
             if( typeof b_read !== 'boolean' ){
                 continue;
             }
-
-            switch(_get_status(device.get_device_index())){
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+            st = _get_status(device.get_device_index());
+            switch(st){
                 case _type_status.ST_IDLE:
-                    if( !_check_server_and_device(server,device)){
-                        break;
-                    }
-                    b_result = _gen_opos_start_io( server, device,_cb_complete_rsp, _cb_error_frame,b_read);
-                    if( b_result ){
-                        _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
-                    }
                     break;
                 case _type_status.ST_WAIT_CARD:
                     if( b_read ){
-                        break;
+                        continue;
                     }
-                     b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
                     break;
                 default:
-                    break;
+                    continue;
             }//end switch
-        }while(false);
 
+            b_result = true;
+        }while(false);
 
         if( !b_result ){
             return new Promise(function (resolve, reject) {
@@ -1157,16 +1161,48 @@
         }
         else{
             return new Promise(function (resolve, reject) {
-                var parameter = {
-                    "server" : server,
-                    "device" : device,
-                    "resolve" : resolve,
-                    "reject" : reject,
-                    "b_read" : b_read,
-                    "cb_received" : null,
-                    "cb_error" : null
-                };
-                elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+                var b_result = false;
+                do{
+                    device.reset_msr_data();
+                    switch(st){
+                        case _type_status.ST_IDLE:
+                            if( device.is_opos_mode() && b_read ){
+                                b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                                if( b_result ){
+                                    _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
+                                }
+                                break;
+                            }
+                            //change to opos mode.
+                            b_result = _gen_opos_start_io( server, device,_cb_complete_rsp, _cb_error_frame,b_read);
+                            if( b_result ){
+                                _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
+                            }
+                            break;
+                        case _type_status.ST_WAIT_CARD:
+                            b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                            break;
+                        default:
+                            break;
+                    }//end switch
+            
+                    if( b_result ){
+                        var parameter = {
+                            "server" : server,
+                            "device" : device,
+                            "resolve" : resolve,
+                            "reject" : reject,
+                            "b_read" : b_read,
+                            "cb_received" : null,
+                            "cb_error" : null
+                        };
+                        elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+                    }
+                }while(false);
+
+                if( !b_result ){
+                    reject(new Error("error"));//another is running.
+                }
             });//the end promise
         }
     };
@@ -1174,12 +1210,18 @@
     /**
      * @public
      * @function read_card_from_device_with_callback
-     * @param {boolean} b_read enable read.
+     * @param {boolean} b_read true - reading card.
+     * <br /> false - ignore reading card.
      * @param {function} cb_read_done called when a card reading is done. or canceled ready for reading.
      * @param {function} cb_read_error called when a error is ocurred.
      * @returns {boolean}   true - success processing.
      * <br /> false - error.
-     * @description execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.
+     * @description lpu237's status is changed to "reading card" or "ignore reading card."
+     * If this function is executed with "b_read is true", 
+     * <br /> lpu237 call cb_read_done whenever a card is reading done,
+     * <br /> until error(communincation error or protcol error) is ocurred 
+     * <br /> this function is executed with "b_read is false".
+     * 
      * <br /> the result of proccess will be given by callback function.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
@@ -1191,6 +1233,8 @@
             if( typeof b_read !== 'boolean' ){
                 continue;
             }
+
+            device.reset_msr_data();
 
             switch(_get_status(device.get_device_index())){
                 case _type_status.ST_IDLE:
