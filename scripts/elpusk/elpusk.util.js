@@ -232,6 +232,7 @@
          * @returns {object|null} success - The front value of the queue corresponding to the key in the map.
          * <br /> error - null
          * @description return the front value of the queue corresponding to the key in the map.
+         * <br /> key & value is removed.
         */                
         _elpusk.util.map_of_queue_front =  function(target_map,key) {
             var value = null;
@@ -251,6 +252,34 @@
                 if( q.length <= 0 ){
                     target_map.delete(key);
                 }
+            }while(false);
+            return value;
+        }
+        /** 
+         * @public 
+         * @function elpusk.util.map_of_queue_get
+         * @param {object} target_map Map instance
+         * @param {any} key the key of map(target_map).
+         * @returns {object|null} success - The value of the queue corresponding to the key in the map.
+         * <br /> error - null
+         * @description return the value of the queue corresponding to the key in the map.
+         * <br /> key & value is not removed.
+        */                
+       _elpusk.util.map_of_queue_get =  function(target_map,key) {
+            var value = null;
+            do{
+                if( !(target_map instanceof Map)){
+                    continue;
+                }
+                if( !target_map.has(key) ){
+                    continue;
+                }
+                var q = target_map.get(key);
+                if( q.length <= 0 ){
+                    continue;
+                }
+                //
+                value = q[0];
             }while(false);
             return value;
         }

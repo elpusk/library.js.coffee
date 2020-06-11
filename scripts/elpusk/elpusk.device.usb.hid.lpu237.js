@@ -23,10 +23,13 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.0.0
+ * @version 1.2.0
  * @description elpusk lpu237 device protocol layer library.
- * <br />  2020.4.10 - release 1.0. 
- * <br />  2020.5.12 - release 1.1. 
+ * <br />   2020.4.10 - release 1.0. 
+ * <br />   2020.5.12 - release 1.1. 
+ * <br />   2020.6.0  - release 1.2.
+ * <br />               add this._b_opos_mode and it's getter.
+ * <br />               add this._b_config_mode and it's getter.
  * @namespace
  */
 'use strict';
@@ -3481,6 +3484,9 @@
             this._deque_generated_tx = [];
             this._dequeu_s_tx = [];
             this._dequeu_s_rx = [];
+
+            this._b_config_mode = false;
+            this._b_opos_mode = false;
             
             this._set_change_parameter = [];
 
@@ -3540,6 +3546,24 @@
 
         /////////////////////////////////////////////////////////////////////
         // getter
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.is_config_mode
+         * @returns {boolean} true - the currrent device is config mode.
+         * <br /> false - the currrent device is none config mode..
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_config_mode = function(){
+            return  this._b_config_mode;
+        }
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.is_opos_mode
+         * @returns {boolean} true - the currrent device is opos mode.( a card data is sent by vendor-defined HID interface )
+         * <br /> false - the currrent device is none opos mode.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_opos_mode = function(){
+            return  this._b_opos_mode;
+        }
 
         /**
          * @public
@@ -4768,15 +4792,35 @@
                         b_result = true;
                     }
                     break;
+                case _type_generated_tx_type.gt_enter_config:
+                    b_result = _is_success_response(s_response);
+                    if( b_result ){
+                        this._b_config_mode = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_leave_config:
+                    b_result = _is_success_response(s_response);
+                    if( b_result ){
+                        this._b_config_mode = false;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_enter_opos:
+                    b_result = _is_success_response(s_response);
+                    if( b_result ){
+                        this._b_opos_mode = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_leave_opos:
+                    b_result = _is_success_response(s_response);
+                    if( b_result ){
+                        this._b_opos_mode = false;
+                    }
+                    break;        
                 case _type_generated_tx_type.gt_change_authkey:
                 case _type_generated_tx_type.gt_change_status:
                 case _type_generated_tx_type.gt_change_sn:
-                case _type_generated_tx_type.gt_enter_config:
-                case _type_generated_tx_type.gt_leave_config:
                 case _type_generated_tx_type.gt_apply:
                 case _type_generated_tx_type.gt_goto_boot:
-                case _type_generated_tx_type.gt_enter_opos:
-                case _type_generated_tx_type.gt_leave_opos:
                     b_result = _is_success_response(s_response);
                     break;
                 case _type_generated_tx_type.gt_support_mmd1000:
@@ -5458,6 +5502,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.reset_msr_data
          * @param {number} n_track iso track number 0~2.
+         * @description reset buffer that contains a card data.
          */
         _elpusk.device.usb.hid.lpu237.prototype.reset_msr_data = function(n_track){
 

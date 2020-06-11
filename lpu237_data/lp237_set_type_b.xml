@@ -39,8 +39,8 @@ ibutton	:	postfix		: hex-format : use lower case.
 		interface	="usb_kb"
 		buzzer		="on"
 		language	="usa_english"
-		iso1		="enable"
-		iso2		="enable"
+		iso1		="disable"
+		iso2		="disable"
 		iso3		="enable"
 		condition	="and"
 		direction	="bidirectional"
@@ -63,8 +63,8 @@ ibutton	:	postfix		: hex-format : use lower case.
 	/>
 
 	<iso3
-		prefix		="[][;]"
-		postfix		="[s][/][][enter]"
+		prefix		="[s][3]"
+		postfix		="[][enter]"
 	/>
 
 	<ibutton
