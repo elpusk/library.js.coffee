@@ -5502,6 +5502,7 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.reset_msr_data
          * @param {number} n_track iso track number 0~2.
+         * @description reset buffer that contains a card data.
          */
         _elpusk.device.usb.hid.lpu237.prototype.reset_msr_data = function(n_track){
 

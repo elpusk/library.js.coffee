@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.0.0
+ * @version 1.2.0
  * @description lpu237 controller of elpusk framework coffee javascript library .
  * <br /> error rules
  * <br /> * coffee framework error : generates promise reject or calls error callback function.
@@ -33,7 +33,10 @@
  * <br /> 
  * <br />  2020.5.14 - release 1.0.
  * <br />  2020.6.01 - release 1.1.
- * <br />               add get, set parameters progress callback function.
+ * <br />            - add : get, set parameters progress callback function.
+ * <br />  2020.6.11 - release 1.2
+ * <br />            - add : read_card_from_device_with_callback function.
+ * <br />            - add : cancel before enable/disable reading.
  * @namespace elpusk.framework.coffee.ctl_lpu237
  */
 
@@ -83,6 +86,14 @@
      */
     var _map_status = new Map();
 
+    /**
+     * @private
+     * @function _get_status
+     * @param {number} n_device_index the index value of device.
+     * @return {number} _type_status type vaue.
+     * @description return system status in card reading method.
+     * <br /> internal use only.
+     */
     function _get_status(n_device_index) {
         var st = _type_status.ST_UNDEFINED;
 
@@ -104,6 +115,14 @@
         return st;
     }
 
+    /**
+     * @private
+     * @function _set_status
+     * @param {number} n_device_index the index value of device.
+     * @param {number} new_status _type_status type value.
+     * @description change system status in card reading method.
+     * <br /> internal use only.
+     */
     function _set_status(n_device_index,new_status) {
         do{
             if( typeof n_device_index !== 'number'){
@@ -430,15 +449,14 @@
                 parameter.cb_received( parameter.device.get_device_index(),"success");
             }
         }while(false);
-    }    
-    ////////////////////////////////////////////////////////////////////////////////////////////
-    // local callback functions
-    ////////////////////////////////////////////////////////////////////////////////////////////
-    function _process_event_in_idle(n_device_index,s_rx){
-        _notifiy_error_all(n_device_index);
-        elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
     }
-
+    /**
+     * @private
+     * @function _is_event_rsp_good
+     * @param {object} device lpu237 protocol object.
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description check whether the response of coffee framework is success or not.
+     */
     function _is_event_rsp_good(device,s_rx) {
         var b_result = false;
         do{
@@ -459,7 +477,12 @@
         }while(false);
         return b_result;
     }
-
+    /**
+     * @private
+     * @function _is_event_rsp_cancel
+     * @param {Array} s_rx the received data that is the data field of  coffee framework.
+     * @description check whether the response of coffee framework is the string array that it's the first item is "cancel".
+     */
     function _is_event_rsp_cancel(s_rx) {
         var b_result = false;
         do{
@@ -474,6 +497,26 @@
         return b_result;
     }
 
+    /**
+     * @private
+     * @function _process_event_in_idle
+     * @param {number} n_device_index the device index
+     * @description the sub function of _cb_complete_rsp() in idle status.
+     * <br /> process the ocurred event in idle status.(card reading case)
+     */
+    function _process_event_in_idle(n_device_index){
+        _notifiy_error_all(n_device_index);
+        elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
+    }
+
+    /**
+     * @private
+     * @function _process_event_in_wait_rsp
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description the sub function of _cb_complete_rsp() in waiting-response status.
+     * <br /> process the ocurred event in waiting-response status.(card reading case)
+     */
     function _process_event_in_wait_rsp(n_device_index,s_rx){
         do{
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
@@ -508,6 +551,14 @@
         elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
         _set_status(n_device_index,_type_status.ST_IDLE);
     }
+    /**
+     * @private
+     * @function _process_event_in_wait_card
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description the sub function of _cb_complete_rsp() in waiting-card-data status.
+     * <br /> process the ocurred event in waiting-card-data status.(card reading case)
+     */
     function _process_event_in_wait_card(n_device_index,s_rx){
 
         do{
@@ -526,13 +577,14 @@
                 continue;
             }
             //event e_rsp_card
-            _notifiy_received(para);
             if( para.resolve ){
                 //the end of waiting for promise type
                 para = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);//remove requesst from queue.
                 _set_status(n_device_index,_type_status.ST_IDLE);
+                _notifiy_received(para);
                 return;
             }
+            _notifiy_received(para);
             //re-waiting card data for callback type
             var b_result = para.server.device_receive_with_callback(
                 n_device_index,0,
@@ -550,6 +602,14 @@
         elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
         _set_status(n_device_index,_type_status.ST_IDLE);
     }
+    /**
+     * @private
+     * @function _process_event_in_wait_cancel
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description the sub function of _cb_complete_rsp() in waiting-cancel-response status.
+     * <br /> process the ocurred event in waiting-cancel-response status.(card reading case)
+     */
     function _process_event_in_wait_cancel(n_device_index,s_rx){
         do{
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
@@ -561,7 +621,7 @@
             }
 
             //e_rsp_good
-            var b_result = _gen_opos_start_io( para.server, para.device,_cb_complete_rsp, _cb_error_frame,false);
+            var b_result = _gen_opos_start_io( para.server, para.device,_cb_complete_rsp, _cb_error_frame,para.b_read);
             if( !b_result ){
                 continue;
             }
@@ -573,7 +633,18 @@
         elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
         _set_status(n_device_index,_type_status.ST_IDLE);
     }
-
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // local callback functions
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @private
+     * @function _cb_complete_rsp
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description the callback function  in waiting a response.(card reading case)
+     * <br /> process the ocurred event in waiting a response status.(card reading case)
+     */
     function _cb_complete_rsp(n_device_index,s_rx ){
         //event e_rsp_good		e_rsp_error	e_rsp_cancel	e_rsp_card
         do{
@@ -585,7 +656,7 @@
             var st = _get_status(n_device_index);
             switch(st){
                 case _type_status.ST_IDLE :
-                    _process_event_in_idle(n_device_index,s_rx);
+                    _process_event_in_idle(n_device_index);
                     continue;
                 case _type_status.ST_WAIT_RSP :
                     _process_event_in_wait_rsp(n_device_index,s_rx);
@@ -601,7 +672,15 @@
             }//end switch
         }while(false);
     }
-
+    /**
+     * @private
+     * @function _cb_error_frame
+     * @param {number} n_device_index the device index
+     * @param {object} event_error Error object.
+     * @description the callback function  of a error event.(card reading case)
+     * <br /> this function is not processed a missing card data event.(card reading case)
+     * <br /> a missing card data event is processed by _cb_complete_rsp().
+     */
     function _cb_error_frame( n_device_index,event_error ){
         //event e_frame_error
         //called by coffee framework error.
@@ -609,19 +688,25 @@
         _notifiy_error_map(event_error);
         _map_status = new Map();//reset map statu to idle
     }
-
     /**
      * @private
      * @function _cb_error_common
      * @param {object} event_error Event object
      * @description local callback function.
      * <br /> this is called when error is occured in a  request.
+     * <br /> _cb_error_frame() will be used in card reading case.
      */
     function _cb_error_common( n_device_index,event_error ){
         var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
         _notifiy_error(parameter);
     };
-
+    /**
+     * @private
+     * @function _cb_complete_get_parameter
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description this callback function will be called when "get parameters" request is done.
+     */
     function _cb_complete_get_parameter( n_device_index,s_rx  ){
         var b_result = false;
         var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
@@ -674,7 +759,13 @@
             }
         }
     };
-
+    /**
+     * @private
+     * @function _cb_complete_sys_info
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description this callback function will be called when "get system parameters" request is done.
+     */
     function _cb_complete_sys_info( n_device_index,s_rx  ){
         var b_result = false;
         var n_request = 0;
@@ -733,7 +824,13 @@
             }
         }
     };
-
+    /**
+     * @private
+     * @function _cb_complete_sys_info
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description this callback function will be called when "set parameters" request is done.
+     */
     function _cb_complete_set_parameter( n_device_index,s_rx  ){
         var b_result = false;
         var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
@@ -789,8 +886,6 @@
             }
         }
     };
-
-
     /**
      * @private
      * @function _check_server_and_device
@@ -985,7 +1080,9 @@
      * @description execute "get system information" and "get parameters" with server and lpu237 object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * <br /> the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * <br /> this function process "get system parameters" and "get parameters" requests.
+     * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(cb_progress){
         var b_error = true;
@@ -1117,98 +1214,6 @@
 
     /**
      * @public
-     * @function read_card_from_device_with_promise
-     * @return {object} return promise object.
-     * @description execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-     */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_promise = function(b_read){
-
-        var b_result = false;
-        var server = this._server;
-        var device = this._device;
-        var st = _type_status.ST_IDLE;
-        do{
-            if( typeof b_read !== 'boolean' ){
-                continue;
-            }
-            if( !_check_server_and_device(server,device)){
-                continue;
-            }
-            st = _get_status(device.get_device_index());
-            switch(st){
-                case _type_status.ST_IDLE:
-                    break;
-                case _type_status.ST_WAIT_CARD:
-                    if( b_read ){
-                        continue;
-                    }
-                    break;
-                default:
-                    continue;
-            }//end switch
-
-            b_result = true;
-        }while(false);
-
-        if( !b_result ){
-            return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
-        else{
-            return new Promise(function (resolve, reject) {
-                var b_result = false;
-                do{
-                    device.reset_msr_data();
-                    switch(st){
-                        case _type_status.ST_IDLE:
-                            if( device.is_opos_mode() && b_read ){
-                                b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
-                                if( b_result ){
-                                    _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
-                                }
-                                break;
-                            }
-                            //change to opos mode.
-                            b_result = _gen_opos_start_io( server, device,_cb_complete_rsp, _cb_error_frame,b_read);
-                            if( b_result ){
-                                _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
-                            }
-                            break;
-                        case _type_status.ST_WAIT_CARD:
-                            b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
-                            break;
-                        default:
-                            break;
-                    }//end switch
-            
-                    if( b_result ){
-                        var parameter = {
-                            "server" : server,
-                            "device" : device,
-                            "resolve" : resolve,
-                            "reject" : reject,
-                            "b_read" : b_read,
-                            "cb_received" : null,
-                            "cb_error" : null
-                        };
-                        elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
-                    }
-                }while(false);
-
-                if( !b_result ){
-                    reject(new Error("error"));//another is running.
-                }
-            });//the end promise
-        }
-    };
-
-    /**
-     * @public
      * @function read_card_from_device_with_callback
      * @param {boolean} b_read true - reading card.
      * <br /> false - ignore reading card.
@@ -1241,9 +1246,9 @@
                     if( !_check_server_and_device(server,device)){
                         break;
                     }
-                    b_result = _gen_opos_start_io( server, device,_cb_complete_rsp, _cb_error_frame,b_read);
+                    b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
                     if( b_result ){
-                        _set_status(device.get_device_index(),_type_status.ST_WAIT_RSP);
+                        _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     }
                     break;
                 case _type_status.ST_WAIT_CARD:

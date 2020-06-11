@@ -104,7 +104,7 @@
     
 
     
-    <h4 class="name" id="_cancel_card_from_device_with_promise"><span class="type-signature">(private) </span>_cancel_card_from_device_with_promise<span class="signature">(server, device)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="_cancel_start_io"><span class="type-signature">(private) </span>_cancel_start_io<span class="signature">(server, device, cb_complete_cancel, cb_error_cancel)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -112,7 +112,7 @@
 
 
 <div class="description">
-    change the status of lpu237 device to ready status that waits a card reading.
+    requests "canel" to server by callback method.
 </div>
 
 
@@ -164,7 +164,7 @@
 
             
 
-            <td class="description last">the instance of coffee class</td>
+            <td class="description last">coffee manager server object.</td>
         </tr>
 
     
@@ -187,7 +187,53 @@
 
             
 
-            <td class="description last">the instance of lpu237 class</td>
+            <td class="description last">target device object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb_complete_cancel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">It is called "callback function" when device accepts your request successfully.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb_error_cancel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">It is called "callback function" when error is occured.</td>
         </tr>
 
     
@@ -228,7 +274,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line671">line 671</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line333">line 333</a>
     </li></ul></dd>
     
 
@@ -257,7 +303,7 @@
 
         
 <div class="param-desc">
-    the instance of Promise class
+    true - request is delivered to server successfully.<br /> false - It is failed that request is delivered.
 </div>
 
 
@@ -268,7 +314,7 @@
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -286,7 +332,7 @@
     
 
     
-    <h4 class="name" id="_cb_error_common"><span class="type-signature">(private) </span>_cb_error_common<span class="signature">(Event)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="_cb_complete_get_parameter"><span class="type-signature">(private) </span>_cb_complete_get_parameter<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
     
 
     
@@ -294,7 +340,7 @@
 
 
 <div class="description">
-    local callback function.<br /> this is called when error is occured in a  request.
+    this callback function will be called when "get parameters" request is done.
 </div>
 
 
@@ -330,13 +376,13 @@
 
         <tr>
             
-                <td class="name"><code>Event</code></td>
+                <td class="name"><code>n_device_index</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
@@ -346,7 +392,33 @@
 
             
 
-            <td class="description last">object</td>
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
         </tr>
 
     
@@ -387,7 +459,793 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line247">line 247</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line703">line 703</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_cb_complete_rsp"><span class="type-signature">(private) </span>_cb_complete_rsp<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the callback function  in waiting a response.(card reading case)<br /> process the ocurred event in waiting a response status.(card reading case)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line640">line 640</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_cb_complete_sys_info"><span class="type-signature">(private) </span>_cb_complete_sys_info<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    this callback function will be called when "get system parameters" request is done.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line762">line 762</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_cb_complete_sys_info"><span class="type-signature">(private) </span>_cb_complete_sys_info<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    this callback function will be called when "set parameters" request is done.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line827">line 827</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_cb_error_common"><span class="type-signature">(private) </span>_cb_error_common<span class="signature">(event_error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    local callback function.<br /> this is called when error is occured in a  request.<br /> _cb_error_frame() will be used in card reading case.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event_error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Event object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line691">line 691</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_cb_error_frame"><span class="type-signature">(private) </span>_cb_error_frame<span class="signature">(n_device_index, event_error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the callback function  of a error event.(card reading case)<br /> this function is not processed a missing card data event.(card reading case)<br /> a missing card data event is processed by _cb_complete_rsp().
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event_error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Error object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line675">line 675</a>
     </li></ul></dd>
     
 
@@ -543,7 +1401,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line593">line 593</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line889">line 889</a>
     </li></ul></dd>
     
 
@@ -601,7 +1459,7 @@
     
 
     
-    <h4 class="name" id="_get_parameters"><span class="type-signature">(private) </span>_get_parameters<span class="signature">(server, device, cb_complete_get_parameter, cb_error_get_parameter)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <h4 class="name" id="_gen_get_para_start_io"><span class="type-signature">(private) </span>_gen_get_para_start_io<span class="signature">(server, device, cb_complete_get_parameter, cb_error_get_parameter)</span><span class="type-signature"> &rarr; {number}</span></h4>
     
 
     
@@ -771,7 +1629,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line109">line 109</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line195">line 195</a>
     </li></ul></dd>
     
 
@@ -829,7 +1687,7 @@
     
 
     
-    <h4 class="name" id="_get_system_information"><span class="type-signature">(private) </span>_get_system_information<span class="signature">(server, device, cb_complete_sys_info, cb_error_sys_info)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <h4 class="name" id="_gen_get_sysinfo_start_io"><span class="type-signature">(private) </span>_gen_get_sysinfo_start_io<span class="signature">(server, device, cb_complete_sys_info, cb_error_sys_info)</span><span class="type-signature"> &rarr; {number}</span></h4>
     
 
     
@@ -999,7 +1857,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line66">line 66</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line152">line 152</a>
     </li></ul></dd>
     
 
@@ -1057,7 +1915,7 @@
     
 
     
-    <h4 class="name" id="_read_card"><span class="type-signature">(private) </span>_read_card<span class="signature">(server, device, cb_complete_ready_card, cb_error_ready_card, b_read)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    <h4 class="name" id="_gen_opos_start_io"><span class="type-signature">(private) </span>_gen_opos_start_io<span class="signature">(server, device, cb_complete_changed_opos, cb_error_changed_opos, b_read)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -1140,14 +1998,14 @@
 
             
 
-            <td class="description last">target devuce object.</td>
+            <td class="description last">target device object.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>cb_complete_ready_card</code></td>
+                <td class="name"><code>cb_complete_changed_opos</code></td>
             
 
             <td class="type">
@@ -1170,7 +2028,7 @@
 
         <tr>
             
-                <td class="name"><code>cb_error_ready_card</code></td>
+                <td class="name"><code>cb_error_changed_opos</code></td>
             
 
             <td class="type">
@@ -1250,7 +2108,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line198">line 198</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line284">line 284</a>
     </li></ul></dd>
     
 
@@ -1308,189 +2166,7 @@
     
 
     
-    <h4 class="name" id="_ready_card_from_device_with_promise"><span class="type-signature">(private) </span>_ready_card_from_device_with_promise<span class="signature">(server, device)</span><span class="type-signature"> &rarr; {object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    change the status of lpu237 device to ready status that waits a card reading.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>server</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the instance of coffee class</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>device</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the instance of lpu237 class</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line618">line 618</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    the instance of Promise class
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="_set_parameters"><span class="type-signature">(private) </span>_set_parameters<span class="signature">(server, device, cb_complete_set_parameter, cb_error_set_parameter)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <h4 class="name" id="_gen_set_para_start_io"><span class="type-signature">(private) </span>_gen_set_para_start_io<span class="signature">(server, device, cb_complete_set_parameter, cb_error_set_parameter)</span><span class="type-signature"> &rarr; {number}</span></h4>
     
 
     
@@ -1660,7 +2336,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line154">line 154</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line240">line 240</a>
     </li></ul></dd>
     
 
@@ -1707,6 +2383,1854 @@
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_get_status"><span class="type-signature">(private) </span>_get_status<span class="signature">(n_device_index)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    return system status in card reading method.<br /> internal use only.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the index value of device.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line89">line 89</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    _type_status type vaue.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_is_event_rsp_cancel"><span class="type-signature">(private) </span>_is_event_rsp_cancel<span class="signature">(s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    check whether the response of coffee framework is the string array that it's the first item is "cancel".
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line480">line 480</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_is_event_rsp_good"><span class="type-signature">(private) </span>_is_event_rsp_good<span class="signature">(device, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    check whether the response of coffee framework is success or not.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>device</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">lpu237 protocol object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line453">line 453</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_notifiy_error"><span class="type-signature">(private) </span>_notifiy_error<span class="signature">(parameter, event_error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    call error callback function or call promise reject.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>parameter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">object that contains notification information.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event_error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">option Event object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line358">line 358</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_notifiy_error_all"><span class="type-signature">(private) </span>_notifiy_error_all<span class="signature">(n_device_index, event_error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    call error callback function of the device. or call promise reject of it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event_error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">option Event object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line388">line 388</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_notifiy_error_map"><span class="type-signature">(private) </span>_notifiy_error_map<span class="signature">(event_error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    call error callback function of _map_q_para. or call promise reject of it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event_error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">option Event object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line417">line 417</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_notifiy_received"><span class="type-signature">(private) </span>_notifiy_received<span class="signature">(parameter)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    call received callback function or call promise resolve.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>parameter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">object that contains notification information.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line432">line 432</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_process_event_in_idle"><span class="type-signature">(private) </span>_process_event_in_idle<span class="signature">(n_device_index)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the sub function of _cb_complete_rsp() in idle status.<br /> process the ocurred event in idle status.(card reading case)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line500">line 500</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_process_event_in_wait_cancel"><span class="type-signature">(private) </span>_process_event_in_wait_cancel<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the sub function of _cb_complete_rsp() in waiting-cancel-response status.<br /> process the ocurred event in waiting-cancel-response status.(card reading case)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line605">line 605</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_process_event_in_wait_card"><span class="type-signature">(private) </span>_process_event_in_wait_card<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the sub function of _cb_complete_rsp() in waiting-card-data status.<br /> process the ocurred event in waiting-card-data status.(card reading case)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line554">line 554</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_process_event_in_wait_rsp"><span class="type-signature">(private) </span>_process_event_in_wait_rsp<span class="signature">(n_device_index, s_rx)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    the sub function of _cb_complete_rsp() in waiting-response status.<br /> process the ocurred event in waiting-response status.(card reading case)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the device index</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s_rx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the received data that is the data field of  coffee framework.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line512">line 512</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_set_status"><span class="type-signature">(private) </span>_set_status<span class="signature">(n_device_index, new_status)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    change system status in card reading method.<br /> internal use only.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n_device_index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the index value of device.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>new_status</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">_type_status type value.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line118">line 118</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1770,7 +4294,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line834">line 834</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1022">line 1022</a>
     </li></ul></dd>
     
 
@@ -1876,7 +4400,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line769">line 769</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line957">line 957</a>
     </li></ul></dd>
     
 
@@ -1982,7 +4506,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line760">line 760</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line948">line 948</a>
     </li></ul></dd>
     
 
@@ -2048,7 +4572,7 @@
 
 
 <div class="description">
-    execute "get system information" and "get parameters" with server and lpu237 object by construcutor.<br /> the result of proccess will be given promise object type.<br /> Always the parameter of promise's resolve is "success" string.<br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+    execute "get system information" and "get parameters" with server and lpu237 object by construcutor.<br /> the result of proccess will be given promise object type.<br /> Always the parameter of promise's resolve is "success" string.<br /> the parameter of promise's reject is Error object.( this object message is "error" string ).<br /> this function process "get system parameters" and "get parameters" requests.<br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
 </div>
 
 
@@ -2141,7 +4665,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line886">line 886</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1074">line 1074</a>
     </li></ul></dd>
     
 
@@ -2251,7 +4775,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line778">line 778</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line966">line 966</a>
     </li></ul></dd>
     
 
@@ -2317,7 +4841,7 @@
 
 
 <div class="description">
-    execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.<br /> the result of proccess will be given by callback function.
+    lpu237's status is changed to "reading card" or "ignore reading card."If this function is executed with "b_read is true", <br /> lpu237 call cb_read_done whenever a card is reading done,<br /> until error(communincation error or protcol error) is ocurred <br /> this function is executed with "b_read is false".<br /> the result of proccess will be given by callback function.
 </div>
 
 
@@ -2369,7 +4893,7 @@
 
             
 
-            <td class="description last">enable read.</td>
+            <td class="description last">true - reading card.<br /> false - ignore reading card.</td>
         </tr>
 
     
@@ -2456,7 +4980,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1052">line 1052</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1215">line 1215</a>
     </li></ul></dd>
     
 
@@ -2497,116 +5021,6 @@
     <dd>
         
 <span class="param-type">boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="read_card_from_device_with_promise"><span class="type-signature"></span>read_card_from_device_with_promise<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    execute "one time reading card" or "ignore reading card." with server and lpu237 object by construcutor.<br /> the result of proccess will be given promise object type.<br /> Always the parameter of promise's resolve is "success" string.<br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1025">line 1025</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    return promise object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
 
 
     </dd>
@@ -2725,7 +5139,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line955">line 955</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line1145">line 1145</a>
     </li></ul></dd>
     
 
@@ -2835,7 +5249,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line739">line 739</a>
+        <a href="elpusk.framework.coffee.ctl_lpu237.js.html">elpusk.framework.coffee.ctl_lpu237.js</a>, <a href="elpusk.framework.coffee.ctl_lpu237.js.html#line927">line 927</a>
     </li></ul></dd>
     
 
@@ -2903,13 +5317,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="elpusk.framework.coffee.ctl_lpu237.html">ctl_lpu237</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_cancel_card_from_device_with_promise">_cancel_card_from_device_with_promise</a></li><li><a href="global.html#_cb_error_common">_cb_error_common</a></li><li><a href="global.html#_check_server_and_device">_check_server_and_device</a></li><li><a href="global.html#_get_parameters">_get_parameters</a></li><li><a href="global.html#_get_system_information">_get_system_information</a></li><li><a href="global.html#_read_card">_read_card</a></li><li><a href="global.html#_ready_card_from_device_with_promise">_ready_card_from_device_with_promise</a></li><li><a href="global.html#_set_parameters">_set_parameters</a></li><li><a href="global.html#close_with_promise">close_with_promise</a></li><li><a href="global.html#get_device">get_device</a></li><li><a href="global.html#get_server">get_server</a></li><li><a href="global.html#load_parameter_from_device_with_promise">load_parameter_from_device_with_promise</a></li><li><a href="global.html#open_with_promise">open_with_promise</a></li><li><a href="global.html#read_card_from_device_with_callback">read_card_from_device_with_callback</a></li><li><a href="global.html#read_card_from_device_with_promise">read_card_from_device_with_promise</a></li><li><a href="global.html#save_parameter_to_device_with_promise">save_parameter_to_device_with_promise</a></li><li><a href="global.html#toString">toString</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="elpusk.framework.coffee.ctl_lpu237.html">ctl_lpu237</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_cancel_start_io">_cancel_start_io</a></li><li><a href="global.html#_cb_complete_get_parameter">_cb_complete_get_parameter</a></li><li><a href="global.html#_cb_complete_rsp">_cb_complete_rsp</a></li><li><a href="global.html#_cb_complete_sys_info">_cb_complete_sys_info</a></li><li><a href="global.html#_cb_error_common">_cb_error_common</a></li><li><a href="global.html#_cb_error_frame">_cb_error_frame</a></li><li><a href="global.html#_check_server_and_device">_check_server_and_device</a></li><li><a href="global.html#_gen_get_para_start_io">_gen_get_para_start_io</a></li><li><a href="global.html#_gen_get_sysinfo_start_io">_gen_get_sysinfo_start_io</a></li><li><a href="global.html#_gen_opos_start_io">_gen_opos_start_io</a></li><li><a href="global.html#_gen_set_para_start_io">_gen_set_para_start_io</a></li><li><a href="global.html#_get_status">_get_status</a></li><li><a href="global.html#_is_event_rsp_cancel">_is_event_rsp_cancel</a></li><li><a href="global.html#_is_event_rsp_good">_is_event_rsp_good</a></li><li><a href="global.html#_notifiy_error">_notifiy_error</a></li><li><a href="global.html#_notifiy_error_all">_notifiy_error_all</a></li><li><a href="global.html#_notifiy_error_map">_notifiy_error_map</a></li><li><a href="global.html#_notifiy_received">_notifiy_received</a></li><li><a href="global.html#_process_event_in_idle">_process_event_in_idle</a></li><li><a href="global.html#_process_event_in_wait_cancel">_process_event_in_wait_cancel</a></li><li><a href="global.html#_process_event_in_wait_card">_process_event_in_wait_card</a></li><li><a href="global.html#_process_event_in_wait_rsp">_process_event_in_wait_rsp</a></li><li><a href="global.html#_set_status">_set_status</a></li><li><a href="global.html#close_with_promise">close_with_promise</a></li><li><a href="global.html#get_device">get_device</a></li><li><a href="global.html#get_server">get_server</a></li><li><a href="global.html#load_parameter_from_device_with_promise">load_parameter_from_device_with_promise</a></li><li><a href="global.html#open_with_promise">open_with_promise</a></li><li><a href="global.html#read_card_from_device_with_callback">read_card_from_device_with_callback</a></li><li><a href="global.html#save_parameter_to_device_with_promise">save_parameter_to_device_with_promise</a></li><li><a href="global.html#toString">toString</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 02 2020 09:44:19 GMT+0900 (GMT+09:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Jun 11 2020 14:21:37 GMT+0900 (GMT+09:00)
 </footer>
 
 <script> prettyPrint(); </script>

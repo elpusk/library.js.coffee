@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.1.0
+ * @version 1.7.0
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -45,6 +45,9 @@
  * 
  * <br />  2020.5.29 - release 1.6.
  * <br />  : add - "b_need_device_index" optional parameter to x_with_callback() functions.
+ * 
+ * <br />  2020.6.11 - release 1.7.
+ * <br />  : add - action code "C" system event when system enters hibernation mode.
  * 
  * @namespace
  */
@@ -166,6 +169,7 @@
                     DEVICE_LIST: "L",
                     CONTROL_SHOW: "S",
                     DEVICE_PLUG_IN: "P",
+                    SERVER_CLOSE:"C",//this value is only in JS library.
                     DEVICE_OPEN: "o",
                     DEVICE_CLOSE: "c",
                     DEVICE_SEND: "s",
@@ -780,7 +784,7 @@
                  * @description default callback function of websocket close event.
                 */                
                 function _on_def_close(evt){
-                    //console.log('_on_def_close');
+                    console.log('_on_def_close');
                     _b_connet = false;
 
                     var n_device_index = 0;
@@ -793,6 +797,14 @@
                             parameter.resolve(_s_session );
                         }
                     }//the end of manager request.
+                    else{
+                        console.log(evt);
+                        if( typeof _system_handler === 'function'){
+                            var closed = [];
+                            closed[0] = "close";
+                            _system_handler( _type_action_code.SERVER_CLOSE, closed );
+                        }
+                    }
                     _s_session = "";
                 }
 
@@ -983,6 +995,7 @@
                  * @description default callback function of websocket error event.
                 */                
                 function _on_def_error(n_device_index,evt){
+                    //console.log('_on_def_error');
                     do{
                         var parameter = null;
 
