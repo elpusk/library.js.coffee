@@ -75,6 +75,10 @@
     <br />
 
     <br />
+    <input type="button" id="button_promise_run_bootloader" onclick="on_button_promise_run_bootloader();" value="run bootloader by promise" />
+    <br />
+
+    <br />
     <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters" />
     <br />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
@@ -191,18 +195,18 @@
                 if( s_action_code === "c"){
                     //removed event
                     ++n_system_event;
-                    _print_message( "p_pre_main","system event [" + n_system_event.toString() + "] : removed." + s_data_field );
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : removed." + s_data_field );
                 }
                 if( s_action_code === "P"){
                     //plugged in event
                     ++n_system_event;
-                    _print_message( "p_pre_main","system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
                     continue;
                 }
                 if( s_action_code === "C"){
                     //server is closed by hibernation mode.
                     ++n_system_event;
-                    _print_message( "p_pre_main","system event [" + n_system_event.toString() + "] : server " + s_data_field );
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : server " + s_data_field );
                 }
                 //
 
@@ -364,6 +368,21 @@
             });            
         }
 
+        /**
+         * @function on_button_promise_run_bootloader
+         * @description button handler of id = button_promise_device_close.
+         */
+         function on_button_promise_run_bootloader() {
+            ctl_lpu237.run_bootloader_of_device_with_promise().then(function (s_message) {
+                //s_message always "success".
+                _add_message("p_main","success : run_bootloader_of_device_with_promise");
+            }).catch(function (event_error) {
+                // error here
+                _add_message("p_main","fail : run_bootloader_of_device_with_promise : "+ event_error.message);
+            });            
+        }
+
+        
         /**
          * @function _cb_progress_get_parameters
          * @parameter {number} n_device_index the index value of device on coffee framework.

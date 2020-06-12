@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.2.0
+ * @version 1.3.0
  * @description lpu237 controller of elpusk framework coffee javascript library .
  * <br /> error rules
  * <br /> * coffee framework error : generates promise reject or calls error callback function.
@@ -37,6 +37,8 @@
  * <br />  2020.6.11 - release 1.2
  * <br />            - add : read_card_from_device_with_callback function.
  * <br />            - add : cancel before enable/disable reading.
+ * <br />  2020.6.12 - release 1.3
+ * <br />            - add : run_bootloader_of_device_with_promise().
  * @namespace elpusk.framework.coffee.ctl_lpu237
  */
 
@@ -354,6 +356,51 @@
         }while(false);
         return b_result;
     }
+
+    /**
+     * @private
+     * @function _gen_run_bootloader_start_io
+     * @param {object} server coffee manager server object.
+     * @param {object} device target device object.
+     * @param {function} cb_complete_run_bootloader It is called "callback function" when device accepts your request successfully. 
+     * @param {function} cb_error_run_bootloader It is called "callback function" when error is occured.
+     * @return {boolean} true - request is delivered to server successfully.
+     * <br /> false - It is failed that request is delivered.
+     * @description requests execute the bootloader of lpu237 device.
+     */
+    function _gen_run_bootloader_start_io(server, device,cb_complete_run_bootloader,cb_error_run_bootloader){
+        var b_result = false;
+        var s_request = null;
+        var n_req = 0;
+
+        do{
+            device.clear_transaction();
+
+            n_req = device.generate_run_bootloader();
+            if( n_req <= 0 ){
+                continue;
+            }
+
+            s_request = device.get_tx_transaction();
+            if( s_request === null ){
+                continue;
+            }
+
+            b_result = server.device_transmit_with_callback(
+                device.get_device_index(),0,0, s_request,
+                cb_complete_run_bootloader,
+                cb_error_run_bootloader,
+                true
+                );
+            if( !b_result ){
+                device.clear_transaction();
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        return b_result;
+    }    
 
     /**
      * @private
@@ -888,6 +935,65 @@
     };
     /**
      * @private
+     * @function _cb_complete_run_bootloader
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description this callback function will be called when "run bootloader" request is done.
+     */
+    function _cb_complete_run_bootloader( n_device_index,s_rx  ){
+        var b_result = false;
+        var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
+        do{
+            if( parameter === null ){
+                console.log("E : _cb_complete_run_bootloader : parameter");
+                continue;
+            }
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                console.log("E : _cb_complete_run_bootloader : set_rx_transaction");
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
+                console.log("E : _cb_complete_run_bootloader : set_from_rx");
+                continue;
+            }
+            //
+            var s_request = parameter.device.get_tx_transaction();
+            if( s_request === null ){
+                //compete all response
+                parameter.device.clear_transaction();
+                _notifiy_received(parameter);
+                parameter = null;
+                b_result = true;
+                continue;
+            }
+
+            b_result = parameter.server.device_transmit_with_callback(
+                parameter.device.get_device_index(),0,0, s_request,
+                _cb_complete_run_bootloader,
+                _cb_error_common,
+                true
+                );
+            if( !b_result ){
+                console.log("E : _cb_complete_set_parameter : device_transmit_with_callback");
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        
+        if( parameter ){ 
+            if( b_result ){
+                elpusk.util.map_of_queue_push(_map_q_para,n_device_index,parameter);                
+            }
+            else{
+                parameter.device.clear_transaction();
+                _notifiy_error(parameter);
+            }
+        }
+    };
+
+    /**
+     * @private
      * @function _check_server_and_device
      * @param {object} server coffee manager server object
      * @param {object} device lpu237 protocol object.
@@ -1201,6 +1307,64 @@
                         "cb_progress" : cb_progress_value,
                         "stage_max" : n_request,
                         "stage_cur" : 0
+                    };
+                    elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+
+                }while(false);
+                if( n_request<= 0 ){
+                    reject(new Error("error"));
+                }
+            });//the end promise
+        }        
+    };
+
+    /**
+     * @public
+     * @function run_bootloader_of_device_with_promise
+     * @return {object} return promise object.
+     * @description run bootload of lpu237 device with server and lpu237 object by construcutor.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.run_bootloader_of_device_with_promise = function(){
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            if( !elpusk.util.map_of_queue_is_empty(_map_q_para,device.get_device_index()) ){
+                continue;
+            }
+
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        else{
+            return new Promise(function (resolve, reject) {
+                var n_request = 0;
+
+                do{
+                    n_request = _gen_run_bootloader_start_io( server, device,_cb_complete_run_bootloader, _cb_error_common);
+                    if( n_request<=0){
+                        continue;
+                    }
+
+                    var parameter = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject
                     };
                     elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
 

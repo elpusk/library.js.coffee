@@ -23,13 +23,15 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.2.0
+ * @version 1.3.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
  * <br />   2020.6.0  - release 1.2.
  * <br />               add this._b_opos_mode and it's getter.
  * <br />               add this._b_config_mode and it's getter.
+ * <br />   2020.6.12 - release 1.3.
+ * <br />               add generate_run_bootloader() method.
  * @namespace
  */
 'use strict';
@@ -4710,6 +4712,33 @@
                     if(!_generate_leave_opos_mode(this._dequeu_s_tx) ){ continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_opos );
                 }
+                //
+                b_result = true;
+            }while (false);
+
+            if( !b_result ){
+                this._dequeu_s_tx.length = 0;
+                this._deque_generated_tx.length = 0;
+            }
+
+            return this._deque_generated_tx.length;         
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.generate_run_bootloader
+         * @return {number} the number of generated requests. may be 1.
+         * <br /> 0 - error
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.generate_run_bootloader = function(){
+            var b_result = false;
+
+            do{
+                if(!_generate_enter_config_mode(this._dequeu_s_tx) ){ continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_config );
+
+                if(!_generate_run_boot_loader(this._dequeu_s_tx) ){ continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_goto_boot );
                 //
                 b_result = true;
             }while (false);
