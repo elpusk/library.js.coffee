@@ -32,6 +32,8 @@
  * <br />               add this._b_config_mode and it's getter.
  * <br />   2020.6.12 - release 1.3.
  * <br />               add generate_run_bootloader() method.
+ * <br />   2020.7.0  - release 1.4
+ *                    - support ganymede v5.13. support multi-combination. 
  * @namespace
  */
 'use strict';
@@ -85,21 +87,76 @@
          * @enum {number}
          */
 		var _type_change_parameter = {
-			cp_GlobalPrePostfixSendCondition : 0,
-			cp_EnableiButton : 1,
-			cp_Interface : 2,
-			cp_BuzzerFrequency : 3,
-			cp_BootRunTime : 4,
-			cp_Language : 5,
-			cp_EnableISO1 : 6, cp_EnableISO2 : 7, cp_EnableISO3 : 8,
-			cp_Direction1 : 9, cp_Direction2 : 10, cp_Direction3 : 11,
-			cp_GlobalPrefix : 12, cp_GlobalPostfix : 13,
-			cp_PrivatePrefix1 : 14, cp_PrivatePrefix2 : 15, cp_PrivatePrefix3 : 16,
-			cp_PrivatePostfix1 : 17, cp_PrivatePostfix2 : 18, cp_PrivatePostfix3 : 19,
-			cp_Prefix_iButton : 20, cp_Postfix_iButton : 21,
-			cp_Prefix_Uart : 22, cp_Postfix_Uart : 23,
-            cp_BtcConfigData : 24,
-            cp_EnableF12iButton : 25, cp_EnableZerosiButton : 26, cp_EnableZeros7TimesiButton : 27, cp_EnableAddmitCodeStickiButton : 28
+            cp_GlobalPrePostfixSendCondition : 0,
+            //
+            cp_IndicateErrorCondition : 1,
+            //
+			cp_EnableiButton : 2,
+			cp_Interface : 3,
+			cp_BuzzerFrequency : 4,
+			cp_BootRunTime : 5,
+			cp_Language : 6,
+			cp_EnableISO1 : 7, cp_EnableISO2 : 8, cp_EnableISO3 : 9,
+			cp_Direction1 : 10, cp_Direction2 : 11, cp_Direction3 : 12,
+            cp_GlobalPrefix : 13, cp_GlobalPostfix : 14,
+            //
+            cp_ISO1_NumberCombi : 15,   cp_ISO2_NumberCombi : 16,   cp_ISO3_NumberCombi : 17,
+
+            cp_ISO1_Combi0_MaxSize : 18,    cp_ISO1_Combi1_MaxSize : 19,    cp_ISO1_Combi2_MaxSize : 20,
+            cp_ISO2_Combi0_MaxSize : 21,    cp_ISO2_Combi1_MaxSize : 22,    cp_ISO2_Combi2_MaxSize : 23,
+            cp_ISO3_Combi0_MaxSize : 24,    cp_ISO3_Combi1_MaxSize : 25,    cp_ISO3_Combi2_MaxSize : 26,
+            //
+            cp_ISO1_Combi0_BitSize : 27,    cp_ISO1_Combi1_BitSize : 28,    cp_ISO1_Combi2_BitSize : 29,
+            cp_ISO2_Combi0_BitSize : 30,    cp_ISO2_Combi1_BitSize : 31,    cp_ISO2_Combi2_BitSize : 32,
+            cp_ISO3_Combi0_BitSize : 33,    cp_ISO3_Combi1_BitSize : 34,    cp_ISO3_Combi2_BitSize : 35,
+
+            cp_ISO1_Combi0_DataMask : 36,    cp_ISO1_Combi1_DataMask : 37,    cp_ISO1_Combi2_DataMask : 38,
+            cp_ISO2_Combi0_DataMask : 39,    cp_ISO2_Combi1_DataMask : 40,    cp_ISO2_Combi2_DataMask : 41,
+            cp_ISO3_Combi0_DataMask : 42,    cp_ISO3_Combi1_DataMask : 43,    cp_ISO3_Combi2_DataMask : 44,
+
+            cp_ISO1_Combi0_UseParity : 45,    cp_ISO1_Combi1_UseParity : 46,    cp_ISO1_Combi2_UseParity : 47,
+            cp_ISO2_Combi0_UseParity : 48,    cp_ISO2_Combi1_UseParity : 49,    cp_ISO2_Combi2_UseParity : 50,
+            cp_ISO3_Combi0_UseParity : 51,    cp_ISO3_Combi1_UseParity : 52,    cp_ISO3_Combi2_UseParity : 53,
+
+            cp_ISO1_Combi0_ParityType : 54,    cp_ISO1_Combi1_ParityType : 55,    cp_ISO1_Combi2_ParityType : 56,
+            cp_ISO2_Combi0_ParityType : 57,    cp_ISO2_Combi1_ParityType : 58,    cp_ISO2_Combi2_ParityType : 59,
+            cp_ISO3_Combi0_ParityType : 60,    cp_ISO3_Combi1_ParityType : 61,    cp_ISO3_Combi2_ParityType : 62,
+
+            cp_ISO1_Combi0_STX_L : 63,    cp_ISO1_Combi1_STX_L : 64,    cp_ISO1_Combi2_STX_L : 65,
+            cp_ISO2_Combi0_STX_L : 66,    cp_ISO2_Combi1_STX_L : 67,    cp_ISO2_Combi2_STX_L : 68,
+            cp_ISO3_Combi0_STX_L : 69,    cp_ISO3_Combi1_STX_L : 70,    cp_ISO3_Combi2_STX_L : 71,
+
+            cp_ISO1_Combi0_ETX_L : 71,    cp_ISO1_Combi1_ETX_L : 73,    cp_ISO1_Combi2_ETX_L : 74,
+            cp_ISO2_Combi0_ETX_L : 75,    cp_ISO2_Combi1_ETX_L : 76,    cp_ISO2_Combi2_ETX_L : 77,
+            cp_ISO3_Combi0_ETX_L : 78,    cp_ISO3_Combi1_ETX_L : 79,    cp_ISO3_Combi2_ETX_L : 80,
+
+            cp_ISO1_Combi0_UseErrorCorrect : 81,    cp_ISO1_Combi1_UseErrorCorrect : 82,    cp_ISO1_Combi2_UseErrorCorrect : 83,
+            cp_ISO2_Combi0_UseErrorCorrect : 84,    cp_ISO2_Combi1_UseErrorCorrect : 85,    cp_ISO2_Combi2_UseErrorCorrect : 86,
+            cp_ISO3_Combi0_UseErrorCorrect : 87,    cp_ISO3_Combi1_UseErrorCorrect : 88,    cp_ISO3_Combi2_UseErrorCorrect : 89,
+
+            cp_ISO1_Combi0_ECMType : 90,    cp_ISO1_Combi1_ECMType : 91,    cp_ISO1_Combi2_ECMType : 92,
+            cp_ISO2_Combi0_ECMType : 93,    cp_ISO2_Combi1_ECMType : 94,    cp_ISO2_Combi2_ECMType : 95,
+            cp_ISO3_Combi0_ECMType : 96,    cp_ISO3_Combi1_ECMType : 97,    cp_ISO3_Combi2_ECMType : 98,
+
+            cp_ISO1_Combi0_AddValue : 99,    cp_ISO1_Combi1_AddValue : 100,    cp_ISO1_Combi2_AddValue : 101,
+            cp_ISO2_Combi0_AddValue : 102,    cp_ISO2_Combi1_AddValue : 103,    cp_ISO2_Combi2_AddValue : 104,
+            cp_ISO3_Combi0_AddValue : 105,    cp_ISO3_Combi1_AddValue : 106,    cp_ISO3_Combi2_AddValue : 107,
+            //
+            cp_PrivatePrefix10 : 108,    cp_PrivatePrefix11 : 109,    cp_PrivatePrefix12 : 110, 
+            cp_PrivatePrefix20 : 111,    cp_PrivatePrefix21 : 112,    cp_PrivatePrefix22 : 113, 
+            cp_PrivatePrefix30 : 114,    cp_PrivatePrefix31 : 115,    cp_PrivatePrefix32 : 116,
+            
+            cp_PrivatePostfix10 : 117,   cp_PrivatePostfix11 : 118,   cp_PrivatePostfix12 : 119, 
+            cp_PrivatePostfix20 : 120,   cp_PrivatePostfix21 : 121,   cp_PrivatePostfix22 : 122, 
+            cp_PrivatePostfix30 : 123,   cp_PrivatePostfix31 : 124,   cp_PrivatePostfix32 : 125,
+            //
+			cp_Prefix_iButton : 126, cp_Postfix_iButton : 127,
+			cp_Prefix_Uart : 128, cp_Postfix_Uart : 129,
+            cp_BtcConfigData : 130,
+            cp_EnableF12iButton : 131, 
+            cp_EnableZerosiButton : 132, 
+            cp_EnableZeros7TimesiButton : 133, 
+            cp_EnableAddmitCodeStickiButton : 134
 		};
 
         /**
@@ -123,37 +180,143 @@
 			gt_type_ibutton : 11,
 			gt_type_device : 12,
 
+            /////////////////////////////
             //get config series
 			gt_get_version : 13,
 			gt_get_name : 14,
-			gt_get_global_prepostfix_send_condition : 15,
-			gt_get_interface : 16,
-			gt_get_language : 17,
-			gt_get_buzzer_frequency : 18,
-			gt_get_boot_run_time : 19,
-			gt_get_enable_iso1 : 20, gt_get_enable_iso2 : 21, gt_get_enable_iso3 : 22,
-			gt_get_direction1 : 23, gt_get_direction2 : 24, gt_get_direction3 : 25,
-			gt_get_global_prefix : 26,  gt_get_global_postfix : 27,
-			gt_get_private_prefix1 : 28, gt_get_private_prefix2 : 29,  gt_get_private_prefix3 : 30,
-			gt_get_private_postfix1 : 31,gt_get_private_postfix2 : 32, gt_get_private_postfix3 : 33,
-			gt_get_prefix_ibutton : 34, gt_get_postfix_ibutton : 35,
-			gt_get_prefix_uart : 36, gt_get_postfix_uart : 37,
-            gt_get_f12_ibutton : 38, gt_get_zeros_ibutton : 39, gt_get_zeros7_times_ibutton : 40, gt_get_addmit_code_stick_ibutton : 41,
+            gt_get_global_prepostfix_send_condition : 15,
+            gt_get_indicate_error_condition : 16,
+            //
+			gt_get_interface : 17,
+			gt_get_language : 18,
+			gt_get_buzzer_frequency : 19,
+			gt_get_boot_run_time : 20,
+			gt_get_enable_iso1 : 21, gt_get_enable_iso2 : 22, gt_get_enable_iso3 : 23,
+			gt_get_direction1 : 24, gt_get_direction2 : 25, gt_get_direction3 : 26,
+            gt_get_global_prefix : 27,  gt_get_global_postfix : 28,
+            //
+            gt_get_iso1_number_combi : 29,   gt_get_iso2_number_combi : 30,   gt_get_iso3_number_combi : 31,
 
-            //set
-			gt_set_global_prepostfix_send_condition : 42,
-			gt_set_interface : 43,
-			gt_set_language : 44, get_set_keymap : 45,
-			gt_set_buzzer_frequency : 46,
-			gt_set_enable_iso1 : 47, gt_set_enable_iso2 : 48, gt_set_enable_iso3 : 49,
-			gt_set_direction1 : 50, gt_set_direction2 : 51, gt_set_direction3 : 52,
-			gt_set_global_prefix : 53,  gt_set_global_postfix : 54,
-			gt_set_private_prefix1 : 55, gt_set_private_prefix2 : 56,  gt_set_private_prefix3 : 57,
-			gt_set_private_postfix1 : 58,gt_set_private_postfix2 : 59, gt_set_private_postfix3 : 60,
-			gt_set_prefix_ibutton : 61, gt_set_postfix_ibutton : 62,
-			gt_set_prefix_uart : 63, gt_set_postfix_uart : 64,
-			gt_set_f12_ibutton : 65, gt_set_zeros_ibutton : 66, gt_set_zeros7_times_ibutton : 67, gt_set_addmit_code_stick_ibutton : 68
+            gt_get_iso1_Combi0_MaxSize : 32,    gt_get_iso1_Combi1_MaxSize : 33,    gt_get_iso1_Combi2_MaxSize : 34,
+            gt_get_iso2_Combi0_MaxSize : 35,    gt_get_iso2_Combi1_MaxSize : 36,    gt_get_iso2_Combi2_MaxSize : 37,
+            gt_get_iso3_Combi0_MaxSize : 38,    gt_get_iso3_Combi1_MaxSize : 39,    gt_get_iso3_Combi2_MaxSize : 40,
             
+            gt_get_iso1_Combi0_BitSize : 41,    gt_get_iso1_Combi1_BitSize : 42,    gt_get_iso1_Combi2_BitSize : 43,
+            gt_get_iso2_Combi0_BitSize : 44,    gt_get_iso2_Combi1_BitSize : 45,    gt_get_iso2_Combi2_BitSize : 46,
+            gt_get_iso3_Combi0_BitSize : 47,    gt_get_iso3_Combi1_BitSize : 48,    gt_get_iso3_Combi2_BitSize : 49,
+
+            gt_get_iso1_Combi0_DataMask : 50,   gt_get_iso1_Combi1_DataMask : 51,   gt_get_iso1_Combi2_DataMask : 52,
+            gt_get_iso2_Combi0_DataMask : 53,   gt_get_iso2_Combi1_DataMask : 54,   gt_get_iso2_Combi2_DataMask : 55,
+            gt_get_iso3_Combi0_DataMask : 56,   gt_get_iso3_Combi1_DataMask : 57,   gt_get_iso3_Combi2_DataMask : 58,
+
+            gt_get_iso1_Combi0_UseParity : 59,  gt_get_iso_Combi1_UseParity : 60,   gt_get_iso1_Combi2_UseParity : 61,
+            gt_get_iso2_Combi0_UseParity : 62,  gt_get_iso_Combi1_UseParity : 63,   gt_get_iso2_Combi2_UseParity : 64,
+            gt_get_iso3_Combi0_UseParity : 65,  gt_get_iso_Combi1_UseParity : 66,   gt_get_iso3_Combi2_UseParity : 67,
+
+            gt_get_iso1_Combi0_ParityType : 68, gt_get_iso1_Combi1_ParityType : 69, gt_get_iso1_Combi2_ParityType : 70,
+            gt_get_iso2_Combi0_ParityType : 71, gt_get_iso2_Combi1_ParityType : 72, gt_get_iso2_Combi2_ParityType : 73,
+            gt_get_iso3_Combi0_ParityType : 74, gt_get_iso3_Combi1_ParityType : 75, gt_get_iso3_Combi2_ParityType : 76,
+
+            gt_get_iso1_Combi0_STX_L : 77,      gt_get_iso1_Combi1_STX_L : 78,    gt_get_iso1_Combi2_STX_L : 79,
+            gt_get_iso2_Combi0_STX_L : 80,      gt_get_iso2_Combi1_STX_L : 81,    gt_get_iso2_Combi2_STX_L : 82,
+            gt_get_iso3_Combi0_STX_L : 83,      gt_get_iso3_Combi1_STX_L : 84,    gt_get_iso3_Combi2_STX_L : 85,
+
+            gt_get_iso1_Combi0_ETX_L : 86,      gt_get_iso1_Combi1_ETX_L : 87,    gt_get_iso1_Combi2_ETX_L : 88,
+            gt_get_iso2_Combi0_ETX_L : 89,      gt_get_iso2_Combi1_ETX_L : 90,    gt_get_iso2_Combi2_ETX_L : 91,
+            gt_get_iso3_Combi0_ETX_L : 92,      gt_get_iso3_Combi1_ETX_L : 93,    gt_get_iso3_Combi2_ETX_L : 94,
+
+            gt_get_iso1_Combi0_UseErrorCorrect : 95,    gt_get_iso1_Combi1_UseErrorCorrect : 96,    gt_get_iso1_Combi2_UseErrorCorrect : 97,
+            gt_get_iso2_Combi0_UseErrorCorrect : 98,    gt_get_iso2_Combi1_UseErrorCorrect : 99,    gt_get_iso2_Combi2_UseErrorCorrect : 100,
+            gt_get_iso3_Combi0_UseErrorCorrect : 101,   gt_get_iso3_Combi1_UseErrorCorrect : 102,    gt_get_iso3_Combi2_UseErrorCorrect : 103,
+
+            gt_get_iso1_Combi0_ECMType : 104,            gt_get_iso1_Combi1_ECMType : 105,            gt_get_iso1_Combi2_ECMType : 106,
+            gt_get_iso2_Combi0_ECMType : 107,            gt_get_iso2_Combi1_ECMType : 108,            gt_get_iso2_Combi2_ECMType : 109,
+            gt_get_iso3_Combi0_ECMType : 110,            gt_get_iso3_Combi1_ECMType : 111,            gt_get_iso3_Combi2_ECMType : 112,
+
+            gt_get_iso1_Combi0_AddValue : 113,           gt_get_iso1_Combi1_AddValue : 114,          gt_get_iso1_Combi2_AddValue : 115,
+            gt_get_iso2_Combi0_AddValue : 116,          gt_get_iso2_Combi1_AddValue : 117,          gt_get_iso2_Combi2_AddValue : 118,
+            gt_get_iso3_Combi0_AddValue : 119,          gt_get_iso3_Combi1_AddValue : 120,          gt_get_iso3_Combi2_AddValue : 121,
+            //            
+            gt_get_private_prefix10 : 122,   gt_get_private_prefix11 : 123,   gt_get_private_prefix12 : 124, 
+            gt_get_private_prefix20 : 125,   gt_get_private_prefix21 : 126,   gt_get_private_prefix22 : 127,  
+            gt_get_private_prefix30 : 128,   gt_get_private_prefix31 : 129,   gt_get_private_prefix32 : 130,
+            
+            gt_get_private_postfix10 : 131,  gt_get_private_postfix11 : 132,  gt_get_private_postfix12 : 133,
+            gt_get_private_postfix20 : 134,  gt_get_private_postfix21 : 135,  gt_get_private_postfix22 : 136, 
+            gt_get_private_postfix30 : 137,  gt_get_private_postfix31 : 138,  gt_get_private_postfix32 : 139,
+            //
+			gt_get_prefix_ibutton : 140, gt_get_postfix_ibutton : 141,
+			gt_get_prefix_uart : 142, gt_get_postfix_uart : 143,
+            gt_get_f12_ibutton : 144, gt_get_zeros_ibutton : 145, gt_get_zeros7_times_ibutton : 146, gt_get_addmit_code_stick_ibutton : 147,
+
+            /////////////////////////////
+            //set
+            gt_set_global_prepostfix_send_condition : 148,
+            gt_set_indicate_error_condition : 149,
+            //
+			gt_set_interface : 150,
+			gt_set_language : 151, get_set_keymap : 152,
+			gt_set_buzzer_frequency : 153,
+			gt_set_enable_iso1 : 154, gt_set_enable_iso2 : 155, gt_set_enable_iso3 : 156,
+			gt_set_direction1 : 157, gt_set_direction2 : 158, gt_set_direction3 : 159,
+            gt_set_global_prefix : 160,  gt_set_global_postfix : 161,
+            
+            gt_set_iso1_number_combi : 162,      gt_set_iso2_number_combi : 163,      gt_set_iso3_number_combi : 164,
+
+            gt_set_iso1_Combi0_MaxSize : 165,    gt_set_iso1_Combi1_MaxSize : 166,    gt_set_iso1_Combi2_MaxSize : 167,
+            gt_set_iso2_Combi0_MaxSize : 168,    gt_set_iso2_Combi1_MaxSize : 169,    gt_set_iso2_Combi2_MaxSize : 170,
+            gt_set_iso3_Combi0_MaxSize : 171,    gt_set_iso3_Combi1_MaxSize : 172,    gt_set_iso3_Combi2_MaxSize : 173,
+            
+            gt_set_iso1_Combi0_BitSize : 174,    gt_set_iso1_Combi1_BitSize : 175,    gt_set_iso1_Combi2_BitSize : 176,
+            gt_set_iso2_Combi0_BitSize : 177,    gt_set_iso2_Combi1_BitSize : 178,    gt_set_iso2_Combi2_BitSize : 179,
+            gt_set_iso3_Combi0_BitSize : 180,    gt_set_iso3_Combi1_BitSize : 181,    gt_set_iso3_Combi2_BitSize : 182,
+
+            gt_set_iso1_Combi0_DataMask : 183,   gt_set_iso1_Combi1_DataMask : 184,   gt_set_iso1_Combi2_DataMask : 185,
+            gt_set_iso2_Combi0_DataMask : 186,   gt_set_iso2_Combi1_DataMask : 187,   gt_set_iso2_Combi2_DataMask : 188,
+            gt_set_iso3_Combi0_DataMask : 189,   gt_set_iso3_Combi1_DataMask : 190,   gt_set_iso3_Combi2_DataMask : 191,
+
+            gt_set_iso1_Combi0_UseParity : 192,  gt_set_iso_Combi1_UseParity : 193,   gt_set_iso1_Combi2_UseParity : 194,
+            gt_set_iso2_Combi0_UseParity : 195,  gt_set_iso_Combi1_UseParity : 196,   gt_set_iso2_Combi2_UseParity : 197,
+            gt_set_iso3_Combi0_UseParity : 198,  gt_set_iso_Combi1_UseParity : 199,   gt_set_iso3_Combi2_UseParity : 200,
+
+            gt_set_iso1_Combi0_ParityType : 201, gt_set_iso1_Combi1_ParityType : 202, gt_set_iso1_Combi2_ParityType : 203,
+            gt_set_iso2_Combi0_ParityType : 204, gt_set_iso2_Combi1_ParityType : 205, gt_set_iso2_Combi2_ParityType : 206,
+            gt_set_iso3_Combi0_ParityType : 207, gt_set_iso3_Combi1_ParityType : 208, gt_set_iso3_Combi2_ParityType : 209,
+
+            gt_set_iso1_Combi0_STX_L : 210,      gt_set_iso1_Combi1_STX_L : 211,      gt_set_iso1_Combi2_STX_L : 212,
+            gt_set_iso2_Combi0_STX_L : 213,      gt_set_iso2_Combi1_STX_L : 214,      gt_set_iso2_Combi2_STX_L : 215,
+            gt_set_iso3_Combi0_STX_L : 216,      gt_set_iso3_Combi1_STX_L : 217,      gt_set_iso3_Combi2_STX_L : 218,
+
+            gt_set_iso1_Combi0_ETX_L : 219,      gt_set_iso1_Combi1_ETX_L : 220,      gt_set_iso1_Combi2_ETX_L : 221,
+            gt_set_iso2_Combi0_ETX_L : 222,      gt_set_iso2_Combi1_ETX_L : 223,      gt_set_iso2_Combi2_ETX_L : 224,
+            gt_set_iso3_Combi0_ETX_L : 225,      gt_set_iso3_Combi1_ETX_L : 226,      gt_set_iso3_Combi2_ETX_L : 227,
+
+            gt_set_iso1_Combi0_UseErrorCorrect : 228,    gt_set_iso1_Combi1_UseErrorCorrect : 229,    gt_set_iso1_Combi2_UseErrorCorrect : 230,
+            gt_set_iso2_Combi0_UseErrorCorrect : 231,    gt_set_iso2_Combi1_UseErrorCorrect : 232,    gt_set_iso2_Combi2_UseErrorCorrect : 233,
+            gt_set_iso3_Combi0_UseErrorCorrect : 234,    gt_set_iso3_Combi1_UseErrorCorrect : 235,    gt_set_iso3_Combi2_UseErrorCorrect : 236,
+
+            gt_set_iso1_Combi0_ECMType : 237,            gt_set_iso1_Combi1_ECMType : 238,            gt_set_iso1_Combi2_ECMType : 239,
+            gt_set_iso2_Combi0_ECMType : 240,            gt_set_iso2_Combi1_ECMType : 241,            gt_set_iso2_Combi2_ECMType : 242,
+            gt_set_iso3_Combi0_ECMType : 243,            gt_set_iso3_Combi1_ECMType : 244,            gt_set_iso3_Combi2_ECMType : 245,
+
+            gt_set_iso1_Combi0_AddValue : 246,           gt_set_iso1_Combi1_AddValue : 247,          gt_set_iso1_Combi2_AddValue : 248,
+            gt_set_iso2_Combi0_AddValue : 249,          gt_set_iso2_Combi1_AddValue : 250,          gt_set_iso2_Combi2_AddValue : 251,
+            gt_set_iso3_Combi0_AddValue : 252,          gt_set_iso3_Combi1_AddValue : 253,          gt_set_iso3_Combi2_AddValue : 254,
+            //          
+            gt_set_private_prefix10 : 255,   gt_set_private_prefix11 : 256,   gt_set_private_prefix12 : 257, 
+            gt_set_private_prefix20 : 258,   gt_set_private_prefix21 : 259,   gt_set_private_prefix22 : 260,  
+            gt_set_private_prefix30 : 261,   gt_set_private_prefix31 : 262,   gt_set_private_prefix32 : 263,
+            
+            gt_set_private_postfix10 : 264,  gt_set_private_postfix11 : 265,  gt_set_private_postfix12 : 266,
+            gt_set_private_postfix20 : 267,  gt_set_private_postfix21 : 268,  gt_set_private_postfix22 : 269, 
+            gt_set_private_postfix30 : 270,  gt_set_private_postfix31 : 271,  gt_set_private_postfix32 : 272,
+            //
+			gt_set_prefix_ibutton : 273, gt_set_postfix_ibutton : 274,
+			gt_set_prefix_uart : 275, gt_set_postfix_uart : 276,
+            gt_set_f12_ibutton : 277, 
+            gt_set_zeros_ibutton : 278, 
+            gt_set_zeros7_times_ibutton : 279, 
+            gt_set_addmit_code_stick_ibutton : 230
         };
                 
         /**
@@ -161,11 +324,14 @@
          * @readonly
          * @constant {number}
          * @description the offset value of system parameters.
+         * <br /> generated by tools_gen_lpu237_data.exe
          */
+
         var _type_system_offset = {
             SYS_OFFSET_VERSION : 28,
             SYS_OFFSET_NAME : 12,
             SYS_OFFSET_G_TAG_CONDITION : 83,
+            SYS_OFFSET_INDICATE_ERROR_CONDITION : 0,
             SYS_OFFSET_INTERFACE : 42,
             SYS_OFFSET_KEYMAP : 103,
             SYS_OFFSET_BUZZER_FREQ : 43,
@@ -174,8 +340,19 @@
             SYS_OFFSET_DIRECTION : [201,388,575],
             SYS_OFFSET_G_PRE : 141,
             SYS_OFFSET_G_POST : 156,
-            SYS_OFFSET_P_PRE : [244,431,618],
-            SYS_OFFSET_P_POST : [289,476,663],
+            SYS_OFFSET_COMBINATION : [172,359,546],
+            SYS_OFFSET_MAX_SIZE : [[174,175,176],[361,362,363],[548,549,550]],
+            SYS_OFFSET_BIT_SIZE : [[177,178,179],[364,365,366],[551,552,553]],
+            SYS_OFFSET_DATA_MASK : [[180,181,182],[367,368,369],[554,555,556]],
+            SYS_OFFSET_USE_PARITY : [[183,184,185],[370,371,372],[557,558,559]],
+            SYS_OFFSET_PARITY_TYPE : [[186,187,188],[373,374,375],[560,561,562]],
+            SYS_OFFSET_STXL : [[189,190,191],[376,377,378],[563,564,565]],
+            SYS_OFFSET_ETXL : [[192,193,194],[379,380,381],[566,567,568]],
+            SYS_OFFSET_USE_ERROR_CORRECT : [[195,196,197],[382,383,384],[569,570,571]],
+            SYS_OFFSET_ECM_TYPE : [[198,199,200],[385,386,387],[572,573,574]],
+            SYS_OFFSET_ADD_VALUE : [[208,209,210],[395,396,397],[582,583,584]],
+            SYS_OFFSET_P_PRE : [[244,259,274],[431,446,461],[618,633,648]],
+            SYS_OFFSET_P_POST : [[289,304,319],[476,491,506],[663,678,693]],
             SYS_OFFSET_IBUTTON_G_PRE : 762,
             SYS_OFFSET_IBUTTON_G_POST : 777,
             SYS_OFFSET_UART_G_PRE : 822,
@@ -193,11 +370,13 @@
          * @readonly
          * @constant {number}
          * @description the size value of system parameters.
+         * <br /> generated by tools_gen_lpu237_data.exe
          */
         var _type_system_size = {
             SYS_SIZE_VERSION : 4,
             SYS_SIZE_NAME : 16,
             SYS_SIZE_G_TAG_CONDITION : 4,
+            SYS_SIZE_INDICATE_ERROR_CONDITION : 4,
             SYS_SIZE_INTERFACE : 1,
             SYS_SIZE_KEYMAP : 4,
             SYS_SIZE_BUZZER_FREQ : 4,
@@ -206,8 +385,19 @@
             SYS_SIZE_DIRECTION : [1,1,1],
             SYS_SIZE_G_PRE : 15,
             SYS_SIZE_G_POST : 15,
-            SYS_SIZE_P_PRE : [15,15,15],
-            SYS_SIZE_P_POST : [15,15,15],
+            SYS_SIZE_COMBINATION : [1,1,1],
+            SYS_SIZE_MAX_SIZE : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_BIT_SIZE : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_DATA_MASK : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_USE_PARITY : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_PARITY_TYPE : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_STXL : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_ETXL : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_USE_ERROR_CORRECT : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_ECM_TYPE : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_ADD_VALUE : [[1,1,1],[1,1,1],[1,1,1]],
+            SYS_SIZE_P_PRE : [[15,15,15],[15,15,15],[15,15,15]],
+            SYS_SIZE_P_POST : [[15,15,15],[15,15,15],[15,15,15]],
             SYS_SIZE_IBUTTON_G_PRE : 15,
             SYS_SIZE_IBUTTON_G_POST : 15,
             SYS_SIZE_UART_G_PRE : 15,
@@ -218,7 +408,7 @@
             SYS_SIZE_ADDMIT_CODE_STCIK_IBUTTON : 4,
             SYS_SIZE_CONTAINER_MAP_INDEX : 4,
             SYS_SIZE_INFOMSR_MAP_INDEX : [4,4,4]
-        };
+        }; 
 
 		var _type_format = {
 			ef_decimal : 0,
@@ -1020,6 +1210,84 @@
             return s_value;
         }
          
+        /** 
+         * @private 
+         * @readonly
+         * @enum {number}
+         * @description the definition of parity bit type
+        */        
+        var _type_parity = {//parity bit type, unsigned char
+            parity_even : 0,	//even parity
+            parity_odd : 1	//odd parity
+        };
+
+        /**
+         * @private
+         * @function _get_parity_type_string
+         * @param {number} type_parity _type_parity value.
+         * @returns {string} parity type.
+         */
+        function _get_parity_type_string( type_parity ){
+            var s_value = "unknown";
+            do{
+                if( typeof type_parity !== 'number'){
+                    continue;
+                }
+                switch(type_parity){
+                    case _type_parity.parity_even:
+                        s_value = "even parity";
+                        break;
+                    case _type_parity.parity_odd:
+                        s_value = "odd parity";
+                        break;
+                    default:
+                        break;
+                }//end switch
+            }while(false);
+            return s_value;
+        }
+
+        /** 
+         * @private 
+         * @readonly
+         * @enum {number}
+         * @description the definition of error correction type
+        */        
+       var _type_error_correct = {//error correction type, unsigned char
+            error_correct_lrc : 0,	//LRC
+            error_correct_inv_lrc : 1,	//inversion LRC
+            error_correct_crc : 2	//CRC
+        };
+
+        /**
+         * @private
+         * @function _get_error_correct_type_string
+         * @param {number} type_error_correct _type_error_correct value.
+         * @returns {string} error correction type.
+         */
+        function _get_error_correct_type_string( type_error_correct ){
+            var s_value = "unknown";
+            do{
+                if( typeof type_error_correct !== 'number'){
+                    continue;
+                }
+                switch(type_error_correct){
+                    case _type_error_correct.error_correct_lrc:
+                        s_value = "LRC error correction";
+                        break;
+                    case _type_error_correct.error_correct_inv_lrc:
+                        s_value = "Inversion LRC error correction";
+                        break;
+                    case _type_error_correct.error_correct_crc:
+                        s_value = "CRC error correction";
+                        break;
+                    default:
+                        break;
+                }//end switch
+            }while(false);
+            return s_value;
+        }
+
         /**
          * @private
          * @function _get_version_string
@@ -1587,6 +1855,35 @@
         
         /**
          * @private
+         * @function _get_indicate_error_condition_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} false - When any track is not a error, reader indicate success-processing.
+         * <br />   true - When all track are not a error, reader indicate success-processing.
+         */
+		function _get_indicate_error_condition_from_response(s_response){
+            var b_result = true;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[1] & 0x01 ){
+                    b_result = false;
+                }
+			} while (false);
+			return b_result;
+        }
+
+        /**
+         * @private
          * @function _get_interface_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {number} interface number.
@@ -1811,13 +2108,455 @@
 
         /**
          * @private
+         * @function _get_number_combi_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @returns {number} the number of combination that is supported a format in each track.
+         * <br /> negative value is error.
+         */
+		function _get_number_combi_from_response(s_response,n_track){
+			var n_value = -1;
+
+			do {
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_COMBINATION[n_track];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_max_size_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {number} the maximum number of data at a combination of track.(except STX,ETX,LRC)
+         * <br /> negative value is error.
+         */
+		function _get_max_size_from_response(s_response,n_track,n_combi){
+			var n_value = -1;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_MAX_SIZE[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_bit_size_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {number} the size of each data at a combination of track.(unit : bit)
+         * <br /> negative value is error.
+         */
+		function _get_bit_size_from_response(s_response,n_track,n_combi){
+			var n_value = -1;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_BIT_SIZE[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_data_mask_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {(null|string)} hex string format. the mask pattern of each data at a combination of track.( including Error check bit, left arrangement)
+         * <br /> null - error.
+         */
+		function _get_data_mask_from_response(s_response,n_track,n_combi){
+			var s_data = null;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_DATA_MASK[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+        
+        /**
+         * @private
+         * @function _get_use_parity_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {boolean} true : use parity bit at a combination of track.( including Error check bit, left arrangement)
+         * <br /> false - Don't use parity bit.
+         * <br /> null - error.
+         */
+		function _get_use_parity_from_response(s_response,n_track,n_combi){
+			var b_result = false;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_USE_PARITY[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                b_result = _get_data_field_member_of_response_by_boolean(s_response);
+			} while (false);
+			return b_result;
+        }
+
+        /**
+         * @private
+         * @function _get_parity_type_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {number} 0 - even parity.
+         * <br /> 1 - odd parity.
+         * <br /> negative value is error.
+         */
+		function _get_parity_type_from_response(s_response,n_track,n_combi){
+			var n_value = -1;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_PARITY_TYPE[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_stxl_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {(null|string)} hex string format. the start sentinel pattern of each data at a combination of track.( including parity, left arrangement)
+         * <br /> null - error.
+         */
+		function _get_stxl_from_response(s_response,n_track,n_combi){
+			var s_data = null;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_STXL[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_etxl_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {(null|string)} hex string format. the end sentinel pattern of each data at a combination of track.( including parity, left arrangement)
+         * <br /> null - error.
+         */
+		function _get_etxl_from_response(s_response,n_track,n_combi){
+			var s_data = null;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_use_error_correct_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {boolean} true : use error correction at a combination of track.( including Error check bit, left arrangement)
+         * <br /> false - Don't use error correction.
+         * <br /> null - error.
+         */
+		function _get_use_error_correct_from_response(s_response,n_track,n_combi){
+			var b_result = false;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_USE_ERROR_CORRECT[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                b_result = _get_data_field_member_of_response_by_boolean(s_response);
+			} while (false);
+			return b_result;
+        }
+
+        /**
+         * @private
+         * @function _get_ecm_type_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {number} 0 - error correction type is LRC.
+         * <br /> 1 - Error correction type is inversion LRC.( after calcuating LRC, inverse LRC )
+         * <br /> 2 - Error correction type is CRC.
+         * <br /> negative value is error.
+         */
+		function _get_ecm_type_from_response(s_response,n_track,n_combi){
+			var n_value = -1;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_ECM_TYPE[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_add_value_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
+         * @returns {number} For converting to ASCII code, the value of each data at a combination of track.
+         * <br /> negative value is error.
+         */
+		function _get_add_value_from_response(s_response,n_track,n_combi){
+			var n_value = -1;
+
+			do {
+                if( n_combi > 2 || n_combi < 0 ){
+                    continue;
+                }
+                var n_size = 0;
+                
+				switch (n_track) {
+				case _type_msr_track_Numer.iso1_track:
+                case _type_msr_track_Numer.iso2_track:
+                case _type_msr_track_Numer.iso3_track:
+                    n_size = _type_system_size.SYS_SIZE_ADD_VALUE[n_track][n_combi];
+					break;
+				default:
+					continue;
+                }//end switch
+
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                n_value = _get_data_field_member_of_response_by_number(s_response);
+			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
          * @function _get_private_prefix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
          * @returns {(null|string)} hex string format.
          * <br /> null - error.
          */
-		function _get_private_prefix_from_response(s_response, n_track ){
+		function _get_private_prefix_from_response(s_response, n_track,n_combi ){
 			var s_data = null;
 
 			do {
@@ -1827,7 +2566,7 @@
 				case _type_msr_track_Numer.iso1_track:
                 case _type_msr_track_Numer.iso2_track:
                 case _type_msr_track_Numer.iso3_track:
-                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track][n_combi];
 					break;
 				default:
 					continue;
@@ -1849,10 +2588,11 @@
          * @function _get_private_postfix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
+         * @param {number} n_combi - combination index 0~2
          * @returns {(null|string)} hex string format.
          * <br /> null - error.
          */
-		function _get_private_postfix_from_response(s_response, n_track ){
+		function _get_private_postfix_from_response(s_response, n_track,n_combi ){
 			var s_data = null;
 
 			do {
@@ -1862,7 +2602,7 @@
 				case _type_msr_track_Numer.iso1_track:
                 case _type_msr_track_Numer.iso2_track:
                 case _type_msr_track_Numer.iso3_track:
-                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track][n_combi];
 					break;
 				default:
 					continue;
@@ -2121,6 +2861,32 @@
         
         /**
          * @private
+         * @function _get_indicate_error_condition_from_string
+         * @param {string} s_string - "and" or "or"
+         * @returns {(null|boolean)} false - When any track is not a error, reader indicate success-processing.
+         * <br /> true - When all track are not a error, reader indicate success-processing.
+         * <br /> null - error.
+         */
+		function _get_indicate_error_condition_from_string(s_string){
+			var b_result = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "and"){
+                    b_result = true;
+                    continue;
+                }
+                if( s_string === "or"){
+                    b_result = false;
+                    continue;
+                }
+			} while (false);
+			return b_result;
+        }        
+        /**
+         * @private
          * @function _get_interface_from_string
          * @param {string} s_string - "usb_kb", "usb_hid" or "rs232".
          * @returns {number} interface number.
@@ -2259,6 +3025,30 @@
                 }
 			} while (false);
 			return b_result;
+        }
+
+        /**
+         * @private
+         * @function _get_use_parity_from_string
+         * @param {string} s_string - "enable" or "disable"
+         * @returns {(null|boolean)} true - use parity bit
+         * <br /> false - don't use parity bit
+         * <br /> null - error.
+         */
+		function _get_use_parity_from_string(s_string){
+            return _get_enable_track_from_string(s_string);
+        }
+
+        /**
+         * @private
+         * @function _get_use_error_correct_from_string
+         * @param {string} s_string - "enable" or "disable"
+         * @returns {(null|boolean)} true - use error correction.
+         * <br /> false - don't use error correction.
+         * <br /> null - error.
+         */
+		function _get_use_error_correct_from_string(s_string){
+            return _get_enable_track_from_string(s_string);
         }
         
         /**
@@ -2468,6 +3258,65 @@
 			return n_value;
         }
     
+        /**
+         * @private
+         * @function _get_parity_type_from_string
+         * @param {string} s_string - "odd"or "even"
+         * @returns {number} 0 - even parity.
+         * <br /> 1 - odd parity.
+         * <br /> negative value is error.
+         */
+		function _get_parity_type_from_string(s_string){
+			var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "even"){
+                    n_value = _type_parity.parity_even;
+                    continue;
+                }
+                if( s_string === "odd"){
+                    n_value = _type_parity.parity_even;
+                    continue;
+                }
+ 			} while (false);
+			return n_value;
+        }
+        
+        /**
+         * @private
+         * @function _get_error_correct_type_from_string
+         * @param {string} s_string - "lrc", "invlrc" or "crc"
+         * @returns {number} 0 - LRC.
+         * <br /> 1 - inversion LRC.
+         * <br /> 2 - CRC.
+         * <br /> negative value is error.
+         */
+		function _get_error_correct_type_from_string(s_string){
+			var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "lrc"){
+                    n_value = _type_error_correct.error_correct_lrc;
+                    continue;
+                }
+                if( s_string === "invlrc"){
+                    n_value = _type_error_correct.error_correct_inv_lrc;
+                    continue;
+                }
+                if( s_string === "crc"){
+                    n_value = _type_error_correct.error_correct_crc;
+                    continue;
+                }
+ 			} while (false);
+			return n_value;
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // generate basic IO pattern.
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2631,6 +3480,18 @@
 
         /**
          * @private
+         * @function _generate_get_indicate_error_condition
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_indicate_error_condition(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_INDICATE_ERROR_CONDITION;
+            var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
          * @function _generate_get_interface
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
@@ -2681,6 +3542,7 @@
          * @private
          * @function _generate_get_enable_track
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
          * @return {boolean} true(success) or false(failure).
         */
         function _generate_get_enable_track(queue_s_tx,n_track){
@@ -2714,6 +3576,7 @@
          * @private
          * @function _generate_get_direction
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
          * @return {boolean} true(success) or false(failure).
         */        
         function _generate_get_direction(queue_s_tx,n_track){
@@ -2769,29 +3632,445 @@
 
         /**
          * @private
-         * @function _generate_get_private_prefix
+         * @function _generate_get_number_combi
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
          * @return {boolean} true(success) or false(failure).
-        */        
-        function _generate_get_private_prefix(queue_s_tx,n_track){
+        */
+        function _generate_get_number_combi(queue_s_tx,n_track){
             var b_result = false;
             var n_offset = 0;
             var n_size = 0;
 
             switch(n_track){
                 case 0:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
-                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_COMBINATION[n_track];
+                    n_size = _type_system_size.SYS_SIZE_COMBINATION[n_track];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
-                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_COMBINATION[n_track];
+                    n_size = _type_system_size.SYS_SIZE_COMBINATION[n_track];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
-                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_COMBINATION[n_track];
+                    n_size = _type_system_size.SYS_SIZE_COMBINATION[n_track];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }
+
+        /**
+         * @private
+         * @function _generate_get_max_size
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+       function _generate_get_max_size(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_MAX_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_MAX_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_MAX_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_MAX_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_MAX_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_MAX_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }      
+        
+        /**
+         * @private
+         * @function _generate_get_bit_size
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_bit_size(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_BIT_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_BIT_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_BIT_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_BIT_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_BIT_SIZE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_BIT_SIZE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+        
+        /**
+         * @private
+         * @function _generate_get_data_mask
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_data_mask(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_DATA_MASK[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_DATA_MASK[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_DATA_MASK[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_DATA_MASK[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_DATA_MASK[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_DATA_MASK[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_use_parity
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_use_parity(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_PARITY[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_PARITY[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_PARITY[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_PARITY[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_PARITY[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_PARITY[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_parity_type
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_parity_type(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_PARITY_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_PARITY_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_PARITY_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_PARITY_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_PARITY_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_PARITY_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+    
+        /**
+         * @private
+         * @function _generate_get_stxl
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_stxl(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_STXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_STXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_STXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_STXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_STXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_STXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_etxl
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_etxl(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_ETXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_ETXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_ETXL[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_use_error_correct
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_use_error_correct(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_ERROR_CORRECT[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_ERROR_CORRECT[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_ERROR_CORRECT[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_ERROR_CORRECT[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_USE_ERROR_CORRECT[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_USE_ERROR_CORRECT[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_ecm_type
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_ecm_type(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_ECM_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ECM_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_ECM_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ECM_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_ECM_TYPE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ECM_TYPE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+
+        /**
+         * @private
+         * @function _generate_get_add_value
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_add_value(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            if(n_combi>2 || n_combi<0 ){
+                return b_result;
+            }
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_ADD_VALUE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ADD_VALUE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_ADD_VALUE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ADD_VALUE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_ADD_VALUE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_ADD_VALUE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                default:
+                    break;
+            }//end switch
+            return b_result;      
+        }   
+    
+        /**
+         * @private
+         * @function _generate_get_private_prefix
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
+         * @return {boolean} true(success) or false(failure).
+        */        
+        function _generate_get_private_prefix(queue_s_tx,n_track,n_combi){
+            var b_result = false;
+            var n_offset = 0;
+            var n_size = 0;
+
+            switch(n_track){
+                case 0:
+                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 1:
+                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track][n_combi];
+                    b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
+                    break;
+                case 2:
+                    n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_PRE[n_track][n_combi];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
@@ -2804,27 +4083,29 @@
          * @private
          * @function _generate_get_private_postfix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @param {number} n_track track index 0~2
+         * @param {number} n_combi combination index 0~2
          * @return {boolean} true(success) or false(failure).
         */        
-        function _generate_get_private_postfix(queue_s_tx,n_track){
+        function _generate_get_private_postfix(queue_s_tx,n_track,n_combi){
             var b_result = false;
             var n_offset = 0;
             var n_size = 0;
 
             switch(n_track){
                 case 0:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];
-                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track][n_combi];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 1:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];;
-                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track][n_combi];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 case 2:
-                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];;
-                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+                    n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track][n_combi];
+                    n_size = _type_system_size.SYS_SIZE_P_POST[n_track][n_combi];
                     b_result = _generate_config_get(queue_s_tx,n_offset,n_size);
                     break;
                 default:
@@ -2993,6 +4274,25 @@
 
         /**
          * @private
+         * @function _generate_set_indicate_error_condition
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number[]} cblank 4 int array.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_indicate_error_condition(queue_s_tx,cblank){
+            var n_offset = _type_system_offset.SYS_OFFSET_INDICATE_ERROR_CONDITION;
+            var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
+            var s_data = "";
+
+            for( var i = 0; i<4; i++ ){
+                s_data.push(elpusk.util.get_byte_hex_string_from_number(cblank[i]));
+            }//end for
+
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
          * @function _generate_set_interface
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_interface setting data.
@@ -3120,17 +4420,202 @@
             var n_size = _type_system_size.SYS_SIZE_G_POST;
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
+        //
+        /**
+         * @private
+         * @function _generate_set_number_combi
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi_number the number of combination( 1~3 )
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_number_combi(queue_s_tx,n_track,n_combi_number){
+            var n_offset = _type_system_offset.SYS_OFFSET_COMBINATION[n_track];
+            var n_size = _type_system_size.SYS_SIZE_COMBINATION[n_track];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_combi_number);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_max_size
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} n_max_size the maximum data size.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_max_size(queue_s_tx,n_track,n_combi,n_max_size){
+            var n_offset = _type_system_offset.SYS_OFFSET_MAX_SIZE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_MAX_SIZE[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_max_size);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_bit_size
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} n_bit_size the bit size of one data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_bit_size(queue_s_tx,n_track,n_combi,n_bit_size){
+            var n_offset = _type_system_offset.SYS_OFFSET_BIT_SIZE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_BIT_SIZE[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_bit_size);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_data_mask
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} c_data_mask the mask pattern of one data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_data_mask(queue_s_tx,n_track,n_combi,c_data_mask){
+            var n_offset = _type_system_offset.SYS_OFFSET_DATA_MASK[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_DATA_MASK[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(c_data_mask);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_use_parity
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {boolean} b_enable whether or not use parity.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_use_parity(queue_s_tx,n_track,n_combi,b_enable){
+            var n_offset = _type_system_offset.SYS_OFFSET_USE_PARITY[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_USE_PARITY[n_track][n_combi];
+            var s_data = "00";
+            if(b_enable){
+                s_data = elpusk.util.get_byte_hex_string_from_number(1);
+            }
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        
+        /**
+         * @private
+         * @function _generate_set_parity_type
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} n_parity_type parity type(0~1)
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_parity_type(queue_s_tx,n_track,n_combi,n_parity_type){
+            var n_offset = _type_system_offset.SYS_OFFSET_PARITY_TYPE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_PARITY_TYPE[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_parity_type);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_stxl
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} c_stxl start sentinel pattern.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_stxl(queue_s_tx,n_track,n_combi,c_stxl){
+            var n_offset = _type_system_offset.SYS_OFFSET_STXL[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_STXL[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(c_stxl);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        
+        /**
+         * @private
+         * @function _generate_set_etxl
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} c_etxl end sentinel pattern.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_etxl(queue_s_tx,n_track,n_combi,c_etxl){
+            var n_offset = _type_system_offset.SYS_OFFSET_ETXL[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(c_stxl);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_use_error_correct
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {boolean} b_enable whether or not error correction.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_use_error_correct(queue_s_tx,n_track,n_combi,b_enable){
+            var n_offset = _type_system_offset.SYS_OFFSET_USE_ERROR_CORRECT[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_USE_ERROR_CORRECT[n_track][n_combi];
+            var s_data = "00";
+            if(b_enable){
+                s_data = elpusk.util.get_byte_hex_string_from_number(1);
+            }
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_ecm_type
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} n_ecm_type error correction type
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_ecm_type(queue_s_tx,n_track,n_combi,n_ecm_type){
+            var n_offset = _type_system_offset.SYS_OFFSET_ECM_TYPE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_ECM_TYPE[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(n_ecm_type);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_add_value
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
+         * @param {number} c_add for converting ASCII code,  added value to each data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_add_value(queue_s_tx,n_track,n_combi,c_add){
+            var n_offset = _type_system_offset.SYS_OFFSET_ADD_VALUE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_ADD_VALUE[n_track][n_combi];
+            var s_data = elpusk.util.get_byte_hex_string_from_number(c_add);
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
 
         /**
          * @private
          * @function _generate_set_private_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
          * @param {string} s_tag setting data.
          * @returns {boolean} true(success) or false(failure).
          */        
-        function _generate_set_private_prefix(queue_s_tx,n_track,s_tag){
-            var n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track];
-            var n_size = _type_system_size.SYS_SIZE_P_PRE[n_track];
+        function _generate_set_private_prefix(queue_s_tx,n_track,n_combi,s_tag){
+            var n_offset = _type_system_offset.SYS_OFFSET_P_PRE[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_P_PRE[n_track][n_combi];
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
@@ -3138,12 +4623,14 @@
          * @private
          * @function _generate_set_private_postfix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination( 0~2 )
          * @param {string} s_tag setting data.
          * @returns {boolean} true(success) or false(failure).
          */        
-        function _generate_set_private_postfix(queue_s_tx,n_track,s_tag){
-            var n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track];
-            var n_size = _type_system_size.SYS_SIZE_P_POST[n_track];
+        function _generate_set_private_postfix(queue_s_tx,n_track,n_combi,s_tag){
+            var n_offset = _type_system_offset.SYS_OFFSET_P_POST[n_track][n_combi];
+            var n_size = _type_system_size.SYS_SIZE_P_POST[n_track][n_combi];
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
         }
 
@@ -3521,8 +5008,20 @@
             this._s_global_prefix = null;//you must include the length in front of this array.
             this._s_global_postfix = null;//you must include the length in front of this array.
     
-            this._s_private_prefix = [null,null,null];//you must include the length in front of this each array.
-            this._s_private_postfix = [null,null,null];//you must include the length in front of this each array.
+            this._n_number_combination = [1,1,1];
+            this._n_max_size = [[0,0,0],[0,0,0],[0,0,0]];
+            this._n_bit_size = [[0,0,0],[0,0,0],[0,0,0]];
+            this._c_data_mask = [[0,0,0],[0,0,0],[0,0,0]];
+            this._b_use_parity = [[true,true,true],[true,true,true],[true,true,true]];
+            this._n_parity_type = [[0,0,0],[0,0,0],[0,0,0]];
+            this._c_stxl = [[0,0,0],[0,0,0],[0,0,0]];
+            this._c_etxl = [[0,0,0],[0,0,0],[0,0,0]];
+            this._b_use_ecm = [[true,true,true],[true,true,true],[true,true,true]];
+            this._n_ecm_type = [[0,0,0],[0,0,0],[0,0,0]];
+            this._n_add_value = [[0,0,0],[0,0,0],[0,0,0]];
+
+            this._s_private_prefix = [[null,null,null],[null,null,null],[null,null,null]];//you must include the length in front of this each array.
+            this._s_private_postfix = [[null,null,null],[null,null,null],[null,null,null]];//you must include the length in front of this each array.
     
             //i-button
             this._s_prefix_ibutton = null;//you must include the length in front of this array.
@@ -3673,6 +5172,21 @@
          */
 		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
             return this._b_global_pre_postfix_send_condition; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_indicate_success_when_any_not_error
+         * @returns {boolean} true - indicate success when a track don't have error.
+         * <br /> false - indicate success when all track don't have error.
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
+            if( (this._c_blank[1] & 0x01) !== 0 ){
+                return true;
+            }
+            else{
+                return false;
+            }
         }
 
         /**
@@ -3914,11 +5428,288 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.get_number_combination
+         * @param {number} n_track msr track number 0~2
+         * @returns {number} the number of combination.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_number_combination = function (n_track){ 
+            var n_combi_number = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_number_combination ) ){
+                    continue;
+                }
+                if(this._n_number_combination.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_combi_number = this._n_number_combination [n_track];
+            }while(false);
+            return n_combi_number;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_max_size
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} the maximum data size at a combination of a track.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_max_size = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_max_size ) ){
+                    continue;
+                }
+                if(this._n_max_size.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._n_max_size [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_bit_size
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} the bit size at one data.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_bit_size = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_bit_size ) ){
+                    continue;
+                }
+                if(this._n_bit_size.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._n_bit_size [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_data_mask
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} the mask pattern at one data.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_data_mask = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._c_data_mask ) ){
+                    continue;
+                }
+                if(this._c_data_mask.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._c_data_mask [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_use_parity
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {boolean} true - use parity
+         * <br /> false - don't use parity.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_use_parity = function (n_track,n_combi){ 
+            var b_data = false;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._b_use_parity ) ){
+                    continue;
+                }
+                if(this._b_use_parity.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                b_data = this._b_use_parity [n_track][n_combi];
+            }while(false);
+            return b_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_parity_type
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} parity type 0 - even, 1- odd.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_parity_type = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_parity_type ) ){
+                    continue;
+                }
+                if(this._n_parity_type.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._n_parity_type [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_stxl
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} start sentinel pattern. left arrangement.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_stxl = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._c_stxl ) ){
+                    continue;
+                }
+                if(this._c_stxl.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._c_stxl [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_etxl
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} end sentinel pattern. left arrangement.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_etxl = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._c_etxl ) ){
+                    continue;
+                }
+                if(this._c_etxl.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._c_etxl [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_use_ecm
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {boolean} true - use error correction
+         * <br /> false - don't use error correction.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_use_ecm = function (n_track,n_combi){ 
+            var b_data = false;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._b_use_ecm ) ){
+                    continue;
+                }
+                if(this._b_use_ecm.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                b_data = this._b_use_ecm [n_track][n_combi];
+            }while(false);
+            return b_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ecm_type
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} error correction type 0-LRC, 1-inversion LRC, 2-CRC
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_ecm_type = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_ecm_type ) ){
+                    continue;
+                }
+                if(this._n_ecm_type.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._n_ecm_type [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_add_value
+         * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
+         * @returns {number} added value that convert to ASCII code.
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_add_value = function (n_track,n_combi){ 
+            var n_data = 0;
+            do{
+                if( typeof n_track !== 'number'){
+                    continue;
+                }
+                if( !Array.isArray(this._n_add_value ) ){
+                    continue;
+                }
+                if(this._n_add_value.length !== _const_the_number_of_track ){
+                    continue;
+                }
+
+                n_data = this._n_add_value [n_track][n_combi];
+            }while(false);
+            return n_data;
+		}
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_private_prefix
          * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
          * @returns {string} hex string or null
          */        
-		_elpusk.device.usb.hid.lpu237.prototype.get_private_prefix = function(n_track){
+		_elpusk.device.usb.hid.lpu237.prototype.get_private_prefix = function(n_track,n_combi){
             var s_value = null;
             do{
                 if( typeof n_track !== 'number'){
@@ -3930,7 +5721,7 @@
                 if( this._s_private_prefix.length !== _const_the_number_of_track ){
                     continue;
                 }
-                s_value = this._s_private_prefix[n_track];
+                s_value = this._s_private_prefix[n_track][n_combi];
             }while(false);
             return s_value; 
         }
@@ -3939,9 +5730,10 @@
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_private_postfix
          * @param {number} n_track msr track number 0~2
+         * @param {number} n_combi the index of combination. 0~2
          * @returns {string} hex string or null
          */        
-		_elpusk.device.usb.hid.lpu237.prototype.get_private_postfix = function(n_track){ 
+		_elpusk.device.usb.hid.lpu237.prototype.get_private_postfix = function(n_track,n_combi){ 
             var s_value = null;
             do{
                 if( typeof n_track !== 'number'){
@@ -3953,7 +5745,7 @@
                 if( this._s_private_postfix.length !== _const_the_number_of_track ){
                     continue;
                 }
-                s_value = this._s_private_postfix[n_track];
+                s_value = this._s_private_postfix[n_track][n_combi];
             }while(false);
             return s_value; 
         }
@@ -4217,18 +6009,18 @@
                         s_description = "get global prefix"; break;
                     case _type_generated_tx_type.gt_get_global_postfix:
                         s_description = "get global postfix"; break;
-                    case _type_generated_tx_type.gt_get_private_prefix1:
-                        s_description = "get private prefix1"; break;
-                    case _type_generated_tx_type.gt_get_private_prefix2:
-                        s_description = "get private prefix2"; break;
-                    case _type_generated_tx_type.gt_get_private_prefix3:
-                        s_description = "get private prefix3"; break;
-                    case _type_generated_tx_type.gt_get_private_postfix1:
-                        s_description = "get private posfix1"; break;
-                    case _type_generated_tx_type.gt_get_private_postfix2:
-                        s_description = "get private posfix2"; break;
-                    case _type_generated_tx_type.gt_get_private_postfix3:
-                        s_description = "get private posfix3"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix10:
+                        s_description = "get private prefix10"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix20:
+                        s_description = "get private prefix20"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix30:
+                        s_description = "get private prefix30"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix10:
+                        s_description = "get private posfix10"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix20:
+                        s_description = "get private posfix20"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix30:
+                        s_description = "get private posfix30"; break;
                     case _type_generated_tx_type.gt_get_prefix_ibutton:
                         s_description = "get i-button prefix"; break;
                     case _type_generated_tx_type.gt_get_postfix_ibutton:
@@ -4272,17 +6064,17 @@
                         s_description = "set global prefix"; break;
                     case _type_generated_tx_type.gt_set_global_postfix:
                         s_description = "set global postfix"; break;
-                    case _type_generated_tx_type.gt_set_private_prefix1:
+                    case _type_generated_tx_type.gt_set_private_prefix10:
                         s_description = "set private prefix1"; break;
-                    case _type_generated_tx_type.gt_set_private_prefix2:
+                    case _type_generated_tx_type.gt_set_private_prefix20:
                         s_description = "set private prefix2"; break;
-                    case _type_generated_tx_type.gt_set_private_prefix3:
+                    case _type_generated_tx_type.gt_set_private_prefix30:
                         s_description = "set private prefix3"; break;
-                    case _type_generated_tx_type.gt_set_private_postfix1:
+                    case _type_generated_tx_type.gt_set_private_postfix10:
                         s_description = "set private postfix1"; break;
-                    case _type_generated_tx_type.gt_set_private_postfix2:
+                    case _type_generated_tx_type.gt_set_private_postfix20:
                         s_description = "set private postfix2"; break;
-                    case _type_generated_tx_type.gt_set_private_postfix3:
+                    case _type_generated_tx_type.gt_set_private_postfix30:
                         s_description = "set private postfix3"; break;
                     case _type_generated_tx_type.gt_set_prefix_ibutton:
                         s_description = "set i-button prefix"; break;
@@ -4463,10 +6255,10 @@
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_enable_iso1+i );
                     //
                     if( !_generate_get_private_prefix(this._dequeu_s_tx,i) ){ b_result = false; break;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix1+i );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix10+i );
                     //
                     if( !_generate_get_private_postfix(this._dequeu_s_tx,i) ){ b_result = false; break;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix1+i );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix10+i );
 
                 }//end for
                 if( !b_result ){
@@ -4635,38 +6427,38 @@
                 }
 
                 // . private prefix 1
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix10 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_prefix[_type_msr_track_Numer.iso1_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix1 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix10 );
                 }
 
                 // . private postfix 1
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix1 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix10 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_postfix[_type_msr_track_Numer.iso1_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix1 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix10 );
                 }
 
                 // . private prefix 2
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix20 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_prefix[_type_msr_track_Numer.iso2_track] )){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix2 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix20 );
                 }
                 
                 // . private postfix 2
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix2 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix20 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix2 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix20 );
                 }
 
                 // . private prefix 3
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix30 ) >= 0 ){
                     if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_prefix[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix3 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix30 );
                 }
                 // . private postfix 3
-                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix3 ) >= 0 ){
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix30 ) >= 0 ){
                     if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_postfix[_type_msr_track_Numer.iso3_track])){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix3 );
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix30 );
                 }
 
                 //
@@ -4953,42 +6745,42 @@
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_prefix1:
+                case _type_generated_tx_type.gt_get_private_prefix10:
                     s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso1_track);
                     if( s_value !== null ){
                         this._s_private_prefix[_type_msr_track_Numer.iso1_track] = s_value;
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_prefix2:
+                case _type_generated_tx_type.gt_get_private_prefix20:
                     s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso2_track);
                     if( s_value !== null ){
                         this._s_private_prefix[_type_msr_track_Numer.iso2_track] = s_value;
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_prefix3:
+                case _type_generated_tx_type.gt_get_private_prefix30:
                     s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso3_track);
                     if( s_value !== null ){
                         this._s_private_prefix[_type_msr_track_Numer.iso3_track] = s_value;
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_postfix1:
+                case _type_generated_tx_type.gt_get_private_postfix10:
                     s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso1_track);
                     if( s_value !== null ){
                         this._s_private_postfix[_type_msr_track_Numer.iso1_track] = s_value;
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_postfix2:
+                case _type_generated_tx_type.gt_get_private_postfix20:
                     s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso2_track);
                     if( s_value !== null ){
                         this._s_private_postfix[_type_msr_track_Numer.iso2_track] = s_value;
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_private_postfix3:
+                case _type_generated_tx_type.gt_get_private_postfix30:
                     s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso3_track);
                     if( s_value !== null ){
                         this._s_private_postfix[_type_msr_track_Numer.iso3_track] = s_value;
@@ -5060,12 +6852,12 @@
                 case _type_generated_tx_type.gt_set_direction3:
                 case _type_generated_tx_type.gt_set_global_prefix:
                 case _type_generated_tx_type.gt_set_global_postfix:
-                case _type_generated_tx_type.gt_set_private_prefix1:
-                case _type_generated_tx_type.gt_set_private_prefix2:
-                case _type_generated_tx_type.gt_set_private_prefix3:
-                case _type_generated_tx_type.gt_set_private_postfix1:
-                case _type_generated_tx_type.gt_set_private_postfix2:
-                case _type_generated_tx_type.gt_set_private_postfix3:
+                case _type_generated_tx_type.gt_set_private_prefix10:
+                case _type_generated_tx_type.gt_set_private_prefix20:
+                case _type_generated_tx_type.gt_set_private_prefix30:
+                case _type_generated_tx_type.gt_set_private_postfix10:
+                case _type_generated_tx_type.gt_set_private_postfix20:
+                case _type_generated_tx_type.gt_set_private_postfix30:
                 case _type_generated_tx_type.gt_set_prefix_ibutton:
                 case _type_generated_tx_type.gt_set_postfix_ibutton:
                 case _type_generated_tx_type.gt_set_prefix_uart:
@@ -5488,8 +7280,8 @@
                             }
 
                             var cp_enable = [_type_change_parameter.cp_EnableISO1 ,_type_change_parameter.cp_EnableISO2 ,_type_change_parameter.cp_EnableISO3  ];
-                            var cp_pre = [_type_change_parameter.cp_PrivatePrefix1,_type_change_parameter.cp_PrivatePrefix2,_type_change_parameter.cp_PrivatePrefix3 ];
-                            var cp_post = [_type_change_parameter.cp_PrivatePostfix1 ,_type_change_parameter.cp_PrivatePostfix2 ,_type_change_parameter.cp_PrivatePostfix3  ];
+                            var cp_pre = [_type_change_parameter.cp_PrivatePrefix10,_type_change_parameter.cp_PrivatePrefix20,_type_change_parameter.cp_PrivatePrefix30 ];
+                            var cp_post = [_type_change_parameter.cp_PrivatePostfix10 ,_type_change_parameter.cp_PrivatePostfix20 ,_type_change_parameter.cp_PrivatePostfix30  ];
                             for( var i = 0; i<_const_the_number_of_track; i++ ){
                                 if( array_b_enable_track[i] !== null ){
                                     if( this._device._b_enable_iso[i]  !== array_b_enable_track[i] ){
