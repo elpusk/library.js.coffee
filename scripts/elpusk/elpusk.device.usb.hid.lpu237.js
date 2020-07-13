@@ -65,6 +65,7 @@
         var _const_min_size_request_header = 3;
         var _const_min_size_response_header = 3;
         var _const_the_number_of_track = 3;
+        var _const_the_number_of_combination = 3;
         var _const_the_size_of_name = 16;
         var _const_the_size_of_uid = 4 * 4;
         var _const_the_size_of_system_blank = 4;
@@ -209,9 +210,9 @@
             gt_get_iso2_Combi0_DataMask : 53,   gt_get_iso2_Combi1_DataMask : 54,   gt_get_iso2_Combi2_DataMask : 55,
             gt_get_iso3_Combi0_DataMask : 56,   gt_get_iso3_Combi1_DataMask : 57,   gt_get_iso3_Combi2_DataMask : 58,
 
-            gt_get_iso1_Combi0_UseParity : 59,  gt_get_iso_Combi1_UseParity : 60,   gt_get_iso1_Combi2_UseParity : 61,
-            gt_get_iso2_Combi0_UseParity : 62,  gt_get_iso_Combi1_UseParity : 63,   gt_get_iso2_Combi2_UseParity : 64,
-            gt_get_iso3_Combi0_UseParity : 65,  gt_get_iso_Combi1_UseParity : 66,   gt_get_iso3_Combi2_UseParity : 67,
+            gt_get_iso1_Combi0_UseParity : 59,  gt_get_iso1_Combi1_UseParity : 60,   gt_get_iso1_Combi2_UseParity : 61,
+            gt_get_iso2_Combi0_UseParity : 62,  gt_get_iso2_Combi1_UseParity : 63,   gt_get_iso2_Combi2_UseParity : 64,
+            gt_get_iso3_Combi0_UseParity : 65,  gt_get_iso3_Combi1_UseParity : 66,   gt_get_iso3_Combi2_UseParity : 67,
 
             gt_get_iso1_Combi0_ParityType : 68, gt_get_iso1_Combi1_ParityType : 69, gt_get_iso1_Combi2_ParityType : 70,
             gt_get_iso2_Combi0_ParityType : 71, gt_get_iso2_Combi1_ParityType : 72, gt_get_iso2_Combi2_ParityType : 73,
@@ -275,9 +276,9 @@
             gt_set_iso2_Combi0_DataMask : 186,   gt_set_iso2_Combi1_DataMask : 187,   gt_set_iso2_Combi2_DataMask : 188,
             gt_set_iso3_Combi0_DataMask : 189,   gt_set_iso3_Combi1_DataMask : 190,   gt_set_iso3_Combi2_DataMask : 191,
 
-            gt_set_iso1_Combi0_UseParity : 192,  gt_set_iso_Combi1_UseParity : 193,   gt_set_iso1_Combi2_UseParity : 194,
-            gt_set_iso2_Combi0_UseParity : 195,  gt_set_iso_Combi1_UseParity : 196,   gt_set_iso2_Combi2_UseParity : 197,
-            gt_set_iso3_Combi0_UseParity : 198,  gt_set_iso_Combi1_UseParity : 199,   gt_set_iso3_Combi2_UseParity : 200,
+            gt_set_iso1_Combi0_UseParity : 192,  gt_set_iso1_Combi1_UseParity : 193,   gt_set_iso1_Combi2_UseParity : 194,
+            gt_set_iso2_Combi0_UseParity : 195,  gt_set_iso2_Combi1_UseParity : 196,   gt_set_iso2_Combi2_UseParity : 197,
+            gt_set_iso3_Combi0_UseParity : 198,  gt_set_iso3_Combi1_UseParity : 199,   gt_set_iso3_Combi2_UseParity : 200,
 
             gt_set_iso1_Combi0_ParityType : 201, gt_set_iso1_Combi1_ParityType : 202, gt_set_iso1_Combi2_ParityType : 203,
             gt_set_iso2_Combi0_ParityType : 204, gt_set_iso2_Combi1_ParityType : 205, gt_set_iso2_Combi2_ParityType : 206,
@@ -2228,11 +2229,10 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @param {number} n_combi - combination index 0~2
-         * @returns {(null|string)} hex string format. the mask pattern of each data at a combination of track.( including Error check bit, left arrangement)
-         * <br /> null - error.
+         * @returns {number}the mask pattern of each data at a combination of track.( including Error check bit, left arrangement)
          */
 		function _get_data_mask_from_response(s_response,n_track,n_combi){
-			var s_data = null;
+			var n_value = 0;
 
 			do {
                 if( n_combi > 2 || n_combi < 0 ){
@@ -2257,9 +2257,9 @@
                     continue;
                 }
 
-                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+                n_value = _get_data_field_member_of_response_by_number(s_response);
 			} while (false);
-			return s_data;
+			return n_value;
         }
         
         /**
@@ -2350,11 +2350,10 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @param {number} n_combi - combination index 0~2
-         * @returns {(null|string)} hex string format. the start sentinel pattern of each data at a combination of track.( including parity, left arrangement)
-         * <br /> null - error.
+         * @returns {number} the start sentinel pattern of each data at a combination of track.( including parity, left arrangement)
          */
 		function _get_stxl_from_response(s_response,n_track,n_combi){
-			var s_data = null;
+			var n_value = 0;
 
 			do {
                 if( n_combi > 2 || n_combi < 0 ){
@@ -2379,9 +2378,9 @@
                     continue;
                 }
 
-                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+                n_value = _get_data_field_member_of_response_by_number(s_response);
 			} while (false);
-			return s_data;
+			return n_value;
         }
 
         /**
@@ -2390,11 +2389,10 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @param {number} n_track - ISO track 0~2
          * @param {number} n_combi - combination index 0~2
-         * @returns {(null|string)} hex string format. the end sentinel pattern of each data at a combination of track.( including parity, left arrangement)
-         * <br /> null - error.
+         * @returns {number} the end sentinel pattern of each data at a combination of track.( including parity, left arrangement)
          */
 		function _get_etxl_from_response(s_response,n_track,n_combi){
-			var s_data = null;
+			var n_value = 0;
 
 			do {
                 if( n_combi > 2 || n_combi < 0 ){
@@ -2419,9 +2417,9 @@
                     continue;
                 }
 
-                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+                n_value = _get_data_field_member_of_response_by_number(s_response);
 			} while (false);
-			return s_data;
+			return n_value;
         }
 
         /**
@@ -5180,7 +5178,7 @@
          * @returns {boolean} true - indicate success when a track don't have error.
          * <br /> false - indicate success when all track don't have error.
          */
-		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
+		_elpusk.device.usb.hid.lpu237.prototype.get_indicate_success_when_any_not_error = function(){
             if( (this._c_blank[1] & 0x01) !== 0 ){
                 return true;
             }
@@ -5945,10 +5943,10 @@
                 if( typeof n_type !== 'number'){
                     continue;
                 }
-                if( n_type < _type_generated_tx_type.gt_read_uid ){
+                if( n_type < _type_generated_tx_type.gt_read_uid ){//minmum
                     continue;
                 }
-                if( n_type > _type_generated_tx_type.gt_set_addmit_code_stick_ibutton ){
+                if( n_type > _type_generated_tx_type.gt_set_addmit_code_stick_ibutton ){//max
                     continue;
                 }
                 //
@@ -5985,6 +5983,8 @@
                         s_description = "get name"; break;
                     case _type_generated_tx_type.gt_get_global_prepostfix_send_condition:
                         s_description = "get global send condition"; break;
+                    case _type_generated_tx_type.gt_get_indicate_error_condition:
+                        s_description = "get indication error condition."; break;
                     case _type_generated_tx_type.gt_get_interface:
                         s_description = "get interface"; break;
                     case _type_generated_tx_type.gt_get_language:
@@ -6009,18 +6009,236 @@
                         s_description = "get global prefix"; break;
                     case _type_generated_tx_type.gt_get_global_postfix:
                         s_description = "get global postfix"; break;
+                    //
+                    case _type_generated_tx_type.gt_get_iso1_number_combi:
+                        s_description = "get_iso1_number_combi"; break;
+                    case _type_generated_tx_type.gt_get_iso2_number_combi:
+                        s_description = "get_iso2_number_combi"; break;
+                    case _type_generated_tx_type.gt_get_iso3_number_combi:
+                        s_description = "get_iso3_number_combi"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_MaxSize:
+                         s_description = "get_iso1_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_MaxSize :
+                         s_description = "get_iso1_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_MaxSize :
+                         s_description = "get_iso1_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_MaxSize :
+                         s_description = "get_iso2_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_MaxSize :
+                         s_description = "get_iso2_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_MaxSize :
+                         s_description = "get_iso2_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_MaxSize :
+                         s_description = "get_iso3_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_MaxSize :
+                         s_description = "get_iso3_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_MaxSize :
+                         s_description = "get_iso3_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_BitSize :
+                         s_description = "get_iso1_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_BitSize :
+                         s_description = "get_iso1_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_BitSize :
+                         s_description = "get_iso1_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_BitSize :
+                         s_description = "get_iso2_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_BitSize :
+                         s_description = "get_iso2_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_BitSize :
+                         s_description = "get_iso2_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_BitSize :
+                         s_description = "get_iso3_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_BitSize :
+                         s_description = "get_iso3_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_BitSize :
+                         s_description = "get_iso3_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_DataMask :
+                         s_description = "get_iso1_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_DataMask :
+                         s_description = "get_iso1_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_DataMask :
+                         s_description = "get_iso1_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_DataMask :
+                         s_description = "get_iso2_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_DataMask :
+                         s_description = "get_iso2_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_DataMask :
+                         s_description = "get_iso2_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_DataMask :
+                         s_description = "get_iso3_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_DataMask :
+                         s_description = "get_iso3_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_DataMask :
+                         s_description = "get_iso3_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_UseParity :
+                         s_description = "get_iso1_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_UseParity :
+                         s_description = "get_iso1_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_UseParity :
+                         s_description = "get_iso1_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_UseParity :
+                         s_description = "get_iso2_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_UseParity :
+                         s_description = "get_iso2_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_UseParity :
+                         s_description = "get_iso2_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_UseParity :
+                         s_description = "get_iso3_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_UseParity :
+                         s_description = "get_iso3_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_UseParity :
+                         s_description = "get_iso3_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_ParityType :
+                         s_description = "get_iso1_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_ParityType :
+                         s_description = "get_iso1_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_ParityType :
+                         s_description = "get_iso1_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_ParityType :
+                         s_description = "get_iso2_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_ParityType :
+                         s_description = "get_iso2_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_ParityType :
+                         s_description = "get_iso2_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_ParityType :
+                         s_description = "get_iso3_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_ParityType :
+                         s_description = "get_iso3_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_ParityType :
+                         s_description = "get_iso3_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_STX_L :
+                         s_description = "get_iso1_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_STX_L :
+                         s_description = "get_iso1_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_STX_L :
+                         s_description = "get_iso1_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_STX_L :
+                         s_description = "get_iso2_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_STX_L :
+                         s_description = "get_iso2_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_STX_L :
+                         s_description = "get_iso2_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_STX_L :
+                         s_description = "get_iso3_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_STX_L :
+                         s_description = "get_iso3_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_STX_L :
+                         s_description = "get_iso3_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_ETX_L :
+                         s_description = "get_iso1_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_ETX_L :
+                         s_description = "get_iso1_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_ETX_L :
+                         s_description = "get_iso1_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_ETX_L :
+                         s_description = "get_iso2_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_ETX_L :
+                         s_description = "get_iso2_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_ETX_L :
+                         s_description = "get_iso2_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_ETX_L :
+                         s_description = "get_iso3_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_ETX_L :
+                         s_description = "get_iso3_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_ETX_L :
+                         s_description = "get_iso3_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_UseErrorCorrect :
+                         s_description = "get_iso1_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_UseErrorCorrect :
+                         s_description = "get_iso1_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_UseErrorCorrect :
+                         s_description = "get_iso1_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_UseErrorCorrect :
+                         s_description = "get_iso2_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_UseErrorCorrect :
+                         s_description = "get_iso2_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_UseErrorCorrect :
+                         s_description = "get_iso2_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_UseErrorCorrect :
+                         s_description = "get_iso3_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_UseErrorCorrect :
+                         s_description = "get_iso3_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_UseErrorCorrect :
+                         s_description = "get_iso3_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_ECMType :
+                         s_description = "get_iso1_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_ECMType :
+                         s_description = "get_iso1_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_ECMType :
+                         s_description = "get_iso1_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_ECMType :
+                         s_description = "get_iso2_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_ECMType :
+                         s_description = "get_iso2_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_ECMType :
+                         s_description = "get_iso2_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_ECMType :
+                         s_description = "get_iso3_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_ECMType :
+                         s_description = "get_iso3_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_ECMType :
+                         s_description = "get_iso3_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi0_AddValue :
+                         s_description = "get_iso1_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi1_AddValue :
+                         s_description = "get_iso1_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso1_Combi2_AddValue :
+                         s_description = "get_iso1_Combi2_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi0_AddValue :
+                         s_description = "get_iso2_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi1_AddValue :
+                         s_description = "get_iso2_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso2_Combi2_AddValue :
+                         s_description = "get_iso2_Combi2_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi0_AddValue :
+                         s_description = "get_iso3_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi1_AddValue :
+                         s_description = "get_iso3_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_get_iso3_Combi2_AddValue :
+                         s_description = "get_iso3_Combi2_AddValue"; break;
+                        //
                     case _type_generated_tx_type.gt_get_private_prefix10:
                         s_description = "get private prefix10"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix11:
+                        s_description = "get private prefix11"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix12:
+                        s_description = "get private prefix12"; break;
+            
                     case _type_generated_tx_type.gt_get_private_prefix20:
                         s_description = "get private prefix20"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix21:
+                        s_description = "get private prefix21"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix22:
+                        s_description = "get private prefix22"; break;
+            
                     case _type_generated_tx_type.gt_get_private_prefix30:
                         s_description = "get private prefix30"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix31:
+                        s_description = "get private prefix31"; break;
+                    case _type_generated_tx_type.gt_get_private_prefix32:
+                        s_description = "get private prefix32"; break;
+            
                     case _type_generated_tx_type.gt_get_private_postfix10:
                         s_description = "get private posfix10"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix11:
+                        s_description = "get private posfix11"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix12:
+                        s_description = "get private posfix12"; break;
+            
                     case _type_generated_tx_type.gt_get_private_postfix20:
                         s_description = "get private posfix20"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix21:
+                        s_description = "get private posfix21"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix22:
+                        s_description = "get private posfix22"; break;
+            
                     case _type_generated_tx_type.gt_get_private_postfix30:
                         s_description = "get private posfix30"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix31:
+                        s_description = "get private posfix31"; break;
+                    case _type_generated_tx_type.gt_get_private_postfix32:
+                        s_description = "get private posfix32"; break;
+            
                     case _type_generated_tx_type.gt_get_prefix_ibutton:
                         s_description = "get i-button prefix"; break;
                     case _type_generated_tx_type.gt_get_postfix_ibutton:
@@ -6040,6 +6258,9 @@
 
                     case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
                         s_description = "set global send condition"; break;
+                    case _type_generated_tx_type.gt_set_indicate_error_condition:
+                        s_description = "set_indicate_error_condition"; break;
+                    //
                     case _type_generated_tx_type.gt_set_interface:
                         s_description = "set interface"; break;
                     case _type_generated_tx_type.gt_set_language:
@@ -6064,18 +6285,236 @@
                         s_description = "set global prefix"; break;
                     case _type_generated_tx_type.gt_set_global_postfix:
                         s_description = "set global postfix"; break;
+                    //
+                    case _type_generated_tx_type.gt_set_iso1_number_combi:
+                        s_description = "set_iso1_number_combi"; break;
+                    case _type_generated_tx_type.gt_set_iso2_number_combi:
+                        s_description = "set_iso2_number_combi"; break;
+                    case _type_generated_tx_type.gt_set_iso3_number_combi:
+                        s_description = "set_iso3_number_combi"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_MaxSize:
+                         s_description = "set_iso1_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_MaxSize :
+                         s_description = "set_iso1_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_MaxSize :
+                         s_description = "set_iso1_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_MaxSize :
+                         s_description = "set_iso2_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_MaxSize :
+                         s_description = "set_iso2_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_MaxSize :
+                         s_description = "set_iso2_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_MaxSize :
+                         s_description = "set_iso3_Combi0_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_MaxSize :
+                         s_description = "set_iso3_Combi1_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_MaxSize :
+                         s_description = "set_iso3_Combi2_MaxSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_BitSize :
+                         s_description = "set_iso1_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_BitSize :
+                         s_description = "set_iso1_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_BitSize :
+                         s_description = "set_iso1_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_BitSize :
+                         s_description = "set_iso2_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_BitSize :
+                         s_description = "set_iso2_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_BitSize :
+                         s_description = "set_iso2_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_BitSize :
+                         s_description = "set_iso3_Combi0_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_BitSize :
+                         s_description = "set_iso3_Combi1_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_BitSize :
+                         s_description = "set_iso3_Combi2_BitSize"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_DataMask :
+                         s_description = "set_iso1_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_DataMask :
+                         s_description = "set_iso1_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_DataMask :
+                         s_description = "set_iso1_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_DataMask :
+                         s_description = "set_iso2_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_DataMask :
+                         s_description = "set_iso2_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_DataMask :
+                         s_description = "set_iso2_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_DataMask :
+                         s_description = "set_iso3_Combi0_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_DataMask :
+                         s_description = "set_iso3_Combi1_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_DataMask :
+                         s_description = "set_iso3_Combi2_DataMask"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_UseParity :
+                         s_description = "set_iso1_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_UseParity :
+                         s_description = "set_iso1_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_UseParity :
+                         s_description = "set_iso1_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_UseParity :
+                         s_description = "set_iso2_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_UseParity :
+                         s_description = "set_iso2_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_UseParity :
+                         s_description = "set_iso2_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_UseParity :
+                         s_description = "set_iso3_Combi0_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_UseParity :
+                         s_description = "set_iso3_Combi1_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_UseParity :
+                         s_description = "set_iso3_Combi2_UseParity"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_ParityType :
+                         s_description = "set_iso1_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_ParityType :
+                         s_description = "set_iso1_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_ParityType :
+                         s_description = "set_iso1_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_ParityType :
+                         s_description = "set_iso2_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_ParityType :
+                         s_description = "set_iso2_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_ParityType :
+                         s_description = "set_iso2_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_ParityType :
+                         s_description = "set_iso3_Combi0_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_ParityType :
+                         s_description = "set_iso3_Combi1_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_ParityType :
+                         s_description = "set_iso3_Combi2_ParityType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_STX_L :
+                         s_description = "set_iso1_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_STX_L :
+                         s_description = "set_iso1_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_STX_L :
+                         s_description = "set_iso1_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_STX_L :
+                         s_description = "set_iso2_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_STX_L :
+                         s_description = "set_iso2_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_STX_L :
+                         s_description = "set_iso2_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_STX_L :
+                         s_description = "set_iso3_Combi0_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_STX_L :
+                         s_description = "set_iso3_Combi1_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_STX_L :
+                         s_description = "set_iso3_Combi2_STX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_ETX_L :
+                         s_description = "set_iso1_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_ETX_L :
+                         s_description = "set_iso1_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_ETX_L :
+                         s_description = "set_iso1_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_ETX_L :
+                         s_description = "set_iso2_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_ETX_L :
+                         s_description = "set_iso2_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_ETX_L :
+                         s_description = "set_iso2_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_ETX_L :
+                         s_description = "set_iso3_Combi0_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_ETX_L :
+                         s_description = "set_iso3_Combi1_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_ETX_L :
+                         s_description = "set_iso3_Combi2_ETX_L"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_UseErrorCorrect :
+                         s_description = "set_iso1_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_UseErrorCorrect :
+                         s_description = "set_iso1_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_UseErrorCorrect :
+                         s_description = "set_iso1_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_UseErrorCorrect :
+                         s_description = "set_iso2_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_UseErrorCorrect :
+                         s_description = "set_iso2_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_UseErrorCorrect :
+                         s_description = "set_iso2_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_UseErrorCorrect :
+                         s_description = "set_iso3_Combi0_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_UseErrorCorrect :
+                         s_description = "set_iso3_Combi1_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_UseErrorCorrect :
+                         s_description = "set_iso3_Combi2_UseErrorCorrect"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_ECMType :
+                         s_description = "set_iso1_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_ECMType :
+                         s_description = "set_iso1_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_ECMType :
+                         s_description = "set_iso1_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_ECMType :
+                         s_description = "set_iso2_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_ECMType :
+                         s_description = "set_iso2_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_ECMType :
+                         s_description = "set_iso2_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_ECMType :
+                         s_description = "set_iso3_Combi0_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_ECMType :
+                         s_description = "set_iso3_Combi1_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_ECMType :
+                         s_description = "set_iso3_Combi2_ECMType"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi0_AddValue :
+                         s_description = "set_iso1_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi1_AddValue :
+                         s_description = "set_iso1_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso1_Combi2_AddValue :
+                         s_description = "set_iso1_Combi2_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi0_AddValue :
+                         s_description = "set_iso2_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi1_AddValue :
+                         s_description = "set_iso2_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso2_Combi2_AddValue :
+                         s_description = "set_iso2_Combi2_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi0_AddValue :
+                         s_description = "set_iso3_Combi0_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi1_AddValue :
+                         s_description = "set_iso3_Combi1_AddValue"; break;
+                    case _type_generated_tx_type.gt_set_iso3_Combi2_AddValue :
+                         s_description = "set_iso3_Combi2_AddValue"; break;
+                    //
                     case _type_generated_tx_type.gt_set_private_prefix10:
-                        s_description = "set private prefix1"; break;
+                        s_description = "set private prefix10"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix11:
+                        s_description = "set private prefix11"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix12:
+                        s_description = "set private prefix12"; break;
+            
                     case _type_generated_tx_type.gt_set_private_prefix20:
-                        s_description = "set private prefix2"; break;
+                        s_description = "set private prefix20"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix21:
+                        s_description = "set private prefix21"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix22:
+                        s_description = "set private prefix22"; break;
+            
                     case _type_generated_tx_type.gt_set_private_prefix30:
-                        s_description = "set private prefix3"; break;
+                        s_description = "set private prefix30"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix31:
+                        s_description = "set private prefix31"; break;
+                    case _type_generated_tx_type.gt_set_private_prefix32:
+                        s_description = "set private prefix32"; break;
+            
                     case _type_generated_tx_type.gt_set_private_postfix10:
-                        s_description = "set private postfix1"; break;
+                        s_description = "set private posfix10"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix11:
+                        s_description = "set private posfix11"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix12:
+                        s_description = "set private posfix12"; break;
+            
                     case _type_generated_tx_type.gt_set_private_postfix20:
-                        s_description = "set private postfix2"; break;
+                        s_description = "set private posfix20"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix21:
+                        s_description = "set private posfix21"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix22:
+                        s_description = "set private posfix22"; break;
+            
                     case _type_generated_tx_type.gt_set_private_postfix30:
-                        s_description = "set private postfix3"; break;
+                        s_description = "set private posfix30"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix31:
+                        s_description = "set private posfix31"; break;
+                    case _type_generated_tx_type.gt_set_private_postfix32:
+                        s_description = "set private posfix32"; break;
+                    //
                     case _type_generated_tx_type.gt_set_prefix_ibutton:
                         s_description = "set i-button prefix"; break;
                     case _type_generated_tx_type.gt_set_postfix_ibutton:
@@ -6182,7 +6621,7 @@
                 // setting detail
                 if( !_generate_get_global_pre_postfix_send_condition(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_global_prepostfix_send_condition );
-                
+
                 if( !_generate_get_device_support_mmd1000(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_support_mmd1000 );
 
@@ -6254,11 +6693,13 @@
                     if( !_generate_get_enable_track(this._dequeu_s_tx,i) ){ b_result = false; break;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_enable_iso1+i );
                     //
-                    if( !_generate_get_private_prefix(this._dequeu_s_tx,i) ){ b_result = false; break;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix10+i );
+                    if( !_generate_get_private_prefix(this._dequeu_s_tx,i,0) ){ b_result = false; break;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix10
+                        +i*_const_the_number_of_combination );
                     //
-                    if( !_generate_get_private_postfix(this._dequeu_s_tx,i) ){ b_result = false; break;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix10+i );
+                    if( !_generate_get_private_postfix(this._dequeu_s_tx,i,0) ){ b_result = false; break;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix10
+                        +i*_const_the_number_of_combination );
 
                 }//end for
                 if( !b_result ){
@@ -6272,6 +6713,82 @@
                 if( !_generate_get_global_postfix(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_global_postfix );
 
+                //
+                var b_run_combination = false;
+                if( _first_version_greater_then_second_version( this._version,[5,12,0,0]) ){
+                    b_run_combination = true;//support from ganymede v5.13
+                }
+                if( _first_version_greater_then_second_version( [4,0,0,0],this._version) ){
+                    //callisto
+                    if( _first_version_greater_then_second_version( this._version,[3,20,0,0]) ){
+                        b_run_combination = true;//support from callisto v3.21
+                    }
+                }
+
+                if( b_run_combination ){
+                    
+                    if( !_generate_get_indicate_error_condition(this._dequeu_s_tx) ){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_indicate_error_condition );
+                    //
+                    var ii=0;
+                    var jj=0;
+                    for( ii = 0; ii<_const_the_number_of_track; ii++){
+                        if( !_generate_get_number_combi(this._dequeu_s_tx,ii) ){break;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_number_combi+ii );
+
+                        for( jj = 0; jj<_const_the_number_of_combination; jj++){
+                            if( !_generate_get_max_size(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_MaxSize
+                                +ii*_const_the_number_of_combination+jj );
+
+                            if( !_generate_get_bit_size(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_BitSize
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_data_mask(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_DataMask
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_use_parity(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_UseParity
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_parity_type(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_ParityType
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_stxl(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_STX_L
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_etxl(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_ETX_L
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_use_error_correct(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_UseErrorCorrect
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_ecm_type(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_ECMType
+                                +ii*_const_the_number_of_combination+jj );
+                            if( !_generate_get_add_value(this._dequeu_s_tx,ii,jj) ){break;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_get_iso1_Combi0_AddValue
+                                +ii*_const_the_number_of_combination+jj );
+                            if( jj > 0 ){
+                                if( !_generate_get_private_prefix(this._dequeu_s_tx,ii,jj) ){ break;}
+                                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_prefix10
+                                    +ii*_const_the_number_of_combination+jj );
+                                //
+                                if( !_generate_get_private_postfix(this._dequeu_s_tx,ii,jj) ){ break;}
+                                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_private_postfix10
+                                    +ii*_const_the_number_of_combination+jj );
+                            }
+            
+                        }//end for j
+
+                        if(jj<_const_the_number_of_combination ){
+                            break;//error
+                        }
+                    }//end for i
+
+                    if( ii<_const_the_number_of_track || jj<_const_the_number_of_combination){
+                        continue;//error
+                    }
+                }
                 ////////////////////////////
                 
                 if( !_generate_leave_config_mode(this._dequeu_s_tx) ){continue;}
@@ -6428,39 +6945,228 @@
 
                 // . private prefix 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix10 ) >= 0 ){
-                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_prefix[_type_msr_track_Numer.iso1_track] )){continue;}
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,0,this._s_private_prefix[_type_msr_track_Numer.iso1_track][0] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix10 );
                 }
 
                 // . private postfix 1
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix10 ) >= 0 ){
-                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,this._s_private_postfix[_type_msr_track_Numer.iso1_track] )){continue;}
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso1_track,0,this._s_private_postfix[_type_msr_track_Numer.iso1_track][0] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix10 );
                 }
 
                 // . private prefix 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix20 ) >= 0 ){
-                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_prefix[_type_msr_track_Numer.iso2_track] )){continue;}
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,0,this._s_private_prefix[_type_msr_track_Numer.iso2_track][0] )){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix20 );
                 }
                 
                 // . private postfix 2
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix20 ) >= 0 ){
-                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,this._s_private_postfix[_type_msr_track_Numer.iso2_track])){continue;}
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso2_track,0,this._s_private_postfix[_type_msr_track_Numer.iso2_track][0])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix20 );
                 }
 
                 // . private prefix 3
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePrefix30 ) >= 0 ){
-                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_prefix[_type_msr_track_Numer.iso3_track])){continue;}
+                    if (!_generate_set_private_prefix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,0,this._s_private_prefix[_type_msr_track_Numer.iso3_track][0])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_prefix30 );
                 }
                 // . private postfix 3
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_PrivatePostfix30 ) >= 0 ){
-                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,this._s_private_postfix[_type_msr_track_Numer.iso3_track])){continue;}
+                    if (!_generate_set_private_postfix(this._dequeu_s_tx,_type_msr_track_Numer.iso3_track,0,this._s_private_postfix[_type_msr_track_Numer.iso3_track][0])){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_private_postfix30 );
                 }
 
+                var b_run_combination = false;
+                if( _first_version_greater_then_second_version( this._version,[5,12,0,0]) ){
+                    b_run_combination = true;//support from ganymede v5.13
+                }
+                if( _first_version_greater_then_second_version( [4,0,0,0],this._version) ){
+                    //callisto
+                    if( _first_version_greater_then_second_version( this._version,[3,20,0,0]) ){
+                        b_run_combination = true;//support from callisto v3.21
+                    }
+                }
+
+                if( b_run_combination ){
+                    //.cp_IndicateErrorCondition
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition ) >= 0 ){
+                        if (!_generate_set_indicate_error_condition(this._dequeu_s_tx,this._c_blank)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_indicate_error_condition );
+                    }
+                    
+                    var ii = 0, jj = 0;
+                    for( ii =0; ii<_const_the_number_of_track; ii++ ){
+                        //.cp_ISO1_NumberCombi~cp_ISO3_NumberCombi
+                        if( elpusk.util.find_from_set( this._set_change_parameter, 
+                            _type_change_parameter.cp_ISO1_NumberCombi+ii ) >= 0 ){
+                                
+                            if (!_generate_set_number_combi(this._dequeu_s_tx,ii,
+                                this._n_number_combination)){break;}
+                            this._deque_generated_tx.push( 
+                                _type_generated_tx_type.gt_set_iso1_number_combi+ii 
+                                );
+                        }
+    
+                        for( jj=0; jj<_const_the_number_of_combination; jj++ ){
+                            //.cp_ISO1_Combi0_MaxSize~cp_ISO3_Combi2_MaxSize
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_MaxSize
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_max_size(this._dequeu_s_tx,ii,jj,
+                                    this._n_max_size[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_MaxSize
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //.cp_ISO1_Combi0_BitSize ~cp_ISO3_Combi2_BitSize 
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_BitSize 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_bit_size(this._dequeu_s_tx,ii,jj,
+                                    this._n_bit_size[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_BitSize
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //.cp_ISO1_Combi0_DataMask ~cp_ISO3_Combi2_DataMask 
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_DataMask 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_data_mask(this._dequeu_s_tx,ii,jj,
+                                    this._c_data_mask[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_DataMask
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_UseParity ~cp_ISO3_Combi2_UseParity
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_UseParity 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_use_parity(this._dequeu_s_tx,ii,jj,
+                                    this._b_use_parity[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_UseParity
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_ParityType ~cp_ISO3_Combi2_ParityType
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_ParityType 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_parity_type(this._dequeu_s_tx,ii,jj,
+                                    this._n_parity_type[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_ParityType
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_STX_L ~cp_ISO3_Combi2_STX_L
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_STX_L 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_stxl(this._dequeu_s_tx,ii,jj,
+                                    this._c_stxl[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_STX_L
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_ETX_L ~cp_ISO3_Combi2_ETX_L
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_ETX_L 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_etxl(this._dequeu_s_tx,ii,jj,
+                                    this._c_etxl[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_ETX_L
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_UseErrorCorrect ~cp_ISO3_Combi2_UseErrorCorrect
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_UseErrorCorrect 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_use_error_correct(this._dequeu_s_tx,ii,jj,
+                                    this._b_use_ecm[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_UseErrorCorrect
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_ECMType ~cp_ISO3_Combi2_ECMType
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_ECMType 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_ecm_type(this._dequeu_s_tx,ii,jj,
+                                    this._n_ecm_type[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_ECMType
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+                            //cp_ISO1_Combi0_AddValue ~cp_ISO3_Combi2_AddValue
+                            if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                _type_change_parameter.cp_ISO1_Combi0_AddValue 
+                                +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                    
+                                if (!_generate_set_add_value(this._dequeu_s_tx,ii,jj,
+                                    this._n_add_value[ii][jj])){break;}
+                                this._deque_generated_tx.push( 
+                                    _type_generated_tx_type.gt_set_iso1_Combi0_AddValue
+                                    +ii*_const_the_number_of_combination+jj
+                                    );
+                            }
+
+                            if( jj > 0 ){
+                                //cp_PrivatePrefix11~cp_PrivatePrefix22
+                                if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                    _type_change_parameter.cp_PrivatePrefix10 
+                                    +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                        
+                                    if (!_generate_set_private_prefix(this._dequeu_s_tx,ii,jj,
+                                        this._s_private_prefix[ii][jj])){break;}
+                                    this._deque_generated_tx.push( 
+                                        _type_generated_tx_type.gt_set_private_prefix10
+                                        +ii*_const_the_number_of_combination+jj
+                                        );
+                                }
+                                //cp_PrivatePostfix11~cp_PrivatePostfix22
+                                if( elpusk.util.find_from_set( this._set_change_parameter, 
+                                    _type_change_parameter.cp_PrivatePostfix10 
+                                    +ii*_const_the_number_of_combination+jj ) >= 0 ){
+                                        
+                                    if (!_generate_set_private_prefix(this._dequeu_s_tx,ii,jj,
+                                        this._s_private_postfix[ii][jj])){break;}
+                                    this._deque_generated_tx.push( 
+                                        _type_generated_tx_type.gt_set_private_postfix10
+                                        +ii*_const_the_number_of_combination+jj
+                                        );
+                                }
+                            }
+                        }//end for jj
+                        if( jj < _const_the_number_of_combination){
+                            break;//error condition
+                        }
+                    }//end for ii
+
+                    if( ii<_const_the_number_of_track || jj < _const_the_number_of_combination){
+                        continue;//error
+                    }
+                }
                 //
                 if (!_generate_apply_config_mode(this._dequeu_s_tx)){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_apply );
@@ -6661,6 +7367,18 @@
                         b_result = true;
                     }
                     break;
+                case _type_generated_tx_type.gt_get_indicate_error_condition:
+                    b_value = _get_indicate_error_condition_from_response(s_response);
+                    if( b_value !== null ){   
+                        if( b_value ){
+                            this._c_blank[1] = this._c_blank[1] & 0xfe;
+                        }
+                        else{
+                            this._c_blank[1] = this._c_blank[1] | 0x01;
+                        }
+                        b_result = true;
+                    }
+                    break;
                 case _type_generated_tx_type.gt_get_interface:
                     n_value = _get_interface_from_response(s_response);
                     if( n_value >= 0 ){
@@ -6745,45 +7463,365 @@
                         b_result = true;
                     }
                     break;
+                    //
+                case _type_generated_tx_type.gt_get_iso1_number_combi :
+                case _type_generated_tx_type.gt_get_iso2_number_combi :
+                case _type_generated_tx_type.gt_get_iso3_number_combi :
+                    n_value = _get_number_combi_from_response(s_response,n_generated_tx-_type_generated_tx_type.gt_get_iso1_number_combi);
+                    if( n_value >= 0 ){
+                        this._n_number_combination[n_generated_tx-_type_generated_tx_type.gt_get_iso1_number_combi] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_get_iso1_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_MaxSize :
+                    n_value = _get_max_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso1_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_MaxSize);
+                    if( n_value >= 0 ){
+                        this._n_max_size[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_MaxSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_MaxSize :
+                    n_value = _get_max_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso2_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_MaxSize);
+                    if( n_value >= 0 ){
+                        this._n_max_size[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_MaxSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_MaxSize :
+                    n_value = _get_max_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso3_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_MaxSize);
+                    if( n_value >= 0 ){
+                        this._n_max_size[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_MaxSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_BitSize :
+                case _type_generated_tx_type.gt_get_iso1_Combi1_BitSize :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_BitSize :
+                    n_value = _get_bit_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso1_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_BitSize);
+                    if( n_value >= 0 ){
+                        this._n_bit_size[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_BitSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_BitSize :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_BitSize :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_BitSize :
+                    n_value = _get_bit_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso2_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_BitSize);
+                    if( n_value >= 0 ){
+                        this._n_bit_size[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_BitSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_BitSize :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_BitSize :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_BitSize :
+                    n_value = _get_bit_size_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso3_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_BitSize);
+                    if( n_value >= 0 ){
+                        this._n_bit_size[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_BitSize] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_DataMask :
+                case _type_generated_tx_type.gt_get_iso1_Combi1_DataMask :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_DataMask :
+                    n_value = _get_data_mask_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso1_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_DataMask);
+                    if( n_value >= 0 ){
+                        this._c_data_mask[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_DataMask] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_DataMask :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_DataMask :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_DataMask :
+                    n_value = _get_data_mask_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso2_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_DataMask);
+                    if( n_value >= 0 ){
+                        this._c_data_mask[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_DataMask] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_DataMask :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_DataMask :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_DataMask :
+                    n_value = _get_data_mask_from_response(
+                        s_response
+                        ,_type_msr_track_Numer.iso3_track
+                        ,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_DataMask);
+                    if( n_value >= 0 ){
+                        this._c_data_mask[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_DataMask] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_UseParity :// this._b_use_parity
+                case _type_generated_tx_type.gt_get_iso1_Combi1_UseParity :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_UseParity :
+                    b_value = _get_use_parity_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_UseParity);
+                    if( b_value !== null ){
+                        this._b_use_parity[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_UseParity] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_UseParity :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_UseParity :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_UseParity :
+                    b_value = _get_use_parity_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_UseParity);
+                    if( b_value !== null ){
+                        this._b_use_parity[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_UseParity] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_UseParity :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_UseParity :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_UseParity :
+                    b_value = _get_use_parity_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_UseParity);
+                    if( b_value !== null ){
+                        this._b_use_parity[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_UseParity] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_ParityType ://this._n_parity_type
+                case _type_generated_tx_type.gt_get_iso1_Combi1_ParityType :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_ParityType :
+                    n_value = _get_parity_type_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ParityType);
+                    if( n_value >= 0 ){
+                        this._n_parity_type[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ParityType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_ParityType :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_ParityType :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_ParityType :
+                    n_value = _get_parity_type_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ParityType);
+                    if( n_value >= 0 ){
+                        this._n_parity_type[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ParityType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_ParityType :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_ParityType :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_ParityType :
+                    n_value = _get_parity_type_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ParityType);
+                    if( n_value >= 0 ){
+                        this._n_parity_type[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ParityType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_STX_L ://this._c_stxl
+                case _type_generated_tx_type.gt_get_iso1_Combi1_STX_L :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_STX_L :
+                    n_value = _get_stxl_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_STX_L);
+                    if( n_value >= 0 ){
+                        this._c_stxl[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_STX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_STX_L :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_STX_L :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_STX_L :
+                    n_value = _get_stxl_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_STX_L);
+                    if( n_value >= 0 ){
+                        this._c_stxl[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_STX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_STX_L :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_STX_L :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_STX_L :
+                    n_value = _get_stxl_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_STX_L);
+                    if( n_value >= 0 ){
+                        this._c_stxl[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_STX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_ETX_L ://this._c_etxl
+                case _type_generated_tx_type.gt_get_iso1_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_ETX_L :
+                    n_value = _get_etxl_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ETX_L);
+                    if( n_value >= 0 ){
+                        this._c_etxl[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ETX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_ETX_L :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_ETX_L :
+                    n_value = _get_etxl_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ETX_L);
+                    if( n_value >= 0 ){
+                        this._c_etxl[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ETX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_ETX_L :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_ETX_L :
+                    n_value = _get_etxl_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ETX_L);
+                    if( n_value >= 0 ){
+                        this._c_etxl[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ETX_L] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_UseErrorCorrect ://this._b_use_ecm
+                case _type_generated_tx_type.gt_get_iso1_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_UseErrorCorrect :
+                    b_value = _get_use_error_correct_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_UseErrorCorrect);
+                    if( b_value !== null ){
+                        this._b_use_ecm[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_UseErrorCorrect] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_UseErrorCorrect :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_UseErrorCorrect :
+                    b_value = _get_use_error_correct_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_UseErrorCorrect);
+                    if( b_value !== null ){
+                        this._b_use_ecm[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_UseErrorCorrect] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_UseErrorCorrect :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_UseErrorCorrect :
+                    b_value = _get_use_error_correct_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_UseErrorCorrect);
+                    if( b_value !== null ){
+                        this._b_use_ecm[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_UseErrorCorrect] = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_ECMType ://this._n_ecm_type
+                case _type_generated_tx_type.gt_get_iso1_Combi1_ECMType :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_ECMType :
+                    n_value = _get_ecm_type_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ECMType);
+                    if( n_value >= 0 ){
+                        this._n_ecm_type[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_ECMType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_ECMType :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_ECMType :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_ECMType :
+                    n_value = _get_ecm_type_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ECMType);
+                    if( n_value >= 0 ){
+                        this._n_ecm_type[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_ECMType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_ECMType :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_ECMType :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_ECMType :
+                    n_value = _get_ecm_type_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ECMType);
+                    if( n_value >= 0 ){
+                        this._n_ecm_type[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_ECMType] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso1_Combi0_AddValue ://this._n_add_value
+                case _type_generated_tx_type.gt_get_iso1_Combi1_AddValue :
+                case _type_generated_tx_type.gt_get_iso1_Combi2_AddValue :
+                    n_value = _get_add_value_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_AddValue);
+                    if( n_value >= 0 ){
+                        this._n_add_value[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_iso1_Combi0_AddValue] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso2_Combi0_AddValue :
+                case _type_generated_tx_type.gt_get_iso2_Combi1_AddValue :
+                case _type_generated_tx_type.gt_get_iso2_Combi2_AddValue :
+                    n_value = _get_add_value_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_AddValue);
+                    if( n_value >= 0 ){
+                        this._n_add_value[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_iso2_Combi0_AddValue] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_iso3_Combi0_AddValue :
+                case _type_generated_tx_type.gt_get_iso3_Combi1_AddValue :
+                case _type_generated_tx_type.gt_get_iso3_Combi2_AddValue :
+                    n_value = _get_add_value_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_AddValue);
+                    if( n_value >= 0 ){
+                        this._n_add_value[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_iso3_Combi0_AddValue] = n_value;
+                        b_result = true;
+                    }
+                    break;
+                    //
                 case _type_generated_tx_type.gt_get_private_prefix10:
-                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso1_track);
+                case _type_generated_tx_type.gt_get_private_prefix11:
+                case _type_generated_tx_type.gt_get_private_prefix12:
+                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_private_prefix10);
                     if( s_value !== null ){
-                        this._s_private_prefix[_type_msr_track_Numer.iso1_track] = s_value;
+                        this._s_private_prefix[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_private_prefix10] = s_value;
                         b_result = true;
                     }
                     break;
                 case _type_generated_tx_type.gt_get_private_prefix20:
-                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso2_track);
+                case _type_generated_tx_type.gt_get_private_prefix21:
+                case _type_generated_tx_type.gt_get_private_prefix22:
+                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_private_prefix20);
                     if( s_value !== null ){
-                        this._s_private_prefix[_type_msr_track_Numer.iso2_track] = s_value;
+                        this._s_private_prefix[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_private_prefix20] = s_value;
                         b_result = true;
                     }
                     break;
                 case _type_generated_tx_type.gt_get_private_prefix30:
-                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso3_track);
+                case _type_generated_tx_type.gt_get_private_prefix31:
+                case _type_generated_tx_type.gt_get_private_prefix32:
+                    s_value = _get_private_prefix_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_private_prefix30);
                     if( s_value !== null ){
-                        this._s_private_prefix[_type_msr_track_Numer.iso3_track] = s_value;
+                        this._s_private_prefix[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_private_prefix30] = s_value;
                         b_result = true;
                     }
                     break;
                 case _type_generated_tx_type.gt_get_private_postfix10:
-                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso1_track);
+                case _type_generated_tx_type.gt_get_private_postfix11:
+                case _type_generated_tx_type.gt_get_private_postfix12:
+                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso1_track,n_generated_tx-_type_generated_tx_type.gt_get_private_postfix10);
                     if( s_value !== null ){
-                        this._s_private_postfix[_type_msr_track_Numer.iso1_track] = s_value;
+                        this._s_private_postfix[_type_msr_track_Numer.iso1_track][n_generated_tx-_type_generated_tx_type.gt_get_private_postfix10] = s_value;
                         b_result = true;
                     }
                     break;
                 case _type_generated_tx_type.gt_get_private_postfix20:
-                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso2_track);
+                case _type_generated_tx_type.gt_get_private_postfix21:
+                case _type_generated_tx_type.gt_get_private_postfix22:
+                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso2_track,n_generated_tx-_type_generated_tx_type.gt_get_private_postfix20);
                     if( s_value !== null ){
-                        this._s_private_postfix[_type_msr_track_Numer.iso2_track] = s_value;
+                        this._s_private_postfix[_type_msr_track_Numer.iso2_track][n_generated_tx-_type_generated_tx_type.gt_get_private_postfix20] = s_value;
                         b_result = true;
                     }
                     break;
                 case _type_generated_tx_type.gt_get_private_postfix30:
-                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso3_track);
+                case _type_generated_tx_type.gt_get_private_postfix31:
+                case _type_generated_tx_type.gt_get_private_postfix32:
+                    s_value = _get_private_postfix_from_response(s_response,_type_msr_track_Numer.iso3_track,n_generated_tx-_type_generated_tx_type.gt_get_private_postfix30);
                     if( s_value !== null ){
-                        this._s_private_postfix[_type_msr_track_Numer.iso3_track] = s_value;
+                        this._s_private_postfix[_type_msr_track_Numer.iso3_track][n_generated_tx-_type_generated_tx_type.gt_get_private_postfix30] = s_value;
                         b_result = true;
                     }
                     break;
@@ -6840,6 +7878,7 @@
                     b_result = true;
                     break;
                 case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
+                case _type_generated_tx_type.gt_set_indicate_error_condition:
                 case _type_generated_tx_type.gt_set_interface:
                 case _type_generated_tx_type.gt_set_language:
                 case _type_generated_tx_type.get_set_keymap:
@@ -6852,12 +7891,119 @@
                 case _type_generated_tx_type.gt_set_direction3:
                 case _type_generated_tx_type.gt_set_global_prefix:
                 case _type_generated_tx_type.gt_set_global_postfix:
+                    //
+                case _type_generated_tx_type.gt_set_iso1_number_combi :
+                case _type_generated_tx_type.gt_set_iso2_number_combi :
+                case _type_generated_tx_type.gt_set_iso3_number_combi :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_MaxSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_MaxSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_MaxSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_MaxSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_MaxSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_BitSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi1_BitSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_BitSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_BitSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_BitSize :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_BitSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_BitSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_BitSize :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_BitSize :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_DataMask :
+                case _type_generated_tx_type.gt_set_iso1_Combi1_DataMask :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_DataMask :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_DataMask :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_DataMask :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_DataMask :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_DataMask :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_DataMask :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_DataMask :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_UseParity :// this._b_use_parity
+                case _type_generated_tx_type.gt_set_iso1_Combi1_UseParity :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_UseParity :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_UseParity :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_UseParity :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_UseParity :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_UseParity :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_UseParity :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_UseParity :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_ParityType ://this._n_parity_type
+                case _type_generated_tx_type.gt_set_iso1_Combi1_ParityType :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_ParityType :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_ParityType :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_ParityType :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_ParityType :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_ParityType :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_ParityType :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_ParityType :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_STX_L ://this._c_stxl
+                case _type_generated_tx_type.gt_set_iso1_Combi1_STX_L :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_STX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_STX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_STX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_STX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_STX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_STX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_STX_L :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_ETX_L ://this._c_etxl
+                case _type_generated_tx_type.gt_set_iso1_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_ETX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_ETX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_ETX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_ETX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_ETX_L :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_ETX_L :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_UseErrorCorrect ://this._b_use_ecm
+                case _type_generated_tx_type.gt_set_iso1_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_UseErrorCorrect :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_ECMType ://this._n_ecm_type
+                case _type_generated_tx_type.gt_set_iso1_Combi1_ECMType :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_ECMType :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_ECMType :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_ECMType :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_ECMType :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_ECMType :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_ECMType :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_ECMType :
+                case _type_generated_tx_type.gt_set_iso1_Combi0_AddValue ://this._n_add_value
+                case _type_generated_tx_type.gt_set_iso1_Combi1_AddValue :
+                case _type_generated_tx_type.gt_set_iso1_Combi2_AddValue :
+                case _type_generated_tx_type.gt_set_iso2_Combi0_AddValue :
+                case _type_generated_tx_type.gt_set_iso2_Combi1_AddValue :
+                case _type_generated_tx_type.gt_set_iso2_Combi2_AddValue :
+                case _type_generated_tx_type.gt_set_iso3_Combi0_AddValue :
+                case _type_generated_tx_type.gt_set_iso3_Combi1_AddValue :
+                case _type_generated_tx_type.gt_set_iso3_Combi2_AddValue :
+                    //
                 case _type_generated_tx_type.gt_set_private_prefix10:
+                case _type_generated_tx_type.gt_set_private_prefix11:
+                case _type_generated_tx_type.gt_set_private_prefix12:                    
                 case _type_generated_tx_type.gt_set_private_prefix20:
+                case _type_generated_tx_type.gt_set_private_prefix21:
+                case _type_generated_tx_type.gt_set_private_prefix22:
                 case _type_generated_tx_type.gt_set_private_prefix30:
+                case _type_generated_tx_type.gt_set_private_prefix31:
+                case _type_generated_tx_type.gt_set_private_prefix32:
                 case _type_generated_tx_type.gt_set_private_postfix10:
+                case _type_generated_tx_type.gt_set_private_postfix11:
+                case _type_generated_tx_type.gt_set_private_postfix12:
                 case _type_generated_tx_type.gt_set_private_postfix20:
+                case _type_generated_tx_type.gt_set_private_postfix21:
+                case _type_generated_tx_type.gt_set_private_postfix22:
                 case _type_generated_tx_type.gt_set_private_postfix30:
+                case _type_generated_tx_type.gt_set_private_postfix31:
+                case _type_generated_tx_type.gt_set_private_postfix32:
                 case _type_generated_tx_type.gt_set_prefix_ibutton:
                 case _type_generated_tx_type.gt_set_postfix_ibutton:
                 case _type_generated_tx_type.gt_set_prefix_uart:
@@ -6915,12 +8061,26 @@
                         var n_language = null;
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
+                        var b_indication = null;
                         var n_ibutton = null;
                         var n_direction = null;
                         var s_gpre = null;
                         var s_gpost = null;
-                        var s_ppretag = [null,null,null];
-                        var s_pposttag = [null,null,null];
+
+                        var n_combination = [null,null,null];
+                        var n_max_size = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_bit_size = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_data_mask = [[null,null,null],[null,null,null],[null,null,null]];
+                        var b_use_parity = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_parity_type = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_stxl = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_etxl = [[null,null,null],[null,null,null],[null,null,null]];
+                        var b_use_error_correct = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_error_correct_type = [[null,null,null],[null,null,null],[null,null,null]];
+                        var n_add_value = [[null,null,null],[null,null,null],[null,null,null]];
+
+                        var s_ppretag = [[null,null,null],[null,null,null],[null,null,null]];
+                        var s_pposttag = [[null,null,null],[null,null,null],[null,null,null]];
                         var s_ipre = null;
                         var s_ipost = null;
                         var s_upre = null;
@@ -6995,6 +8155,15 @@
                                         continue;
                                     }
                                 }
+                                // indication attribute
+                                s_attr_name = "indication";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_indication = _get_indicate_error_condition_from_string(s_attr);
+                                    if( b_indication === null ){
+                                        continue;
+                                    }
+                                }
                                 // ibutton attribute
                                 s_attr_name = "ibutton";
                                 if( ele.hasAttribute(s_attr_name)){
@@ -7040,80 +8209,181 @@
                                 }
                             }//the end of global element.
 
-                            //iso1 element
-                            array_ele = xml_doc.getElementsByTagName("iso1");
-                            if(array_ele.length>0 ){
-                                ele =  array_ele[0];
+                            //iso1~iso3 element
+                            var n_track = 0;
+                            var s_track = "iso";
+                            for( n_track = 0; i<3; n_track ++ ){
+                                s_track = "iso" + String(n_track+1);
+                                array_ele = xml_doc.getElementsByTagName(s_track);
+                                if(array_ele.length>0 ){
+                                    ele =  array_ele[0];
 
-                                // prefix attribute
-                                s_attr_name = "prefix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_ppretag[0] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_ppretag[0] === null ){
-                                        continue;
+                                    // prefix attribute
+                                    s_attr_name = "prefix";
+                                    if( ele.hasAttribute(s_attr_name)){
+                                        s_attr = ele.getAttribute(s_attr_name);
+                                        s_ppretag[0][0] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                        if( s_ppretag[0][0] === null ){
+                                            continue;
+                                        }
                                     }
-                                }
-                                // postfix attribute
-                                s_attr_name = "postfix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_pposttag[0] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_pposttag[0] === null ){
-                                        continue;
+                                    // postfix attribute
+                                    s_attr_name = "postfix";
+                                    if( ele.hasAttribute(s_attr_name)){
+                                        s_attr = ele.getAttribute(s_attr_name);
+                                        s_pposttag[0][0] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                        if( s_pposttag[0][0] === null ){
+                                            continue;
+                                        }
                                     }
-                                }
-                            }//the end of iso1 element.
+                                    ////////////////////////////////////////////////////
+                                    //
+                                    s_attr_name = "combination";
+                                    if( ele.hasAttribute(s_attr_name)){
+                                        s_attr = ele.getAttribute(s_attr_name);
+                                        n_combination[n_track] = parseInt(s_attr,10);
+                                        if( isNaN(n_combination[n_track])  ){
+                                            n_combination[n_track] = null;
+                                            continue;
+                                        }
+                                    }
 
-                            //iso2 element
-                            array_ele = xml_doc.getElementsByTagName("iso2");
-                            if(array_ele.length>0 ){
-                                ele =  array_ele[0];
-                                
-                                // prefix attribute
-                                s_attr_name = "prefix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_ppretag[1] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_ppretag[1] === null ){
-                                        continue;
-                                    }
-                                }
-                                // postfix attribute
-                                s_attr_name = "postfix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_pposttag[1] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_pposttag[1] === null ){
-                                        continue;
-                                    }
-                                }
-                            }//the end of iso2 element.
+                                    var i;
+                                    for( i = 0; i<_const_the_number_of_combination; i++ ){
+                                        s_attr_name = "max_size";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_max_size[n_track][i] = parseInt(s_attr,10);
+                                            if( isNaN(n_max_size[n_track][i])  ){
+                                                n_max_size[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "bit_size";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_bit_size[n_track][i] = parseInt(s_attr,10);
+                                            if( isNaN(n_bit_size[n_track][i])  ){
+                                                n_bit_size[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "data_mask";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_data_mask[n_track][i] = parseInt(s_attr,16);
+                                            if( isNaN(n_data_mask[n_track][i])  ){
+                                                n_data_mask[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "use_parity";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            b_use_parity[n_track][i] = _get_enable_track_from_string(s_attr);
+                                            if( b_use_parity[n_track][i]===null  ){
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "parity_type";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_parity_type[n_track][i] = _get_parity_type_from_string(s_attr);
+                                            if( n_parity_type[n_track][i]<0  ){
+                                                n_parity_type[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "stxl";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_stxl[n_track][i] = parseInt(s_attr,16);
+                                            if( isNaN(n_stxl[n_track][i])  ){
+                                                n_stxl[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "etxl";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_etxl[n_track][i] = parseInt(s_attr,16);
+                                            if( isNaN(n_etxl[n_track][i])  ){
+                                                n_etxl[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "use_error_correct";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            b_use_error_correct[n_track][i] = _get_enable_track_from_string(s_attr);
+                                            if( b_use_error_correct[n_track][i]===null  ){
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "error_correct_type";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_error_correct_type[n_track][i] = _get_error_correct_type_from_string(s_attr);
+                                            if( n_error_correct_type[n_track][i]<0  ){
+                                                n_error_correct_type[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        //
+                                        s_attr_name = "add_value";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            n_add_value[n_track][i] = parseInt(s_attr,10);
+                                            if( isNaN(n_add_value[n_track][i])  ){
+                                                n_add_value[n_track][i] = null;
+                                                break;//exit for
+                                            }
+                                        }
+                                        // new prefix attribute
+                                        s_attr_name = "prefix";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            s_ppretag[n_track][i] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                            if( s_ppretag[n_track][i] === null ){
+                                                break;//exit for
+                                            }
+                                        }
+                                        // new postfix attribute
+                                        s_attr_name = "postfix";
+                                        s_attr_name += String(i);
+                                        if( ele.hasAttribute(s_attr_name)){
+                                            s_attr = ele.getAttribute(s_attr_name);
+                                            s_pposttag[n_track][i] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                            if( s_pposttag[n_track][i] === null ){
+                                                break;//exit for
+                                            }
+                                        }
+                                    }//end for
 
-                            //iso3 element
-                            array_ele = xml_doc.getElementsByTagName("iso3");
-                            if(array_ele.length>0 ){
-                                ele =  array_ele[0];
-                                
-                                // prefix attribute
-                                s_attr_name = "prefix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_ppretag[2] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_ppretag[2] === null ){
-                                        continue;
+                                    if( i<_const_the_number_of_combination ){
+                                        continue;//error
                                     }
-                                }
-                                // postfix attribute
-                                s_attr_name = "postfix";
-                                if( ele.hasAttribute(s_attr_name)){
-                                    s_attr = ele.getAttribute(s_attr_name);
-                                    s_pposttag[2] = _get_hid_key_pair_hex_string_from_string(s_attr);
-                                    if( s_pposttag[2] === null ){
-                                        continue;
-                                    }
-                                }
-                            }//the end of iso3 element.
+                                }//the end of iso1~3 element.
+                            }//end for n_track
 
                             //ibutton element
                             array_ele = xml_doc.getElementsByTagName("ibutton");
@@ -7223,6 +8493,16 @@
                                 if( this._device._b_global_pre_postfix_send_condition !== b_condition ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition );
                                     this._device._b_global_pre_postfix_send_condition = b_condition;
+                                }
+                            }
+                            if( b_indication !== null ){
+                                if( b_indication && (this._device._c_blank[1]&0x01 !== 0x00) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] & 0xfe;
+                                }
+                                else if( !b_indication && (this._device._c_blank[1]&0x01 === 0x00) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] | 0x01;
                                 }
                             }
                             if( n_ibutton !== null ){
@@ -7461,6 +8741,12 @@
                 else{
                     s_description = s_description + "MSR global pre/postfixs sending condition : send when a track isn't error.\n";
                 }
+                if(this,_c_blank[1]&0x01){
+                    s_description = s_description + "indication error condition : If any track is not error, it is success.\n";
+                }
+                else{
+                    s_description = s_description + "indication error condition : If all track are not error, it is success.\n";
+                }
 
                 s_description = s_description + "MSR global prefixs : " + this._s_global_prefix + "\n";
                 s_description = s_description + "MSR global postfixs : " + this._s_global_postfix + "\n";
@@ -7478,9 +8764,40 @@
                     else{
                         s_description = s_description + "MSR enabled track " + String(i+1) + " : disabled.\n";
                     }
+
                     s_description = s_description + "MSR reading direction track " + String(i+1) + " : " + _get_direction_string( this._n_direction[i]) + "\n";
-                    s_description = s_description + "MSR private prefix track " + String(i+1) + " : " + this._s_private_prefix[i] + "\n";
-                    s_description = s_description + "MSR private postfix track " + String(i+1) + " : " + this._s_private_postfix[i] + "\n";
+
+                    s_description = s_description + "the number of combination track " + String(i+1) + " : " + String(this._n_number_combination[i]) + "\n";
+        
+                    for( var j = 0; j<_const_the_number_of_combination; j++ ){
+                        s_description = s_description + "max size of track " + String(i+1) + "combination"+ String(j) +" : " + String(this._n_max_size[i][j]) + "\n";
+                        s_description = s_description + "one bit size of track " + String(i+1) + "combination"+ String(j) +" : " + String(this._n_bit_size[i][j]) + "\n";
+                        s_description = s_description + "data mask of track " + String(i+1) + "combination"+ String(j) +" : 0x" + this._c_data_mask[i][j].toString(16) + "\n";
+
+                        if( this._b_use_parity[i][j] ){
+                            s_description = s_description + "parity bit of track " + String(i+1) + "combination"+ String(j) +" : enabled.\n";
+                        }
+                        else{
+                            s_description = s_description + "parity bit of track " + String(i+1) + "combination"+ String(j) +" : disabled.\n";
+                        }
+                        s_description = s_description + "parity bit type of track " + String(i+1) + "combination"+ String(j) +" : " + _get_parity_type_string(this._n_parity_type[i][j]) + "\n";
+
+                        s_description = s_description + "STX pattern of track " + String(i+1) + "combination"+ String(j) +" : 0x" + this._c_stxl[i][j].toString(16) + "\n";
+                        s_description = s_description + "ETX pattern of track " + String(i+1) + "combination"+ String(j) +" : 0x" + this._c_etxl[i][j].toString(16) + "\n";
+
+                        if( this._b_use_ecm[i][j] ){
+                            s_description = s_description + "ecm of track " + String(i+1) + "combination"+ String(j) +" : enabled.\n";
+                        }
+                        else{
+                            s_description = s_description + "ecm of track " + String(i+1) + "combination"+ String(j) +" : disabled.\n";
+                        }
+
+                        s_description = s_description + "ecm type of track " + String(i+1) + "combination"+ String(j) +" : " + _get_error_correct_type_string(this._n_ecm_type[i][j]) + "\n";
+                        s_description = s_description + "for converting to ASCII,add value of track " + String(i+1) + "combination"+ String(j) +" : " + String(this._n_add_value[i][j]) + "\n";
+
+                        s_description = s_description + "MSR private prefix track " + String(i+1) + "combination"+ String(j) +" : " + this._s_private_prefix[i][j] + "\n";
+                        s_description = s_description + "MSR private postfix track "+ String(i+1) + "combination"+ String(j) +" : " + this._s_private_postfix[i][j] + "\n";
+                    }//end for j
                 }//end for
 
            }while(false);
