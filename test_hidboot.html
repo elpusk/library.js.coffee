@@ -30,7 +30,7 @@
 <HEAD>
     <meta charset="utf-8" />
 
-    <TITLE>Test of lpu237 controller class</TITLE>
+    <TITLE>Test of hid bootloader class</TITLE>
 
 </HEAD>
 <BODY>
@@ -56,7 +56,7 @@
     </script>    
 
     <!-- fixed message area -->
-    this page supports that lpu237 controller class.
+    this page supports that hid bootloader class.
     <br />
     <br />
 
@@ -84,7 +84,7 @@
     <progress id="progress_get_parameters" value="0" max="100"></progress>
 
     <br />
-    <input type="file" id="input_file" accept=".xml" />
+    <input type="file" id="input_file" accept=".rom" />
     <br />
 
     <br />
@@ -242,7 +242,7 @@
                 function(s_session_number){
                     console.log("session : " + s_session_number);
                     //get device list. filtering hid, vid 0x134b, pid 0x0206, interface 1.
-                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0243");
                 }
             )
             .catch(
@@ -310,6 +310,23 @@
          * @function fun_init
          * @description initialize system
          */
+        var file_reader = new FileReader();
+
+        function file_reader_handle_event(event) {
+            //event.loaded - unit bytes the size of loaded data.
+
+            _add_message("p_main",`${event.type}: ${event.loaded} bytes transferred`);
+
+            if (event.type === "loadend") {
+                //preview.src = reader.result;
+                var ArrayBuffer_data = event.target.result;
+                
+                var uint8View = new Uint8Array(ArrayBuffer_data);
+                _add_message("p_main",uint8View.length.toString());
+                //_add_message("p_main",uint8View.toString());//out of memory in 80MBytes
+            }
+        }
+
         function fun_init() {
 
             _fun_init_coffee_framework();
@@ -324,15 +341,20 @@
                 var name = file.name;
                 var size = file.size;
                 //
-                ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
-                    //alway true.
-                    _add_message("p_main","ok : set_from_file");
-                    _add_multi_message("p_main",ctl_lpu237.get_device().get_string());
-                }).catch(function (event_error) {
-                    // error here
-                    _add_message("p_main","fail : set_from_file : "+ ctl_lpu237.get_device().get_error_message(event_error));
-                });
+                do{
+                    if(!file){
+                        continue;
+                    }
+                    file_reader.addEventListener('loadstart', file_reader_handle_event);
+                    file_reader.addEventListener('load', file_reader_handle_event);
+                    file_reader.addEventListener('loadend', file_reader_handle_event);
+                    file_reader.addEventListener('progress', file_reader_handle_event);
+                    file_reader.addEventListener('error', file_reader_handle_event);
+                    file_reader.addEventListener('abort', file_reader_handle_event);
 
+                    file_reader.readAsArrayBuffer(file);
+
+                }while(false);
             };
         }
 

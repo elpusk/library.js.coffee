@@ -196,18 +196,18 @@ ibutton	:	postfix		: hex-format : use lower case.
 		interface	="usb_kb"
 		buzzer		="on"
 		language	="usa_english"
-		iso1		="disable"
+		iso1		="enable"
 		iso2		="enable"
 		iso3		="enable"
-		condition	="or"
-		indication  ="or"
+		condition	="and"
+		indication  ="and"
 		direction	="bidirectional"
 		ibutton		="zeros"
 	/>
 
 	<global
-		prefix		="[c][b]"
-		postfix		="[c][b]"
+		prefix		=""
+		postfix		="[][][][]"
 	/>
 
 	<iso1
@@ -306,8 +306,8 @@ ibutton	:	postfix		: hex-format : use lower case.
 		add_value1	="48"
 		add_value2	="48"
 
-		prefix0		="[][a]"
-		postfix0	=""
+		prefix0		="[][;]"
+		postfix0	="[s][/][][enter]"
 
 		prefix1		="[][;]"
 		postfix1	="[s][/][][enter]"
@@ -317,7 +317,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 	/>
 
 	<iso3
-		combination	="2"
+		combination	="1"
 
 		max_size0	="104"
 		max_size1	="45"
@@ -359,14 +359,14 @@ ibutton	:	postfix		: hex-format : use lower case.
 		add_value1	="48"
 		add_value2	="48"
 
-		prefix0		="[][b]"
-		postfix0	=""
+		prefix0		="[][;]"
+		postfix0	="[s][/][][enter]"
 
-		prefix1		="[][c]"
-		postfix1	=""
+		prefix1		="[][;]"
+		postfix1	="[s][/][][enter]"
 
-		prefix2		="[][d]"
-		postfix2	=""
+		prefix2		="[][;]"
+		postfix2	="[s][/][][enter]"
 	/>
 
 	<ibutton
