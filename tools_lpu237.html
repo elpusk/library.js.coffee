@@ -186,6 +186,7 @@
         function clearMessage() {
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML ="";
         }
@@ -194,12 +195,14 @@
         {
             var parag_main = document.getElementById("p_system");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML = Message + "<br />";
         }
         function addMessage_system(Message) {
             var parag_main = document.getElementById("p_system");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML += (Message + "<br />");
         }
@@ -208,12 +211,14 @@
         {
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML = Message + "<br />";
         }
         function addMessage(Message) {
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "12px";
             parag_main.innerHTML += (Message + "<br />");
         }
@@ -223,17 +228,26 @@
                 addMessage(ss_msg[i]);
             }
         }
+        function addMessage_bold(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "bold";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
 
         function printMessage_pre(Message)
         {
             var parag_main = document.getElementById("p_pre_main");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML = Message + "<br />";
         }
         function addMessage_pre(Message) {
             var parag_main = document.getElementById("p_pre_main");
             parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontWeight = "normal";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML += (Message + "<br />");
         }
@@ -360,6 +374,10 @@
             }
             
             //
+            document.getElementById("input_file").onclick = function () {
+                this.value='';
+            };
+
             document.getElementById("input_file").onchange = function () {
                 var file = this.files[0];
                 var name = file.name;
@@ -396,7 +414,7 @@
             ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
                 clearMessage();
                 //s_message always "success".
-                addMessage(" = system parameters");
+                addMessage_bold(" = system parameters");
                 addMultiMessage( ctl_lpu237.get_device().get_string() );
                 //alert(ctl_lpu237.get_device().get_string());
 
@@ -406,7 +424,7 @@
             }).catch(function (event_error) {
                 // error here
                 clearMessage();
-                addMessage("fail : loading system parameters : "+ event_error.message);
+                addMessage_bold("fail : loading system parameters : "+ event_error.message);
             });
         }        
 
@@ -422,13 +440,13 @@
             ctl_lpu237.save_parameter_to_device_with_promise(_cb_progress_set_parameters).then(function (s_message) {
                 //s_message always "success".
                 clearMessage();
-                addMessage("success : save system parameter to device.");
+                addMessage_bold("success : save system parameter to device.");
 
                 addMultiMessage( ctl_lpu237.get_device().get_string() );
             }).catch(function (event_error) {
                 // error here
                 clearMessage();
-                addMessage("fail : save system parameter to device : "+ event_error.message);
+                addMessage_bold("fail : save system parameter to device : "+ event_error.message);
             });
         }
 

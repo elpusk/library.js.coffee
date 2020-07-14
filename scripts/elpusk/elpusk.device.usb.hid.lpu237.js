@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.3.0
+ * @version 1.4.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -32,8 +32,9 @@
  * <br />               add this._b_config_mode and it's getter.
  * <br />   2020.6.12 - release 1.3.
  * <br />               add generate_run_bootloader() method.
- * <br />   2020.7.0  - release 1.4
+ * <br />   2020.7.14 - release 1.4
  *                    - support ganymede v5.13. support multi-combination. 
+ *                    - support callisto v3.21. support multi-combination. 
  * @namespace
  */
 'use strict';
@@ -127,7 +128,7 @@
             cp_ISO2_Combi0_STX_L : 66,    cp_ISO2_Combi1_STX_L : 67,    cp_ISO2_Combi2_STX_L : 68,
             cp_ISO3_Combi0_STX_L : 69,    cp_ISO3_Combi1_STX_L : 70,    cp_ISO3_Combi2_STX_L : 71,
 
-            cp_ISO1_Combi0_ETX_L : 71,    cp_ISO1_Combi1_ETX_L : 73,    cp_ISO1_Combi2_ETX_L : 74,
+            cp_ISO1_Combi0_ETX_L : 72,    cp_ISO1_Combi1_ETX_L : 73,    cp_ISO1_Combi2_ETX_L : 74,
             cp_ISO2_Combi0_ETX_L : 75,    cp_ISO2_Combi1_ETX_L : 76,    cp_ISO2_Combi2_ETX_L : 77,
             cp_ISO3_Combi0_ETX_L : 78,    cp_ISO3_Combi1_ETX_L : 79,    cp_ISO3_Combi2_ETX_L : 80,
 
@@ -4283,7 +4284,7 @@
             var s_data = "";
 
             for( var i = 0; i<4; i++ ){
-                s_data.push(elpusk.util.get_byte_hex_string_from_number(cblank[i]));
+                s_data = s_data + elpusk.util.get_byte_hex_string_from_number(cblank[i]);
             }//end for
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
@@ -5179,7 +5180,7 @@
          * <br /> false - indicate success when all track don't have error.
          */
 		_elpusk.device.usb.hid.lpu237.prototype.get_indicate_success_when_any_not_error = function(){
-            if( (this._c_blank[1] & 0x01) !== 0 ){
+            if( this._c_blank[1] & 0x01 ){
                 return true;
             }
             else{
@@ -7003,7 +7004,7 @@
                             _type_change_parameter.cp_ISO1_NumberCombi+ii ) >= 0 ){
                                 
                             if (!_generate_set_number_combi(this._dequeu_s_tx,ii,
-                                this._n_number_combination)){break;}
+                                this._n_number_combination[ii])){break;}
                             this._deque_generated_tx.push( 
                                 _type_generated_tx_type.gt_set_iso1_number_combi+ii 
                                 );
@@ -7149,7 +7150,7 @@
                                     _type_change_parameter.cp_PrivatePostfix10 
                                     +ii*_const_the_number_of_combination+jj ) >= 0 ){
                                         
-                                    if (!_generate_set_private_prefix(this._dequeu_s_tx,ii,jj,
+                                    if (!_generate_set_private_postfix(this._dequeu_s_tx,ii,jj,
                                         this._s_private_postfix[ii][jj])){break;}
                                     this._deque_generated_tx.push( 
                                         _type_generated_tx_type.gt_set_private_postfix10
@@ -8061,7 +8062,7 @@
                         var n_language = null;
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
-                        var b_indication = null;
+                        var b_indicate_all_success_is_success = null;
                         var n_ibutton = null;
                         var n_direction = null;
                         var s_gpre = null;
@@ -8159,8 +8160,8 @@
                                 s_attr_name = "indication";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    b_indication = _get_indicate_error_condition_from_string(s_attr);
-                                    if( b_indication === null ){
+                                    b_indicate_all_success_is_success = _get_indicate_error_condition_from_string(s_attr);
+                                    if( b_indicate_all_success_is_success === null ){
                                         continue;
                                     }
                                 }
@@ -8212,7 +8213,7 @@
                             //iso1~iso3 element
                             var n_track = 0;
                             var s_track = "iso";
-                            for( n_track = 0; i<3; n_track ++ ){
+                            for( n_track = 0; n_track<_const_the_number_of_track; n_track ++ ){
                                 s_track = "iso" + String(n_track+1);
                                 array_ele = xml_doc.getElementsByTagName(s_track);
                                 if(array_ele.length>0 ){
@@ -8495,12 +8496,16 @@
                                     this._device._b_global_pre_postfix_send_condition = b_condition;
                                 }
                             }
-                            if( b_indication !== null ){
-                                if( b_indication && (this._device._c_blank[1]&0x01 !== 0x00) ){
+                            if( b_indicate_all_success_is_success !== null ){
+                                var b_indicate_set= true;
+                                if( !(this._device._c_blank[1]&0x01) ){
+                                    b_indicate_set = false;
+                                }
+                                if( b_indicate_all_success_is_success && b_indicate_set ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
                                     this._device._c_blank[1] =  this._device._c_blank[1] & 0xfe;
                                 }
-                                else if( !b_indication && (this._device._c_blank[1]&0x01 === 0x00) ){
+                                else if( !b_indicate_all_success_is_success && !b_indicate_set ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x01;
                                 }
@@ -8560,27 +8565,109 @@
                             }
 
                             var cp_enable = [_type_change_parameter.cp_EnableISO1 ,_type_change_parameter.cp_EnableISO2 ,_type_change_parameter.cp_EnableISO3  ];
-                            var cp_pre = [_type_change_parameter.cp_PrivatePrefix10,_type_change_parameter.cp_PrivatePrefix20,_type_change_parameter.cp_PrivatePrefix30 ];
-                            var cp_post = [_type_change_parameter.cp_PrivatePostfix10 ,_type_change_parameter.cp_PrivatePostfix20 ,_type_change_parameter.cp_PrivatePostfix30  ];
                             for( var i = 0; i<_const_the_number_of_track; i++ ){
+                                if( n_combination[i] !== null ){
+                                    if( this._device._n_number_combination[i] !== n_combination[i]){
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                            , _type_change_parameter.cp_ISO1_NumberCombi+i );
+                                        this._device._n_number_combination[i] = n_combination[i];
+                                    }
+                                }
+
                                 if( array_b_enable_track[i] !== null ){
                                     if( this._device._b_enable_iso[i]  !== array_b_enable_track[i] ){
-                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_enable[i] );
+                                        elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                            , _type_change_parameter.cp_EnableISO1+i );
                                         this._device._b_enable_iso[i]  = array_b_enable_track[i];
                                     }
                                 }
-                                if( s_ppretag[i] !== null ){
-                                    if(!_is_equal_tag(this._device._s_private_prefix[i],s_ppretag[i])){
-                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_pre[i] );
-                                        this._device._s_private_prefix[i] = s_ppretag[i];
+                                //
+                                for( var j=0; j<_const_the_number_of_combination; j++ ){
+                                    if( n_max_size[i][j] !== null){
+                                        if(this._device._n_max_size[i][j] !== n_max_size[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_MaxSize + i*_const_the_number_of_combination + j );
+                                            this._device._n_max_size[i][j] = n_max_size[i][j];
+                                        }
                                     }
-                                }
-                                if( s_pposttag[i] !== null ){
-                                    if( !_is_equal_tag(this._device._s_private_postfix[i],s_pposttag[i]) ){
-                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, cp_post[i] );
-                                        this._device._s_private_postfix[i] = s_pposttag[i];
+                                    if( n_bit_size[i][j] !== null){
+                                        if(this._device._n_bit_size[i][j] !== n_bit_size[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_BitSize + i*_const_the_number_of_combination + j );
+                                            this._device._n_bit_size[i][j] = n_bit_size[i][j];
+                                        }
                                     }
-                                }
+                                    if( n_data_mask[i][j] !== null){
+                                        if(this._device._c_data_mask[i][j] !== n_data_mask[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_DataMask + i*_const_the_number_of_combination + j );
+                                            this._device._c_data_mask[i][j] = n_data_mask[i][j];
+                                        }
+                                    }
+                                    if( b_use_parity[i][j] !== null){
+                                        if(this._device._b_use_parity[i][j] !== b_use_parity[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_UseParity + i*_const_the_number_of_combination + j );
+                                            this._device._b_use_parity[i][j] = b_use_parity[i][j];
+                                        }
+                                    }
+                                    if( n_parity_type[i][j] !== null){
+                                        if(this._device._n_parity_type[i][j] !== n_parity_type[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_ParityType + i*_const_the_number_of_combination + j );
+                                            this._device._n_parity_type[i][j] = n_parity_type[i][j];
+                                        }
+                                    }
+                                    if( n_stxl[i][j] !== null){
+                                        if(this._device._c_stxl[i][j] !== n_stxl[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_STX_L + i*_const_the_number_of_combination + j );
+                                            this._device._c_stxl[i][j] = n_stxl[i][j];
+                                        }
+                                    }
+                                    if( n_etxl[i][j] !== null){
+                                        if(this._device._c_etxl[i][j] !== n_etxl[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_ETX_L + i*_const_the_number_of_combination + j );
+                                            this._device._c_etxl[i][j] = n_etxl[i][j];
+                                        }
+                                    }
+                                    if( b_use_error_correct[i][j] !== null){
+                                        if(this._device._b_use_ecm[i][j] !== b_use_error_correct[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_UseErrorCorrect + i*_const_the_number_of_combination + j );
+                                            this._device._b_use_ecm[i][j] = b_use_error_correct[i][j];
+                                        }
+                                    }
+                                    if( n_error_correct_type[i][j] !== null){
+                                        if(this._device._n_ecm_type[i][j] !== n_error_correct_type[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_ECMType + i*_const_the_number_of_combination + j );
+                                            this._device._n_ecm_type[i][j] = n_error_correct_type[i][j];
+                                        }
+                                    }
+                                    if( n_add_value[i][j] !== null){
+                                        if(this._device._n_add_value[i][j] !== n_add_value[i][j]){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_ISO1_Combi0_AddValue + i*_const_the_number_of_combination + j );
+                                            this._device._n_add_value[i][j] = n_add_value[i][j];
+                                        }
+                                    }
+                                    if( s_ppretag[i][j] !== null ){
+                                        if(!_is_equal_tag(this._device._s_private_prefix[i][j],s_ppretag[i][j])){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_PrivatePrefix10 + i*_const_the_number_of_combination + j );
+                                            this._device._s_private_prefix[i][j] = s_ppretag[i][j];
+                                        }
+                                    }
+                                    if( s_pposttag[i][j] !== null ){
+                                        if( !_is_equal_tag(this._device._s_private_postfix[i][j],s_pposttag[i][j]) ){
+                                            elpusk.util.insert_to_set ( this._device._set_change_parameter
+                                                , _type_change_parameter.cp_PrivatePostfix10 + i*_const_the_number_of_combination + j );
+                                            this._device._s_private_postfix[i][j] = s_pposttag[i][j];
+                                        }
+                                    }
+                                }//end for j
                             }//end for
     
                             resolve(true);
@@ -8741,12 +8828,18 @@
                 else{
                     s_description = s_description + "MSR global pre/postfixs sending condition : send when a track isn't error.\n";
                 }
-                if(this,_c_blank[1]&0x01){
+                if(this._c_blank[1]&0x01){
                     s_description = s_description + "indication error condition : If any track is not error, it is success.\n";
                 }
                 else{
                     s_description = s_description + "indication error condition : If all track are not error, it is success.\n";
                 }
+                s_description = s_description 
+                +"c_blank : 0x" + this._c_blank[0].toString(16)
+                +": 0x" + this._c_blank[1].toString(16)
+                +": 0x" + this._c_blank[2].toString(16)
+                +": 0x" + this._c_blank[0].toString(16)
+                +"\n";
 
                 s_description = s_description + "MSR global prefixs : " + this._s_global_prefix + "\n";
                 s_description = s_description + "MSR global postfixs : " + this._s_global_postfix + "\n";
@@ -8758,6 +8851,8 @@
                 s_description = s_description + "Uart postfixs : " + this._s_postfix_uart + "\n";
 
                 for( var i = 0; i<_const_the_number_of_track; i++ ){
+                    s_description = s_description + "==================================================\n";
+                    s_description = s_description + ".......ISO track " + String(i+1) + " Information.\n";
                     if( this._b_enable_iso[i] ){
                         s_description = s_description + "MSR enabled track " + String(i+1) + " : enabled.\n";
                     }
@@ -8770,6 +8865,9 @@
                     s_description = s_description + "the number of combination track " + String(i+1) + " : " + String(this._n_number_combination[i]) + "\n";
         
                     for( var j = 0; j<_const_the_number_of_combination; j++ ){
+                        s_description = s_description + "------------------------------\n";
+                        s_description = s_description + ".......combination " + String(j) + " Information.\n";
+    
                         s_description = s_description + "max size of track " + String(i+1) + "combination"+ String(j) +" : " + String(this._n_max_size[i][j]) + "\n";
                         s_description = s_description + "one bit size of track " + String(i+1) + "combination"+ String(j) +" : " + String(this._n_bit_size[i][j]) + "\n";
                         s_description = s_description + "data mask of track " + String(i+1) + "combination"+ String(j) +" : 0x" + this._c_data_mask[i][j].toString(16) + "\n";
