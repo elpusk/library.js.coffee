@@ -5,7 +5,7 @@ For generating API document, run "js_doc_coffee.bat" on windows console.
 
 # elpusk.device.usb.hid.lpu237
 lpu237 device protocol JavaScript  library for cmi-js.
-v1.4
+v1.5..
 For generating API document, run "js_doc_lpu237.bat" on windows console.
 
 # elpusk.framework.coffee.ctl_lpu237
