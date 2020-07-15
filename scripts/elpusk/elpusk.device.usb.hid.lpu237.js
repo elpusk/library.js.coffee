@@ -35,6 +35,8 @@
  * <br />   2020.7.14 - release 1.4
  *                    - support ganymede v5.13. support multi-combination. 
  *                    - support callisto v3.21. support multi-combination. 
+ * <br />   2020.7.15 - release 1.5
+ *                    - fix _generate_set_etxl() missing code.
  * @namespace
  */
 'use strict';
@@ -4548,7 +4550,7 @@
         function _generate_set_etxl(queue_s_tx,n_track,n_combi,c_etxl){
             var n_offset = _type_system_offset.SYS_OFFSET_ETXL[n_track][n_combi];
             var n_size = _type_system_size.SYS_SIZE_ETXL[n_track][n_combi];
-            var s_data = elpusk.util.get_byte_hex_string_from_number(c_stxl);
+            var s_data = elpusk.util.get_byte_hex_string_from_number(c_etxl);
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
         }
 
@@ -7096,6 +7098,7 @@
                                     );
                             }
                             //cp_ISO1_Combi0_UseErrorCorrect ~cp_ISO3_Combi2_UseErrorCorrect
+                            
                             if( elpusk.util.find_from_set( this._set_change_parameter, 
                                 _type_change_parameter.cp_ISO1_Combi0_UseErrorCorrect 
                                 +ii*_const_the_number_of_combination+jj ) >= 0 ){
@@ -7107,6 +7110,7 @@
                                     +ii*_const_the_number_of_combination+jj
                                     );
                             }
+                            
                             //cp_ISO1_Combi0_ECMType ~cp_ISO3_Combi2_ECMType
                             if( elpusk.util.find_from_set( this._set_change_parameter, 
                                 _type_change_parameter.cp_ISO1_Combi0_ECMType 
@@ -8564,7 +8568,6 @@
                                 }
                             }
 
-                            var cp_enable = [_type_change_parameter.cp_EnableISO1 ,_type_change_parameter.cp_EnableISO2 ,_type_change_parameter.cp_EnableISO3  ];
                             for( var i = 0; i<_const_the_number_of_track; i++ ){
                                 if( n_combination[i] !== null ){
                                     if( this._device._n_number_combination[i] !== n_combination[i]){
