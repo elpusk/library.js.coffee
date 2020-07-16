@@ -14,6 +14,9 @@ common	:	iso2		: "enable" or "disable"
 common	:	iso3		: "enable" or "disable"
 common	:	condition	: "and" or "or"( and - if all track are not error,global pro/postfix will be sent. )
 common	:	indication	: "and" or "or"( and - When all track are not a error, reader indicate success-processing.)=
+common	:	ignore1		: "enable" or "disable"( if ISO1 data is equal to ISO2 data, don't send ISO1 data.)
+common	:	ignore3		: "enable" or "disable"( if ISO2 data is equal to ISO3 data, don't send ISO3 data.)
+common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first character is colon,  don't send colon.)
 common :	direction:  : "bidirectional","forward" or "backward"
 common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
 =====================================================================================================================================================
@@ -209,6 +212,9 @@ ibutton	:	postfix		: hex-format : use lower case.
 		iso3		="enable"
 		condition	="and"
 		indication  ="or"
+		ignore1 	= "disable"
+		ignore3 	= "disable"
+		rm_colon	= "enable"
 		direction	="bidirectional"
 		ibutton		="zeros"
 	/>

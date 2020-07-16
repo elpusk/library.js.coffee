@@ -37,6 +37,10 @@
  *                    - support callisto v3.21. support multi-combination. 
  * <br />   2020.7.15 - release 1.5
  *                    - fix _generate_set_etxl() missing code.
+ * <br />   2020.7.16 - release 1.6
+ *                    - support ISO1 ignore mode.
+ *                    - support ISO3 ignore mode.
+ *                    - support colon ignore mode.
  * @namespace
  */
 'use strict';
@@ -160,7 +164,10 @@
             cp_EnableF12iButton : 131, 
             cp_EnableZerosiButton : 132, 
             cp_EnableZeros7TimesiButton : 133, 
-            cp_EnableAddmitCodeStickiButton : 134
+            cp_EnableAddmitCodeStickiButton : 134,
+            cp_EnableIgnoreISO1 : 135,
+            cp_EnableIgnoreISO3 : 136,
+            cp_EnableRemoveColon : 137
 		};
 
         /**
@@ -252,7 +259,7 @@
 			gt_get_prefix_ibutton : 140, gt_get_postfix_ibutton : 141,
 			gt_get_prefix_uart : 142, gt_get_postfix_uart : 143,
             gt_get_f12_ibutton : 144, gt_get_zeros_ibutton : 145, gt_get_zeros7_times_ibutton : 146, gt_get_addmit_code_stick_ibutton : 147,
-
+            // get_get_x is more exist at the end of this defintion.
             /////////////////////////////
             //set
             gt_set_global_prepostfix_send_condition : 148,
@@ -320,7 +327,16 @@
             gt_set_f12_ibutton : 277, 
             gt_set_zeros_ibutton : 278, 
             gt_set_zeros7_times_ibutton : 279, 
-            gt_set_addmit_code_stick_ibutton : 230
+            gt_set_addmit_code_stick_ibutton : 230,
+
+            //additional 
+            gt_get_ignore_iso1 : 231,
+            gt_get_ignore_iso3 : 232,
+            gt_get_remove_colon : 233,
+
+            gt_set_ignore_iso1 : 234,
+            gt_set_ignore_iso3 : 235,
+            gt_set_remove_colon : 236
         };
                 
         /**
@@ -336,6 +352,9 @@
             SYS_OFFSET_NAME : 12,
             SYS_OFFSET_G_TAG_CONDITION : 83,
             SYS_OFFSET_INDICATE_ERROR_CONDITION : 0,
+            SYS_OFFSET_IGNORE_ISO1 : 0,
+            SYS_OFFSET_IGNORE_ISO3 : 0,
+            SYS_OFFSET_REMOVE_COLON : 0,
             SYS_OFFSET_INTERFACE : 42,
             SYS_OFFSET_KEYMAP : 103,
             SYS_OFFSET_BUZZER_FREQ : 43,
@@ -381,6 +400,9 @@
             SYS_SIZE_NAME : 16,
             SYS_SIZE_G_TAG_CONDITION : 4,
             SYS_SIZE_INDICATE_ERROR_CONDITION : 4,
+            SYS_SIZE_IGNORE_ISO1 : 4,
+            SYS_SIZE_IGNORE_ISO3 : 4,
+            SYS_SIZE_REMOVE_COLON : 4,
             SYS_SIZE_INTERFACE : 1,
             SYS_SIZE_KEYMAP : 4,
             SYS_SIZE_BUZZER_FREQ : 4,
@@ -1863,9 +1885,10 @@
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {boolean} false - When any track is not a error, reader indicate success-processing.
          * <br />   true - When all track are not a error, reader indicate success-processing.
+         * <br /> null - error.
          */
 		function _get_indicate_error_condition_from_response(s_response){
-            var b_result = true;
+            var b_result = null;
 
 			do {
                 var c_blank = [];
@@ -1882,10 +1905,112 @@
                 if( c_blank[1] & 0x01 ){
                     b_result = false;
                 }
+                else{
+                    b_result = true;
+                }
 			} while (false);
 			return b_result;
         }
 
+        /**
+         * @private
+         * @function _get_ignore_iso1_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - If 1 & 2 track data is equal, send 2 track data only.
+         * <br />   true - else
+         * <br /> null - error.
+         */
+		function _get_ignore_iso1_from_response(s_response){
+            var b_result = null;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO1;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[1] & 0x02 ){
+                    b_result = true;
+                }
+                else{
+                    b_result = false;
+                }
+			} while (false);
+			return b_result;
+        }
+        /**
+         * @private
+         * @function _get_ignore_iso3_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - If 2 & 3 track data is equal, send 2 track data only.
+         * <br />   false - else.
+         * <br /> null - error.
+         */
+		function _get_ignore_iso3_from_response(s_response){
+            var b_result = null;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO3;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[1] & 0x04 ){
+                    b_result = true;
+                }
+                else{
+                    b_result = false;
+                }
+			} while (false);
+			return b_result;
+        }
+        /**
+         * @private
+         * @function _get_remove_colon_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {boolean} true - If a track ETXL is 0xe0 and the first data is ASCII ':', then track's ':' isn't sent.
+         * <br />   false - else.
+         * <br /> null - error.
+         */
+		function _get_remove_colon_from_response(s_response){
+            var b_result = null;
+
+			do {
+                var c_blank = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_REMOVE_COLON;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
+                if( c_blank[1] & 0x08 ){
+                    b_result = true;
+                }
+                else{
+                    b_result = false;
+                }
+			} while (false);
+			return b_result;
+        }
+
+
+        //////////////////
         /**
          * @private
          * @function _get_interface_from_response
@@ -3493,6 +3618,42 @@
 
         /**
          * @private
+         * @function _generate_get_ignore_iso1
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_ignore_iso1(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_IGNORE_ISO1;
+            var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO1;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
+         * @function _generate_get_ignore_iso3
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_ignore_iso3(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_IGNORE_ISO3;
+            var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO3;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
+         * @function _generate_get_remove_colon
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */
+        function _generate_get_remove_colon(queue_s_tx){
+            var n_offset = _type_system_offset. SYS_OFFSET_REMOVE_COLON;
+            var n_size = _type_system_size. SYS_SIZE_REMOVE_COLON;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
          * @function _generate_get_interface
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
@@ -4290,6 +4451,39 @@
             }//end for
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_ignore_iso1
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number[]} cblank 4 int array.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_ignore_iso1(queue_s_tx,cblank){
+            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_ignore_iso3
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number[]} cblank 4 int array.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_ignore_iso3(queue_s_tx,cblank){
+            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_remove_colon
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {number[]} cblank 4 int array.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_remove_colon(queue_s_tx,cblank){
+            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
         }
 
         /**
@@ -5192,6 +5386,51 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ignore_iso1
+         * @returns {boolean} true - If 1 & 2 track data is equal, send 2 track data only.
+         * <br /> false - else
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_ignore_iso1 = function(){
+            if( this._c_blank[1] & 0x02 ){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ignore_iso3
+         * @returns {boolean} true - If 2 & 3 track data is equal, send 2 track data only.
+         * <br /> false - else
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_ignore_iso3 = function(){
+            if( this._c_blank[1] & 0x04 ){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_remove_colon
+         * @returns {boolean} true - If a track ETXL is 0xe0 and the first data is ASCII ':', then track's ':' isn't sent.
+         * <br /> false - else
+         */
+		_elpusk.device.usb.hid.lpu237.prototype.get_remove_colon = function(){
+            if( this._c_blank[1] & 0x08 ){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_device_is_mmd1000
          * @returns {boolean} true - used decoder is MMD1000.
          * <br /> false - used decoder is Magtek DeltaAsic
@@ -5949,7 +6188,7 @@
                 if( n_type < _type_generated_tx_type.gt_read_uid ){//minmum
                     continue;
                 }
-                if( n_type > _type_generated_tx_type.gt_set_addmit_code_stick_ibutton ){//max
+                if( n_type > _type_generated_tx_type.gt_set_remove_colon ){//max
                     continue;
                 }
                 //
@@ -5988,6 +6227,12 @@
                         s_description = "get global send condition"; break;
                     case _type_generated_tx_type.gt_get_indicate_error_condition:
                         s_description = "get indication error condition."; break;
+                    case _type_generated_tx_type.gt_get_ignore_iso1:
+                        s_description = "get_ignore_iso1."; break;
+                    case _type_generated_tx_type.gt_get_ignore_iso3:
+                        s_description = "get_ignore_iso3."; break;
+                    case _type_generated_tx_type.gt_get_remove_colon:
+                        s_description = "get_remove_colon."; break;
                     case _type_generated_tx_type.gt_get_interface:
                         s_description = "get interface"; break;
                     case _type_generated_tx_type.gt_get_language:
@@ -6264,6 +6509,13 @@
                     case _type_generated_tx_type.gt_set_indicate_error_condition:
                         s_description = "set_indicate_error_condition"; break;
                     //
+                    case _type_generated_tx_type.gt_set_ignore_iso1:
+                        s_description = "set_ignore_iso1."; break;
+                    case _type_generated_tx_type.gt_set_ignore_iso3:
+                        s_description = "set_ignore_iso3."; break;
+                    case _type_generated_tx_type.gt_set_remove_colon:
+                        s_description = "set_remove_colon."; break;
+
                     case _type_generated_tx_type.gt_set_interface:
                         s_description = "set interface"; break;
                     case _type_generated_tx_type.gt_set_language:
@@ -6732,6 +6984,15 @@
                     
                     if( !_generate_get_indicate_error_condition(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_indicate_error_condition );
+
+                    if( !_generate_get_ignore_iso1(this._dequeu_s_tx) ){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_ignore_iso1 );
+
+                    if( !_generate_get_ignore_iso3(this._dequeu_s_tx) ){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_ignore_iso3 );
+
+                    if( !_generate_get_remove_colon(this._dequeu_s_tx) ){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_remove_colon );
                     //
                     var ii=0;
                     var jj=0;
@@ -6997,6 +7258,18 @@
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition ) >= 0 ){
                         if (!_generate_set_indicate_error_condition(this._dequeu_s_tx,this._c_blank)){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_indicate_error_condition );
+                    }
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO1 ) >= 0 ){
+                        if (!_generate_set_ignore_iso1(this._dequeu_s_tx,this._c_blank)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_ignore_iso1 );
+                    }
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO3 ) >= 0 ){
+                        if (!_generate_set_ignore_iso3(this._dequeu_s_tx,this._c_blank)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_ignore_iso3 );
+                    }
+                    if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableRemoveColon ) >= 0 ){
+                        if (!_generate_set_remove_colon(this._dequeu_s_tx,this._c_blank)){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_set_remove_colon );
                     }
                     
                     var ii = 0, jj = 0;
@@ -7380,6 +7653,43 @@
                         }
                         else{
                             this._c_blank[1] = this._c_blank[1] | 0x01;
+                        }
+                        b_result = true;
+                    }
+                    break;
+
+                case _type_generated_tx_type.gt_get_ignore_iso1:
+                    b_value = _get_ignore_iso1_from_response(s_response);
+                    if( b_value !== null ){   
+                        if( b_value ){
+                            this._c_blank[1] = this._c_blank[1] | 0x02;
+                        }
+                        else{
+                            this._c_blank[1] = this._c_blank[1] & 0xfd;
+                        }
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_ignore_iso3:
+                    b_value = _get_ignore_iso3_from_response(s_response);
+                    if( b_value !== null ){   
+                        if( b_value ){
+                            this._c_blank[1] = this._c_blank[1] | 0x04;
+                        }
+                        else{
+                            this._c_blank[1] = this._c_blank[1] & 0xfb;
+                        }
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_remove_colon:
+                    b_value = _get_remove_colon_from_response(s_response);
+                    if( b_value !== null ){   
+                        if( b_value ){
+                            this._c_blank[1] = this._c_blank[1] | 0x08;
+                        }
+                        else{
+                            this._c_blank[1] = this._c_blank[1] & 0xf7;
                         }
                         b_result = true;
                     }
@@ -7884,6 +8194,9 @@
                     break;
                 case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
                 case _type_generated_tx_type.gt_set_indicate_error_condition:
+                case _type_generated_tx_type.gt_set_ignore_iso1:
+                case _type_generated_tx_type.gt_set_ignore_iso3:
+                case _type_generated_tx_type.gt_set_remove_colon:
                 case _type_generated_tx_type.gt_set_interface:
                 case _type_generated_tx_type.gt_set_language:
                 case _type_generated_tx_type.get_set_keymap:
@@ -8067,6 +8380,9 @@
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
                         var b_indicate_all_success_is_success = null;
+                        var b_ignore_iso1 = null;
+                        var b_ignore_iso3 = null;
+                        var b_remove_colon = null;
                         var n_ibutton = null;
                         var n_direction = null;
                         var s_gpre = null;
@@ -8169,6 +8485,35 @@
                                         continue;
                                     }
                                 }
+
+                                // ignore1 attribute
+                                s_attr_name = "ignore1";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_ignore_iso1 = _get_enable_track_from_string(s_attr);
+                                    if( b_ignore_iso1 === null ){
+                                        continue;
+                                    }
+                                }
+                                // ignore3 attribute
+                                s_attr_name = "ignore3";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_ignore_iso3 = _get_enable_track_from_string(s_attr);
+                                    if( b_ignore_iso3 === null ){
+                                        continue;
+                                    }
+                                }
+                                // rm_colon attribute
+                                s_attr_name = "rm_colon";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    b_remove_colon = _get_enable_track_from_string(s_attr);
+                                    if( b_remove_colon === null ){
+                                        continue;
+                                    }
+                                }
+
                                 // ibutton attribute
                                 s_attr_name = "ibutton";
                                 if( ele.hasAttribute(s_attr_name)){
@@ -8514,6 +8859,49 @@
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x01;
                                 }
                             }
+                            if( b_ignore_iso1 !== null){
+                                var b_ignore_iso1_cur = false;
+                                if( this._device._c_blank[1]&0x02 ){
+                                    b_ignore_iso1_cur = true;
+                                }
+                                if( b_ignore_iso1 && !b_ignore_iso1_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO1 );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] | 0x02;
+                                }
+                                else if( !b_ignore_iso1 && b_ignore_iso1_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO1 );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] & 0xfd;
+                                }
+                            }
+                            if( b_ignore_iso3 !== null){
+                                var b_ignore_iso3_cur = false;
+                                if( this._device._c_blank[1]&0x04 ){
+                                    b_ignore_iso3_cur = true;
+                                }
+                                if( b_ignore_iso3 && !b_ignore_iso3_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO3 );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] | 0x04;
+                                }
+                                else if( !b_ignore_iso3 && b_ignore_iso3_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO3 );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] & 0xfb;
+                                }
+                            }
+                            if( b_remove_colon !== null){
+                                var b_remove_colon_cur = false;
+                                if( this._device._c_blank[1]&0x08 ){
+                                    b_remove_colon_cur = true;
+                                }
+                                if( b_remove_colon && !b_remove_colon_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableRemoveColon );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] | 0x08;
+                                }
+                                else if( !b_remove_colon && b_remove_colon_cur ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableRemoveColon );
+                                    this._device._c_blank[1] =  this._device._c_blank[1] & 0xf7;
+                                }
+                            }
+
                             if( n_ibutton !== null ){
                                 if(this._device._n_ibutton_mode !== n_ibutton){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableF12iButton );
@@ -8843,6 +9231,25 @@
                 +": 0x" + this._c_blank[2].toString(16)
                 +": 0x" + this._c_blank[0].toString(16)
                 +"\n";
+                //////////////////////
+                if(this._c_blank[1]&0x02){
+                    s_description = s_description + "Ignore ISO1 : If 1 & 2 track data is equal, send 2 track data only.\n";
+                }
+                else{
+                    s_description = s_description + "Ignore ISO1 : not ignore iso1 track.\n";
+                }
+                if(this._c_blank[1]&0x04){
+                    s_description = s_description + "Ignore ISO3 : If 2 & 3 track data is equal, send 2 track data only.\n";
+                }
+                else{
+                    s_description = s_description + "Ignore ISO3 : not ignore iso3 track\n";
+                }
+                if(this._c_blank[1]&0x08){
+                    s_description = s_description + "remove colon : If a track ETXL is 0xe0 and the first data is ASCII ':',then track's ':' isn't sent.\n";
+                }
+                else{
+                    s_description = s_description + "remove colon : not remove colon.\n";
+                }
 
                 s_description = s_description + "MSR global prefixs : " + this._s_global_prefix + "\n";
                 s_description = s_description + "MSR global postfixs : " + this._s_global_postfix + "\n";
