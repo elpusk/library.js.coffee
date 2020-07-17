@@ -385,8 +385,10 @@
                 //
                 ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
                     //alway true.
+                    clearMessage();
                     addMessage("ok : set_from_file");
-                    addMultiMessage(ctl_lpu237.get_device().get_string());
+                    addMessage( ctl_lpu237.get_device().get_string_html_table() );
+                    //addMultiMessage(ctl_lpu237.get_device().get_string());
 
                     //document.getElementById("input_file").value = "";
                 }).catch(function (event_error) {
@@ -415,7 +417,8 @@
                 clearMessage();
                 //s_message always "success".
                 addMessage_bold(" = system parameters");
-                addMultiMessage( ctl_lpu237.get_device().get_string() );
+                addMessage( ctl_lpu237.get_device().get_string_html_table() );
+                //addMultiMessage( ctl_lpu237.get_device().get_string() );
                 //alert(ctl_lpu237.get_device().get_string());
 
                 //addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
@@ -441,8 +444,8 @@
                 //s_message always "success".
                 clearMessage();
                 addMessage_bold("success : save system parameter to device.");
-
-                addMultiMessage( ctl_lpu237.get_device().get_string() );
+                addMessage( ctl_lpu237.get_device().get_string_html_table() );
+                //addMultiMessage( ctl_lpu237.get_device().get_string() );
             }).catch(function (event_error) {
                 // error here
                 clearMessage();

@@ -41,6 +41,9 @@
  *                    - support ISO1 ignore mode.
  *                    - support ISO3 ignore mode.
  *                    - support colon ignore mode.
+ * <br />   2020.7.17 - release 1.7
+ *                    - support system parameter table view.
+ *                    - bugfix always displayed even parity.
  * @namespace
  */
 'use strict';
@@ -582,6 +585,38 @@
     
         /** 
          * @private 
+         * @function _get_key_symbol_string_by_hid_modifier_code_number
+         * @param {number} n_hid_modifier_code hid modifier keycode number.
+         * @returns {string} the symbol of hid modifier
+         * <br /> error case return ""
+         * @description get a symbol from hid modifier number.
+        */                
+        function _get_key_symbol_string_by_hid_modifier_code_number( n_hid_modifier_code ){
+        
+            var s_symbol = "";
+    
+            do{
+                if( typeof n_hid_modifier_code !== 'number' ){
+                    continue;
+                }
+    
+                if( n_hid_modifier_code & 0x02 ){
+                    s_symbol += "left_shift"
+                }
+                if( n_hid_modifier_code & 0x01 ){
+                    s_symbol += "left_control"
+                }
+                if( n_hid_modifier_code & 0x04 ){
+                    s_symbol += "left_alt"
+                }
+    
+            }while(false);
+    
+            return s_symbol;
+        }
+
+        /** 
+         * @private 
          * @function _get_hid_key_code_hex_string_by_key_symbol
          * @param {string} s_key_symbol  english keyboard key symbol or hex string with "0x"( this is hid key code)
          * @returns {string} hex string. (excluded "0x")
@@ -876,6 +911,291 @@
             return s_hid_key_code_hex;
         }
     
+        /** 
+         * @private 
+         * @function _get_key_symbol_string_by_hid_key_code_number
+         * @param {number} n_hid_key_code hid keycode number.
+         * @returns {string} the symbol of hid key
+         * <br /> error case return ""
+         * @description get hid key symbol string.
+        */                
+        function _get_key_symbol_string_by_hid_key_code_number( n_hid_key_code ){
+            //key
+            var s_key_symbol = "";
+            var s_hid_key_code = 0;
+            
+            do{
+                if( typeof n_hid_key_code !== 'number' ){
+                    continue;
+                }
+
+                s_hid_key_code = n_hid_key_code.toString(16).toLowerCase();
+
+
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F1 ){
+                    s_key_symbol = "f1";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F2 ){
+                    s_key_symbol = "f2";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F3 ){
+                    s_key_symbol = "f3";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F4 ){
+                    s_key_symbol = "f4";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F5 ){
+                    s_key_symbol = "f5";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F6 ){
+                    s_key_symbol = "f6";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F7 ){
+                    s_key_symbol = "f7";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F8 ){
+                    s_key_symbol = "f8";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F9 ){
+                    s_key_symbol = "f9";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_______F10 ){
+                    s_key_symbol = "f10";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_______F11 ){
+                    s_key_symbol = "f11";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_______F12 ){
+                    s_key_symbol = "f12";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____ESCAPE ){
+                    s_key_symbol = "esc";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_____SPACE ){
+                    s_key_symbol = "space";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_______TAB ){
+                    s_key_symbol = "tab";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____q____Q ){
+                    s_key_symbol = "q";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____w____W ){
+                    s_key_symbol = "w";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____e____E ){
+                    s_key_symbol = "e";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____r____R ){
+                    s_key_symbol = "r";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____t____T ){
+                    s_key_symbol = "t";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____y____Y ){
+                    s_key_symbol = "y";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____u____U ){
+                    s_key_symbol = "u";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____i____I ){
+                    s_key_symbol = "i";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____o____O ){
+                    s_key_symbol = "o";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____p____P ){
+                    s_key_symbol = "p";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_LBT___LBR ){
+                    s_key_symbol = "[";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_RBT___RBR ){
+                    s_key_symbol = "]";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_BSLA_VBAR ){
+                    s_key_symbol = "\\";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____DELETE ){
+                    s_key_symbol = "del";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____z____Z ){
+                    s_key_symbol = "z";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____x____X ){
+                    s_key_symbol = "x";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____c____C ){
+                    s_key_symbol = "c";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____v____V ){
+                    s_key_symbol = "v";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____b____B ){
+                    s_key_symbol = "b";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____n____N ){
+                    s_key_symbol = "n";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____m____M ){
+                    s_key_symbol = "m";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_COMA___LT ){
+                    s_key_symbol = ",";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_PERIOD_GT ){
+                    s_key_symbol = ".";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_SLASH__QM ){
+                    s_key_symbol = "/";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_GRAV_TILD ){
+                    s_key_symbol = "`";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____1_EXCL ){
+                    s_key_symbol = "1";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____2_QUOT ){
+                    s_key_symbol = "2";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____3_SHAR ){
+                    s_key_symbol = "3";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____4_DOLL ){
+                    s_key_symbol = "4";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____5_PERC ){
+                    s_key_symbol = "5";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____6_CIRC ){
+                    s_key_symbol = "6";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____7_AMPE ){
+                    s_key_symbol = "7";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____8_ASTE ){
+                    s_key_symbol = "8";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____9_L_PA ){
+                    s_key_symbol = "9";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____0_R_PA ){
+                    s_key_symbol = "0";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_MIN_UNDER ){
+                    s_key_symbol = "-";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_EQU__PLUS ){
+                    s_key_symbol = "=";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_BACKSPACE ){
+                    s_key_symbol = "bs";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____a____A ){
+                    s_key_symbol = "a";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____s____S ){
+                    s_key_symbol = "s";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____d____D ){
+                    s_key_symbol = "d";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____f____F ){
+                    s_key_symbol = "f";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____g____G ){
+                    s_key_symbol = "g";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____h____H ){
+                    s_key_symbol = "h";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____j____J ){
+                    s_key_symbol = "j";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____k____K ){
+                    s_key_symbol = "k";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____l____L ){
+                    s_key_symbol = "l";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_SEMI__COL ){
+                    s_key_symbol = ";";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY_APOS_QUOT ){
+                    s_key_symbol = "'";
+                    continue;
+                }
+                if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY____RETURN ){
+                    s_key_symbol = "enter";
+                    continue;
+                }
+            }while(false);
+            return s_key_symbol;
+        }
+
 
         /**
          * @private
@@ -3404,7 +3724,7 @@
                     continue;
                 }
                 if( s_string === "odd"){
-                    n_value = _type_parity.parity_even;
+                    n_value = _type_parity.parity_odd;
                     continue;
                 }
  			} while (false);
@@ -5149,6 +5469,72 @@
                 s_ascii.push( String.fromCharCode(n_ascii[i]) );
             }//end for
             return s_ascii;
+        }
+
+        /**
+         * @private
+         * @function _get_tag_by_symbol
+         * @param {number} n_language language index number 0~10. type is _type_keyboard_language_index.
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {string | null} string format of symbol of tag.
+         * <br /> error return null.
+         */
+        function _get_tag_by_symbol(n_language,s_len_tag_hex){
+            var s_symbols = null;
+
+            do{
+                if( typeof n_language !== 'number'){
+                    continue;
+                }
+                if( typeof s_len_tag_hex !== 'string'){
+                    continue;
+                }
+                if( (s_len_tag_hex.length % 2) !== 0){
+                    continue;
+                }
+
+                s_symbols = "";
+
+                var s_one_byte = "";
+                var n_len = 0;
+                var n_tag = [];
+
+                //change hex string -> byte array.
+                for( var i = 0; i<s_len_tag_hex.length; i=i+2 ){
+                    s_one_byte = s_len_tag_hex.substring(i,i+2);
+                    n_tag.push(parseInt(s_one_byte,16));
+                }//end for
+
+                n_len = n_tag.shift();
+                if( n_len === 0 ){
+                    continue;//none tag
+                }
+                if( n_len > _const_max_size_tag_byte ){
+                    n_len = _const_max_size_tag_byte;
+                }
+                n_tag.length = n_len;
+
+                //
+                var c_mod = 0;
+                var c_key = 0;
+                for( var i = 0; i<n_tag.length; i=i+2 ){
+                    if(n_tag[i] === 0 && n_tag[i+1] === 0 ){
+                        continue;
+                    }
+                    if(n_tag[i]===0xff ){
+                        //ascii code format
+                        s_symbols = s_symbols
+                        + String.fromCharCode(n_tag[i+1]);
+                        continue;
+                    }
+                    //hid keyboard code.
+                    s_symbols = s_symbols 
+                    + "[" + _get_key_symbol_string_by_hid_modifier_code_number(n_tag[i]) + "]"
+                    + "[" + _get_key_symbol_string_by_hid_key_code_number(n_tag[i+1]) + "]"
+                }//end for i
+
+            }while(false);
+            return s_symbols;
         }
 
         /**
@@ -9310,6 +9696,285 @@
 
            }while(false);
            return s_description;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_string_html_table
+         * @return {string} the system parameters
+         * @description return the string of system parameters. 
+         * <br /> this string is html-table format."\n".
+        */
+       _elpusk.device.usb.hid.lpu237.prototype.get_string_html_table = function(){
+            var s_description = "";
+            var as_name = [];
+            var as_value = [];
+            var n_count = 0;
+
+            var as_n = [];
+            var as_v = [];
+
+            do{
+                var ver = [0,0,0,0];
+                var n_value = 0;
+                //
+                n_count = 0;
+                as_name[n_count] = "System name";
+                as_value[n_count] = this._s_name;
+                //
+                ++n_count;
+                as_name[n_count] = "System version";
+                as_value[n_count] = _get_version_string(this._version);
+                //
+                ++n_count;
+                as_name[n_count] = "System UID";
+                as_value[n_count] = this._s_uid;
+                //
+                ++n_count;
+                as_name[n_count] = "Used bootloader";
+                if( this._b_is_hid_boot ){
+                    as_value[n_count] = "Hid";
+                }
+                else{
+                    as_value[n_count] = "MSD";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "System interface";
+                as_value[n_count] = _get_system_inferface_string(this._n_interface);
+                //
+                ++n_count;
+                as_name[n_count] = "Language";
+                as_value[n_count] = _get_keyboard_language_index_string(this._n_language_index);
+                //
+                ++n_count;
+                as_name[n_count] = "Manufacture";
+                as_value[n_count] = _get_manufacturer_string( this._n_manufacture );
+                //
+                ++n_count;
+                as_name[n_count] = "MSD bootloader running time";
+                as_value[n_count] = String(this._dw_boot_run_time);
+                //
+                ++n_count;
+                as_name[n_count] = "Buzzer frequency";
+                as_value[n_count] = String(this._dw_buzzer_frequency);
+                //
+                ++n_count;
+                as_name[n_count] = "The supported functions";
+                as_value[n_count] = _get_function_string(this._n_device_function);
+                //
+                ++n_count;
+                as_name[n_count] = "i-Button mode";
+                as_value[n_count] = _get_ibutton_mode_string(this._n_ibutton_mode);
+                //
+                ++n_count;
+                as_name[n_count] = "blank data";
+                as_value[n_count] = "0x" + this._c_blank[0].toString(16)
+                +" : 0x" + this._c_blank[1].toString(16)
+                +" : 0x" + this._c_blank[2].toString(16)
+                +" : 0x" + this._c_blank[0].toString(16);
+                //
+                ++n_count;
+                as_name[n_count] = "MSR global pre/postfixs sending condition";
+                if(this._b_global_pre_postfix_send_condition){
+                    as_value[n_count] = "send when all track have not a error.";
+                }
+                else{
+                    as_value[n_count] = "send when any track isn't error.";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "indication error condition";
+                if(this._c_blank[1]&0x01){
+                    as_value[n_count] = "If any track is not error, it is success.";
+                }
+                else{
+                    as_value[n_count] = "If all track are not error, it is success.";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "Ignore ISO1";
+                if(this._c_blank[1]&0x02){
+                    as_value[n_count] = "If 1 & 2 track data is equal, send 2 track data only.";
+                }
+                else{
+                    as_value[n_count] = "Ignore ISO1 : not ignore iso1 track.";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "Ignore ISO3";
+                if(this._c_blank[1]&0x04){
+                    as_value[n_count] = "If 3 & 2 track data is equal, send 2 track data only.";
+                }
+                else{
+                    as_value[n_count] = "Ignore ISO3 : not ignore iso3 track.";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "remove colon";
+                if(this._c_blank[1]&0x08){
+                    as_value[n_count] = "If a track ETXL is 0xe0 and the first data is ASCII ':',then track's ':' isn't sent.";
+                }
+                else{
+                    as_value[n_count] = "remove colon : not remove colon.";
+                }
+                //
+                ++n_count;
+                as_name[n_count] = "MSR global prefixs";
+                as_value[n_count] = this._s_global_prefix;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_prefix);
+                //
+                ++n_count;
+                as_name[n_count] = "MSR global postfixs";
+                as_value[n_count] = this._s_global_postfix;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_postfix);
+                //
+                ++n_count;
+                as_name[n_count] = "i-button prefixs";
+                as_value[n_count] = this._s_prefix_ibutton;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_ibutton);
+                //
+                ++n_count;
+                as_name[n_count] = "i-button postfixs";
+                as_value[n_count] = this._s_postfix_ibutton;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_ibutton);
+                //
+                ++n_count;
+                as_name[n_count] = "Uart prefixs";
+                as_value[n_count] = this._s_prefix_uart;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_uart);
+                //
+                ++n_count;
+                as_name[n_count] = "Uart postfixs";
+                as_value[n_count] = this._s_postfix_uart;
+                as_value[n_count] += "<br/>";
+                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_uart);
+                ////////////////////////////////////////////////////
+
+                for( var i = 0; i<_const_the_number_of_track; i++ ){
+
+                    as_n.push([]);
+                    as_n[i].push("ISO track " + String(i+1) + " Information");
+                    as_v.push([]);
+                    as_v[i].push("ISO track " + String(i+1) + " Information");//for colspan 2
+
+
+                    
+                    as_n[i].push("MSR enabled track");
+                    if( this._b_enable_iso[i] ){
+                        as_v[i].push("enabled");
+                    }
+                    else{
+                        as_v[i].push("disabled");
+                    }
+                    //
+                    as_n[i].push("MSR reading direction");
+                    as_v[i].push(_get_direction_string( this._n_direction[i]));
+                    //
+                    as_n[i].push("the number of combination");
+                    as_v[i].push(String(this._n_number_combination[i]));
+
+                    var s_tag = "";
+                    for( var j = 0; j<_const_the_number_of_combination; j++ ){
+                        as_n[i].push("ISO track " + String(i+1) + "combination " + String(j) + " Information");
+                        as_v[i].push("ISO track " + String(i+1) + "combination " + String(j) + " Information");//for colspan 2
+    
+                        //
+                        as_n[i].push("max size combination"+ String(j));
+                        as_v[i].push(String(this._n_max_size[i][j]));
+                        //
+                        as_n[i].push("one bit size combination"+ String(j));
+                        as_v[i].push(String(this._n_bit_size[i][j]));
+                        //
+                        as_n[i].push("data mask combination"+ String(j));
+                        as_v[i].push("0x" + this._c_data_mask[i][j].toString(16));
+                        //
+                        as_n[i].push("parity bit combination"+ String(j));
+                        if( this._b_use_parity[i][j] ){
+                            as_v[i].push("enabled");
+                        }
+                        else{
+                            as_v[i].push("disabled");
+                        }
+                        //
+                        as_n[i].push("parity bit type combination"+ String(j));
+                        as_v[i].push(_get_parity_type_string(this._n_parity_type[i][j]));
+                        //
+                        as_n[i].push("STX pattern combination"+ String(j));
+                        as_v[i].push("0x" + this._c_stxl[i][j].toString(16));
+                        //
+                        as_n[i].push("ETX pattern combination"+ String(j));
+                        as_v[i].push("0x" + this._c_etxl[i][j].toString(16));
+                        //
+                        as_n[i].push("ecm combination"+ String(j));
+                        if( this._b_use_ecm[i][j] ){
+                            as_v[i].push("enabled");
+                        }
+                        else{
+                            as_v[i].push("disabled");
+                        }
+                        //
+                        as_n[i].push("ecm type combination"+ String(j));
+                        as_v[i].push(_get_error_correct_type_string(this._n_ecm_type[i][j]));
+                        //
+                        as_n[i].push("for converting to ASCII,add value combination"+ String(j));
+                        as_v[i].push(String(this._n_add_value[i][j]));
+                        //
+                        as_n[i].push("MSR private prefix combination"+ String(j));
+                        s_tag = this._s_private_prefix[i][j] 
+                        + "<br/>" + _get_tag_by_symbol(this._n_language_index,this._s_private_prefix[i][j]);
+                        as_v[i].push(s_tag);
+                        //
+                        as_n[i].push("MSR postfix prefix combination"+ String(j));
+                        s_tag = this._s_private_postfix[i][j] 
+                        + "<br/>" + _get_tag_by_symbol(this._n_language_index,this._s_private_postfix[i][j]);
+                        as_v[i].push(s_tag);
+
+                    }//end for j
+                }//end for                
+                
+                /////////////////////////////////////////////////////////////////
+                s_description +="<table border=1>";
+
+                s_description +="<tr> <th colspan = '2' bgcolor='#E6E6E6'>";
+                s_description += "System information";
+                s_description +="</th> </tr>";
+                //
+                for( var i=0; i<as_name.length; i++ ){
+                    s_description +="<tr> <td>";
+                    s_description += as_name[i];
+                    s_description += "</td><td>";
+                    s_description += as_value[i] ;
+                    s_description +="</td> </tr>";
+                }//end for
+
+                //
+                for( var i=0; i<as_n.length; i++ ){
+                    for( var j=0; j<as_n[i].length; j++ ){
+                        if( as_n[i][j] === as_v[i][j]){
+                            s_description +="<tr> <th colspan = '2' bgcolor='#FAFAFA'>";
+                            s_description += as_n[i][j];
+                            s_description +="</th> </tr>";
+                        }
+                        else{
+                            s_description +="<tr> <td>";
+                            s_description += as_n[i][j];
+                            s_description += "</td><td>";
+                            s_description += as_v[i][j] ;
+                            s_description +="</td> </tr>";
+                        }
+                    }//end for
+                }//end for
+
+                s_description +="</table>";
+
+            }while(false);
+            return s_description;
         }
 
         /**
