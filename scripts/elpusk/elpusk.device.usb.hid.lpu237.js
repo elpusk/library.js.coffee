@@ -8726,6 +8726,68 @@
         }   
         
         /**
+         * @public this function may be deleted. -_-;;
+         * @function elpusk.device.usb.hid.lpu237.update_firmware
+         * @param {File} file_rom rom file contains a firmware.
+         * @return {Promise} processing result.
+         * @description send a rom file data to server.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.update_firmware = function(file_rom){
+
+            var this_device = this;
+
+            return new Promise(function (resolve, reject) {
+
+                do{
+                    /*
+                    if( typeof file_rom !== 'object'){
+                        reject(_get_error_object('en_e_parameter'));
+                        continue;
+                    }
+                    */
+                    //
+                    var reader = new FileReader();
+
+                    reader._device = this_device;
+                    
+                    reader.onload = function(evt) {
+                        var array_data = evt.target.result;
+                        var b_result = false;
+                        var s_hex="";
+                        var s_hex_total="";
+                        do{
+                            var bytes  = new Uint8Array(array_data);
+
+                            var length = bytes.byteLength;
+                            for (var i = 0; i < length; i++) {
+                                s_hex = bytes[i].toString(16);
+                                if( s_hex.length == 1){
+                                    s_hex = "0"+s_hex;
+                                }
+                                s_hex_total += s_hex;
+                            }
+
+                            b_result = true;
+                        }while(false);
+
+                        if( b_result ){
+                            resolve(true);
+                        }
+                        else{//error
+                            reject(_get_error_object('en_e_parameter'));
+                        }
+                        //
+                        
+                    };// the end of onload event handler.
+                    //
+                    reader.readAsArrayBuffer(file_rom);
+    
+                }while(false);
+                
+            });//the end of Promise definition.
+        }   
+
+        /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.set_from_file
          * @param {File} file_xml xml file format setting file.

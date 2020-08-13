@@ -66,7 +66,18 @@
     <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
     <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
     <br />
-
+    <br />
+    <input type="button" id="button_promise_file_create" onclick="on_button_promise_file_create();" value="create file" />
+    <input type="button" id="button_promise_file_open" onclick="on_button_promise_file_open();" value="open file" />
+    <input type="button" id="button_promise_file_close" onclick="on_button_promise_file_close();" value="close file" />
+    <br />
+    <input type="button" id="button_promise_file_delete" onclick="on_button_promise_file_delete();" value="delete file" />
+    <input type="button" id="button_promise_file_truncate" onclick="on_button_promise_file_truncate();" value="truncate file" />
+    <input type="button" id="button_promise_file_get_size" onclick="on_button_promise_file_get_size();" value="get file size" />
+    <input type="button" id="button_promise_file_get_list" onclick="on_button_promise_file_get_list();" value="get file list" />
+    <input type="button" id="button_promise_file_append" onclick="on_button_promise_file_append();" value="append file" />
+    <br />
+    <br />
     <br />
     the registered usb device in coffee manager.
     <br />
@@ -241,6 +252,232 @@
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : echo : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_create(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_create("test1.aaa").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file create failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file create success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file create : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_open(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_open("test1.aaa").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file open failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file open success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file open : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_close(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_close().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file close failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file close success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file close : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_delete(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_delete("test1.aaa").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file delete failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file delete success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : delete : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_truncate(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_truncate("test1.aaa").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file truncate failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file truncate success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : truncate : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_get_list(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_get_list().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    if( s_rx[0] != "success" ){
+                        addMessage("file get_list failure");
+                        continue;
+                    }
+
+                    if( s_rx.length == 1){
+                        addMessage("none file in virtual drive");
+                        continue;
+                    }
+                    addMessage(s_rx.toString());
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_list : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_get_size(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_get_size().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    if( s_rx[0] != "success" ){
+                        addMessage("file get_size failure");
+                        continue;
+                    }
+
+                    addMessage(s_rx.toString());
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_size : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_append(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_append().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file_append failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("file_append success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file_append : "+ server.get_error_message(event_error));
             });
         }
 

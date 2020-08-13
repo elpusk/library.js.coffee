@@ -79,6 +79,11 @@
     <br />
 
     <br />
+    Select the your firmware file : 
+    <input type="file" id="fw_file" accept=".rom" />
+    <br />
+
+    <br />
     <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters" />
     <br />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
@@ -318,7 +323,8 @@
                 _add_message("p_main","Not Supported File API");
             }
             
-            //
+            //////////////////////////////////////
+            // for setting file
             document.getElementById("input_file").onchange = function () {
                 var file = this.files[0];
                 var name = file.name;
@@ -334,6 +340,31 @@
                 });
 
             };
+
+            //////////////////////////////////////
+            // for updating fw.
+            document.getElementById("fw_file").onclick = function () {
+                this.value='';
+            };
+
+            document.getElementById("fw_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                //
+                ctl_lpu237.get_device().update_firmware(file).then(function (b_result) {
+                    //alway true.
+                    _add_message("p_main","ok : update_firmware");
+
+                    //document.getElementById("input_file").value = "";
+                }).catch(function (event_error) {
+                    // error here
+                    _add_message("p_main","fail : update_firmware : "+ ctl_lpu237.get_device().get_error_message(event_error));
+                    //document.getElementById("input_file").value = "";
+                });
+
+            };
+
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +413,6 @@
             });            
         }
 
-        
         /**
          * @function _cb_progress_get_parameters
          * @parameter {number} n_device_index the index value of device on coffee framework.

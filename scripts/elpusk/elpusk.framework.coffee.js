@@ -48,6 +48,9 @@
  * 
  * <br />  2020.6.11 - release 1.7.
  * <br />  : add - action code "C" system event when system enters hibernation mode.
+ *
+ * <br />  2020.8.13 - release 1.8.
+ * <br />  : add - action code "F" file operation
  * 
  * @namespace
  */
@@ -168,6 +171,7 @@
                     ECHO: "E",
                     DEVICE_LIST: "L",
                     CONTROL_SHOW: "S",
+                    FILE_OPERATION: "F",
                     DEVICE_PLUG_IN: "P",
                     SERVER_CLOSE:"C",//this value is only in JS library.
                     DEVICE_OPEN: "o",
@@ -475,6 +479,7 @@
                             case _type_action_code.DEVICE_SEND:
                             case _type_action_code.DEVICE_TRANSMIT:
                             case _type_action_code.ECHO:
+                            case _type_action_code.FILE_OPERATION:
                             case _type_action_code.UNKNOWN:
                                 break;
                             default:
@@ -860,6 +865,22 @@
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                     break;
+                                case "file_create":
+                                case "file_open":
+                                case "file_close":
+                                case "file_delete":
+                                case "file_truncate":
+                                case "file_get_size":
+                                case "file_get_list":
+                                case "file_append":
+                                    if (json_obj.action_code == _type_action_code.FILE_OPERATION) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+
                                 case "device_open":
                                     if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
                                         if(json_obj.data_field == "success"){
@@ -1011,6 +1032,14 @@
                                 case "disconnect":
                                 case "_promise_echo":
                                 case "get_device_list":
+                                case "file_create":
+                                case "file_open":
+                                case "file_close":
+                                case "file_delete":
+                                case "file_truncate":
+                                case "file_get_size":
+                                case "file_get_list":
+                                case "file_append":
                                 case "device_open":
                                     parameter.reject(evt);
                                     break;
@@ -1182,6 +1211,457 @@
                         return _promise_echo(_type_data_field_type.HEX_STRING, s_data);
                     },
                 
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_create
+                     * @param {string} s_file_name the created file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_create : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_create",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["create",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_open
+                     * @param {string} s_file_name the opened file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_open : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_open",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["open",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_close
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file close action to server by promise.
+                    */                
+                    file_close : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_close",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["close"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_delete
+                     * @param {string} s_file_name the deleted file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file delete action to server by promise.
+                    */                
+                   file_delete : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_delete",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["delete",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_truncate
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file truncate action to server by promise.
+                    */                
+                    file_truncate : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_truncate",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["truncate"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_get_size
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file get size action to server by promise.
+                    */                
+                   file_get_size : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_get_size",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["get","size"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_get_list
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file get list action to server by promise.
+                    */                
+                    file_get_list : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_get_list",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["get","list"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_append
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_append : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_append",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.HEX_STRING
+                                    , "30313233343536373839"
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
                     /** 
                      * @public 
                      * @async
