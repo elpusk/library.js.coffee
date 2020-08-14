@@ -1610,12 +1610,14 @@
                      * @public 
                      * @async
                      * @function file_append
+                     * @param {string} s_hex_string server will change this parameter to binary.
+                     * <br /> each byte must be 2 characters, and seperator is space or empty.
                      * @returns {Promise} if success, resolve with echo data from server.
                      * <br /> else reject with Error object.
                      * 
                      * @description file crearte action to server by promise.
                     */                
-                    file_append : function () {
+                    file_append : function (s_hex_string) {
                         return new Promise(function (resolve, reject){
                 
                             do {
@@ -1652,7 +1654,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.HEX_STRING
-                                    , "30313233343536373839"
+                                    , String(s_hex_string)
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);

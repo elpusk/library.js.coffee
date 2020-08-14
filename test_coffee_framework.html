@@ -456,7 +456,7 @@
         function on_button_promise_file_append(){
             var server = elpusk.framework.coffee.get_instance();
 
-            server.file_append().then(function (s_rx) {
+            server.file_append("3031323334353637383930").then(function (s_rx) {
                 do{
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
