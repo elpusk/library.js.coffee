@@ -774,6 +774,36 @@
             
                 /** 
                  * @private 
+                 * @function _promise_load_file
+                 * @param {object} file_loaded
+                 * @returns {Promise}
+                 * @description a file is loaded to ArrayBuffer object
+                */                
+                function _promise_load_file(file_loaded) {
+                    return new Promise(function (resolve, reject) {
+            
+                        do{
+                            if (!_b_connet) {
+                                //already websocket created.
+                                reject(_get_error_object('en_e_server_connect'));
+                                continue;
+                            }
+                            //
+                            var reader = new FileReader();
+        
+                            reader.onload = function(evt) {
+                                var array_data = evt.target.result;
+                                resolve(array_data);
+                            };// the end of onload event handler.
+                            //
+                            reader.readAsArrayBuffer(file_loaded);
+            
+                        }while(false);
+                    });
+                }
+
+                /** 
+                 * @private 
                  * @function _on_def_open
                  * @param {Event} evt
                  * @description default callback function of websocket open event.
@@ -1662,6 +1692,142 @@
                 
                             } while (false);
                         });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_Copy
+                     * @param {File} file_src source file for copying.
+                     * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description a file copy to virtual drive.
+                    */
+                    file_Copy : function( file_src, s_virtual_file_path_dst ){
+                        var this_obj = this;
+                        return new Promise(function (resolve, reject){
+                            this_obj.file_create(s_virtual_file_path_dst)
+                            .then(//file_create
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                        
+                                    }while(false);
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy::file_create : ");
+                                        return _promise_load_file(file_src);
+                                    }
+                                    else{
+                                        reject("file_create");
+                                    }
+                                }
+                            )
+                            .catch(//file_create
+                                function(event_error){
+                                    console.log("- file_Copy::file_create : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//_promise_load_file
+                                function( ArrayBuffer_file_data ){
+                                    var s_hex="";
+                                    var s_hex_total="";
+                                    do{
+                                        var bytes  = new Uint8Array(ArrayBuffer_file_data);
+                                        var length = bytes.byteLength;
+                                        for (var i = 0; i < length; i++) {
+                                            s_hex = bytes[i].toString(16);
+                                            if( s_hex.length == 1){
+                                                s_hex = "0"+s_hex;
+                                            }
+                                            s_hex_total += s_hex;
+                                        }
+                                    }while(false);
+                                    console.log(" ++ file_Copy::_promise_load_file : ");
+                                    return this_obj.file_append(s_hex_total);
+                                }
+    
+                            )
+                            .catch(//_promise_load_file
+                                function(event_error){
+                                    console.log("- file_Copy::_promise_load_file : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//file_append
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                    }while(false);
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy::file_append : ");
+                                        return this_obj.file_close();
+                                    }
+                                    else{
+                                        reject("file_append");
+                                    }
+                                }
+                            )
+                            .catch(//file_append
+                                function(event_error){
+                                    console.log("-file_Copy::file_append : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//file_close
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                    }while(false);
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy::file_close : ");
+                                        resolve("success");
+                                    }
+                                    else{
+                                        reject("file_close");
+                                    }
+                                }
+                            )
+                            .catch(//file_close
+                                function(event_error){
+                                    console.log("-file_Copy::file_append : " + event_error);
+                                    reject(event_error);
+                                }
+                            );
+                        });
+
                     },
 
                     /** 

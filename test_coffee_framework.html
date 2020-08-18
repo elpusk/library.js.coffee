@@ -67,6 +67,11 @@
     <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
     <br />
     <br />
+    <input type="button" id="button_promise_file_get_list" onclick="on_button_promise_file_get_list();" value="get file list" />
+    <select id="drop_get_file_list">
+    </select>
+    <br />
+    <br />
     <input type="button" id="button_promise_file_create" onclick="on_button_promise_file_create();" value="create file" />
     <input type="button" id="button_promise_file_open" onclick="on_button_promise_file_open();" value="open file" />
     <input type="button" id="button_promise_file_close" onclick="on_button_promise_file_close();" value="close file" />
@@ -74,9 +79,13 @@
     <input type="button" id="button_promise_file_delete" onclick="on_button_promise_file_delete();" value="delete file" />
     <input type="button" id="button_promise_file_truncate" onclick="on_button_promise_file_truncate();" value="truncate file" />
     <input type="button" id="button_promise_file_get_size" onclick="on_button_promise_file_get_size();" value="get file size" />
-    <input type="button" id="button_promise_file_get_list" onclick="on_button_promise_file_get_list();" value="get file list" />
+    
     <input type="button" id="button_promise_file_append" onclick="on_button_promise_file_append();" value="append file" />
     <br />
+    Select the your source file : 
+    <input type="file" id="src_file" accept="." />
+    <br />
+
     <br />
     <br />
     the registered usb device in coffee manager.
@@ -149,6 +158,30 @@
             }
 
             elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+
+            //
+            //////////////////////////////////////
+            // for updating fw.
+            document.getElementById("src_file").onclick = function () {
+                this.value='';
+            };
+
+            document.getElementById("src_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+                //
+                var server = elpusk.framework.coffee.get_instance();
+                server.file_Copy(file,"mgo.rom").then(function(s_message){
+                    addMessage("copy ok : " + s_message );
+                })
+                .catch( 
+                    function(event_error){
+                        console.log("error copy file : "+event_error);
+                    }
+                );
+            };
+
         }
 
         window.addEventListener("load", init, false);
@@ -255,6 +288,8 @@
             });
         }
 
+        var file_current_path = null;
+
         function on_button_promise_file_create(){
             var server = elpusk.framework.coffee.get_instance();
 
@@ -273,7 +308,6 @@
                         continue;
                     }
 
-                    n_opened_device_index = 0;
                     addMessage("file create success");
 
                 }while(false);
@@ -285,8 +319,20 @@
 
         function on_button_promise_file_open(){
             var server = elpusk.framework.coffee.get_instance();
+            var select_file = document.getElementById("drop_get_file_list");
 
-            server.file_open("test1.aaa").then(function (s_rx) {
+            if( select_file.length <= 0 ){
+                addMessage("none file");
+                return;
+            }
+            if( file_current_path !== null ){
+                addMessage("error : for opening a file, you must close the opened file.");
+                return;
+            }
+
+            var s_file_path = select_file.options[select_file.selectedIndex].text;
+
+            server.file_open(s_file_path).then(function (s_rx) {
                 do{
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
@@ -301,8 +347,8 @@
                         continue;
                     }
 
-                    n_opened_device_index = 0;
-                    addMessage("file open success");
+                    file_current_path = s_file_path;
+                    addMessage("file open success : "+file_current_path);
 
                 }while(false);
             }).catch(function (event_error) {
@@ -313,6 +359,11 @@
 
         function on_button_promise_file_close(){
             var server = elpusk.framework.coffee.get_instance();
+
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
 
             server.file_close().then(function (s_rx) {
                 do{
@@ -328,9 +379,8 @@
                         addMessage("file close failure");
                         continue;
                     }
-
-                    n_opened_device_index = 0;
-                    addMessage("file close success");
+                    addMessage("file close success : "+ file_current_path);
+                    file_current_path = null;
 
                 }while(false);
             }).catch(function (event_error) {
@@ -341,8 +391,15 @@
 
         function on_button_promise_file_delete(){
             var server = elpusk.framework.coffee.get_instance();
+            var select_file = document.getElementById("drop_get_file_list");
 
-            server.file_delete("test1.aaa").then(function (s_rx) {
+            if( select_file.length <= 0 ){
+                addMessage("none file");
+                return;
+            }
+            var s_file_path = select_file.options[select_file.selectedIndex].text;
+
+            server.file_delete(s_file_path).then(function (s_rx) {
                 do{
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
@@ -353,12 +410,11 @@
                         continue;
                     }
                     else if( s_rx != "success" ){
-                        addMessage("file delete failure");
+                        addMessage("file delete failure : "+ s_file_path);
                         continue;
                     }
 
-                    n_opened_device_index = 0;
-                    addMessage("file delete success");
+                    addMessage("file delete success : "+ s_file_path);
 
                 }while(false);
             }).catch(function (event_error) {
@@ -369,8 +425,12 @@
 
         function on_button_promise_file_truncate(){
             var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
 
-            server.file_truncate("test1.aaa").then(function (s_rx) {
+            server.file_truncate().then(function (s_rx) {
                 do{
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
@@ -385,7 +445,6 @@
                         continue;
                     }
 
-                    n_opened_device_index = 0;
                     addMessage("file truncate success");
 
                 }while(false);
@@ -400,6 +459,12 @@
 
             server.file_get_list().then(function (s_rx) {
                 do{
+                    var select_file = document.getElementById("drop_get_file_list");
+                    var length = select_file.options.length;
+                    for (var i = length - 1; i >= 0; i--) {
+                        select_file.options[i] = null;
+                    }
+                                        
                     if (!Array.isArray(s_rx)) {
                         addMessage("erro reponse : " + s_rx);
                         continue;
@@ -419,6 +484,14 @@
                     }
                     addMessage(s_rx.toString());
 
+                    var n_file = s_rx.length;
+                    //except the first string - success or error
+                    for (var n_file_index = 1; n_file_index < n_file; n_file_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_file_index;
+                        option.text = s_rx[n_file_index];
+                        select_file.add(option, 0);
+                    }
                 }while(false);
             }).catch(function (event_error) {
                 // error here
@@ -428,6 +501,10 @@
 
         function on_button_promise_file_get_size(){
             var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
 
             server.file_get_size().then(function (s_rx) {
                 do{
@@ -455,6 +532,10 @@
 
         function on_button_promise_file_append(){
             var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
 
             server.file_append("3031323334353637383930").then(function (s_rx) {
                 do{
@@ -471,7 +552,6 @@
                         continue;
                     }
 
-                    n_opened_device_index = 0;
                     addMessage("file_append success");
 
                 }while(false);
