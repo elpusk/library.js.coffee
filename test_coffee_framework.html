@@ -85,6 +85,9 @@
     Select the your source file : 
     <input type="file" id="src_file" accept="." />
     <br />
+    input destination file path : 
+    <input type="text" id="dst_virtual_path" value="" />
+    <br />
 
     <br />
     <br />
@@ -139,6 +142,19 @@
             }while(false);
         }
 
+        function cb_progress_file_copy( b_result , n_progress , n_file_size, s_error_message){
+            do{
+                if( !b_result ){
+                    continue;
+                }
+
+                var s_percentage = n_progress*100/n_file_size;
+                s_percentage.toFixed(3);
+
+                printMessage("copy offset = " + n_progress.toString() + "( " + s_percentage.toString() +"% ) : " + s_error_message);
+            }while(false);
+        }   
+
         function init() {
             if( typeof Promise === 'undefined'){
                 addMessage("none promise");
@@ -161,7 +177,7 @@
 
             //
             //////////////////////////////////////
-            // for updating fw.
+            // copy file
             document.getElementById("src_file").onclick = function () {
                 this.value='';
             };
@@ -170,16 +186,34 @@
                 var file = this.files[0];
                 var name = file.name;
                 var size = file.size;
+
+                addMessage("source file size "+size.toString()+" bytes.");
+                addMessage("source file size "+(size/1024).toString()+" Kbytes.");
                 //
-                var server = elpusk.framework.coffee.get_instance();
-                server.file_Copy(file,"mgo.rom").then(function(s_message){
-                    addMessage("copy ok : " + s_message );
-                })
-                .catch( 
-                    function(event_error){
-                        console.log("error copy file : "+event_error);
+                do{
+                    var s_virtual_path = document.getElementById("dst_virtual_path").value;
+                    if( s_virtual_path.length==0 ){
+                        addMessage("please input destination file path.");
+                        continue;
                     }
-                );
+                    var server = elpusk.framework.coffee.get_instance();
+                    if( !server.file_Copy_callback(file,s_virtual_path,cb_progress_file_copy) ){
+                        addMessage("file_Copy_callback : ERROR");
+                    }
+                    else{
+                        addMessage("file_Copy_callback : SUCCESS");
+                    }
+                    /*
+                    server.file_Copy_small_size(file,s_virtual_path).then(function(s_message){
+                        addMessage("copy ok : " + s_message );
+                    })
+                    .catch( 
+                        function(event_error){
+                            console.log("error copy file : "+event_error);
+                        }
+                    );
+                    */
+                }while(false);
             };
 
         }

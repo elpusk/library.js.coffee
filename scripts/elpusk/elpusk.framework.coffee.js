@@ -795,11 +795,124 @@
                                 var array_data = evt.target.result;
                                 resolve(array_data);
                             };// the end of onload event handler.
+
+                            reader.onerror = function(){
+                                reject(new Error("_promise_load_file"));
+                            };// the end of onerror event handler.
                             //
                             reader.readAsArrayBuffer(file_loaded);
             
                         }while(false);
                     });
+                }
+
+                /** 
+                 * @private 
+                 * @function _load_and_append_file
+                 * @param {object} this_class_instance elpusk.framework.coffee's instance.
+                 * @param {object} file_loaded
+                 * @param {function} cb_process callback function the progreess of copying file.
+                 * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_error_message).
+                 * @param {number} n_chunk the size of reading at one time.
+                 * @returns {Promise}
+                 * @description a file is loaded to ArrayBuffer object
+                */                
+                function _load_and_append_file(this_class_instance,file_loaded, cb_process) {
+                    // 1 KB at a time
+                    var n_chunk = 1024;
+                    var n_offset = 0;
+
+                    var reader = new FileReader();
+                    reader.onload = function(evt) {
+                        var array_data = evt.target.result;
+                        var s_hex="";
+                        var s_hex_total="";
+                        var bytes  = new Uint8Array(array_data);
+                        var length = bytes.byteLength;
+                        for (var i = 0; i < length; i++) {
+                            s_hex = bytes[i].toString(16);
+                            if( s_hex.length == 1){
+                                s_hex = "0"+s_hex;
+                            }
+                            s_hex_total += s_hex;
+                        }
+                        n_offset += length;
+
+                        this_class_instance.file_append(s_hex_total)
+                        .then(function (s_rx) {
+                            do{
+                                if (!Array.isArray(s_rx)) {
+                                    continue;
+                                }
+                                if (s_rx === null) {
+                                    continue;
+                                }
+                                else if( s_rx != "success" ){
+                                    continue;
+                                }
+                                if( _read_chunk() ){
+                                    //complete
+                                    console.log(" ++ _load_and_append_file : complete.");
+                                }
+                                else{
+                                    console.log(" ++ _load_and_append_file : more");
+                                }
+                            }while(false);
+                        })
+                        .catch(function (event_error) {
+                            // error here
+                            console.log("-_load_and_append_file::file_append : " + event_error);
+                            if( typeof cb_progress === 'function'){
+                                cb_progress( false, -1, "file_append::catch");
+                            }
+                        });                        
+                    };
+                    reader.onerror = function() {
+                        if( typeof cb_process === 'function'){
+                            cb_process( false,-1,file_loaded.size,"error");
+                        }
+                    };
+                    _read_chunk();
+             
+                    function _read_chunk() {
+                        if (n_offset >= file_loaded.size) {
+                            this_class_instance.file_close()
+                            .then(function (s_rx) {
+                                do{
+                                    if (!Array.isArray(s_rx)) {
+                                        continue;
+                                    }
+                                    if (s_rx === null) {
+                                        continue;
+                                    }
+                                    else if( s_rx != "success" ){
+                                        continue;
+                                    }
+                                    console.log(" ++ _load_and_append_file : file_close : compete.");
+                                    if( typeof cb_process === 'function'){
+                                        cb_process( true,file_loaded.size,file_loaded.size,"complete");
+                                    }
+                                }while(false);
+                            })
+                            .catch(function (event_error) {
+                                // error here
+                                console.log("-_load_and_append_file::file_close : " + event_error);
+
+                                if( typeof cb_process === 'function'){
+                                    cb_process( false,-1,file_loaded.size,"file_close::catch");
+                                }
+                            });
+                            return true;//complete
+                        }
+                        else{
+                            if( typeof cb_process === 'function'){
+                                cb_process( true,n_offset,file_loaded.size,"copying");
+                            }
+                            var slice = file_loaded.slice(n_offset, n_offset + n_chunk);
+                            reader.readAsArrayBuffer(slice);
+                            return false;//read more
+                        }
+                    }
                 }
 
                 /** 
@@ -1697,15 +1810,76 @@
                     /** 
                      * @public 
                      * @async
-                     * @function file_Copy
+                     * @function file_Copy_callback
+                     * @param {File} file_src source file for copying.
+                     * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
+                     * @param {function} cb_process callback function the progreess of copying file.
+                     * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_error_message).
+                     * @returns {bool} if true, success starting process.
+                     * <br /> else fail starting process.
+                     * 
+                     * @description a file copy to virtual drive by callback method.
+                    */
+
+                    file_Copy_callback : function ( file_src, s_virtual_file_path_dst,cb_progress ){
+                        if( typeof s_virtual_file_path_dst !== 'string'){
+                            return false;
+                        }
+
+                        var this_obj = this;
+                        this.file_create(s_virtual_file_path_dst)
+                        .then(//file_create
+                            function(s_rx){
+                                var b_result=false;
+                                do{
+                                    if (!Array.isArray(s_rx)) {
+                                        continue;
+                                    }
+                                    if (s_rx === null) {
+                                        continue;
+                                    }
+                                    else if( s_rx != "success" ){
+                                        continue;
+                                    }
+                                    b_result = true;
+                                }while(false);
+
+                                if( b_result ){
+                                    console.log(" ++ file_Copy::file_create : ");
+                                    _load_and_append_file(this_obj,file_src,cb_progress);
+                                }
+                                else{
+                                    console.log(" -- file_Copy::file_create : ");
+                                    if( typeof cb_progress === 'function'){
+                                        cb_progress( false, -1, file_src.size, "file_create");
+                                    }
+                                }
+                            }
+                        )
+                        .catch(
+                            function(event_error){
+                                console.log("-file_Copy_callback::file_create : " + event_error);
+                                if( typeof cb_progress === 'function'){
+                                    cb_progress( false, -1, file_src.size, "file_create::catch");
+                                }
+                            }
+                        );
+
+                        return true;
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_Copy_small_size
                      * @param {File} file_src source file for copying.
                      * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
                      * @returns {Promise} if success, resolve with echo data from server.
                      * <br /> else reject with Error object.
                      * 
-                     * @description a file copy to virtual drive.
+                     * @description a file copy to virtual drive. file size of less then 200K byets
                     */
-                    file_Copy : function( file_src, s_virtual_file_path_dst ){
+                    file_Copy_small_size : function( file_src, s_virtual_file_path_dst ){
                         var this_obj = this;
                         return new Promise(function (resolve, reject){
                             this_obj.file_create(s_virtual_file_path_dst)
@@ -1723,20 +1897,20 @@
                                             continue;
                                         }
                                         b_result = true;
-                                        
                                     }while(false);
+
                                     if( b_result ){
-                                        console.log(" ++ file_Copy::file_create : ");
+                                        console.log(" ++ file_Copy_small_size::file_create : ");
                                         return _promise_load_file(file_src);
                                     }
                                     else{
-                                        reject("file_create");
+                                        reject(new Error("file_create"));
                                     }
                                 }
                             )
                             .catch(//file_create
                                 function(event_error){
-                                    console.log("- file_Copy::file_create : " + event_error);
+                                    console.log("- file_Copy_small_size::file_create : " + event_error);
                                     throw(event_error);
                                 }
                             )
@@ -1755,14 +1929,14 @@
                                             s_hex_total += s_hex;
                                         }
                                     }while(false);
-                                    console.log(" ++ file_Copy::_promise_load_file : ");
+                                    console.log(" ++ file_Copy_small_size::_promise_load_file : ");
                                     return this_obj.file_append(s_hex_total);
                                 }
     
                             )
                             .catch(//_promise_load_file
                                 function(event_error){
-                                    console.log("- file_Copy::_promise_load_file : " + event_error);
+                                    console.log("- file_Copy_small_size::_promise_load_file : " + event_error);
                                     throw(event_error);
                                 }
                             )
@@ -1786,13 +1960,13 @@
                                         return this_obj.file_close();
                                     }
                                     else{
-                                        reject("file_append");
+                                        reject(new Error("file_append"));
                                     }
                                 }
                             )
                             .catch(//file_append
                                 function(event_error){
-                                    console.log("-file_Copy::file_append : " + event_error);
+                                    console.log("-file_Copy_small_size::file_append : " + event_error);
                                     throw(event_error);
                                 }
                             )
@@ -1812,7 +1986,7 @@
                                         b_result = true;
                                     }while(false);
                                     if( b_result ){
-                                        console.log(" ++ file_Copy::file_close : ");
+                                        console.log(" ++ file_Copy_small_size::file_close : ");
                                         resolve("success");
                                     }
                                     else{
@@ -1822,7 +1996,7 @@
                             )
                             .catch(//file_close
                                 function(event_error){
-                                    console.log("-file_Copy::file_append : " + event_error);
+                                    console.log("-file_Copy_small_size::file_close : " + event_error);
                                     reject(event_error);
                                 }
                             );
