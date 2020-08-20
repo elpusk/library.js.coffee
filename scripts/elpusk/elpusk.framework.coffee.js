@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.7.0
+ * @version 1.9.0
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -51,6 +51,9 @@
  *
  * <br />  2020.8.13 - release 1.8.
  * <br />  : add - action code "F" file operation
+ * 
+ * <br />  2020.8.20 - release 1.9.
+ * <br />  : add - file_Copy_callback() method for supporting big size file copy.
  * 
  * @namespace
  */
@@ -811,16 +814,23 @@
                  * @function _load_and_append_file
                  * @param {object} this_class_instance elpusk.framework.coffee's instance.
                  * @param {object} file_loaded
+                 * @param {number} n_packet_size the size of one packet(unit byte)
                  * @param {function} cb_process callback function the progreess of copying file.
-                 * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_error_message).
+                 * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_message).
                  * @param {number} n_chunk the size of reading at one time.
                  * @returns {Promise}
                  * @description a file is loaded to ArrayBuffer object
                 */                
-                function _load_and_append_file(this_class_instance,file_loaded, cb_process) {
+                function _load_and_append_file(this_class_instance,file_loaded, n_packet_size,cb_process) {
                     // 1 KB at a time
                     var n_chunk = 1024;
                     var n_offset = 0;
+
+                    if( typeof n_packet_size === 'number'){
+                        if( n_packet_size > 0 ){
+                            n_chunk = n_packet_size;
+                        }
+                    }
 
                     var reader = new FileReader();
                     reader.onload = function(evt) {
@@ -840,6 +850,7 @@
 
                         this_class_instance.file_append(s_hex_total)
                         .then(function (s_rx) {
+                            var b_result = false;
                             do{
                                 if (!Array.isArray(s_rx)) {
                                     continue;
@@ -850,34 +861,45 @@
                                 else if( s_rx != "success" ){
                                     continue;
                                 }
-                                if( _read_chunk() ){
-                                    //complete
-                                    console.log(" ++ _load_and_append_file : complete.");
+
+                                b_result = true;
+                            }while(false);
+
+                            if( b_result){
+                                if( _read_chunk_() ){
+                                    console.log(" ++ _load_and_append_file : last.");
                                 }
                                 else{
                                     console.log(" ++ _load_and_append_file : more");
                                 }
-                            }while(false);
+                            }
+                            else{
+                                if( typeof cb_process === 'function'){
+                                    cb_process( false,-1,file_loaded.size,"file_append");
+                                }
+                            }
                         })
                         .catch(function (event_error) {
                             // error here
                             console.log("-_load_and_append_file::file_append : " + event_error);
                             if( typeof cb_progress === 'function'){
-                                cb_progress( false, -1, "file_append::catch");
+                                cb_progress( false, -1, event_error.message);
                             }
                         });                        
                     };
                     reader.onerror = function() {
                         if( typeof cb_process === 'function'){
-                            cb_process( false,-1,file_loaded.size,"error");
+                            cb_process( false,-1,file_loaded.size,"FileReader::onerror");
                         }
                     };
-                    _read_chunk();
+                    _read_chunk_();
              
-                    function _read_chunk() {
+                    function _read_chunk_() {
                         if (n_offset >= file_loaded.size) {
                             this_class_instance.file_close()
                             .then(function (s_rx) {
+                                var b_result = false;
+
                                 do{
                                     if (!Array.isArray(s_rx)) {
                                         continue;
@@ -888,21 +910,29 @@
                                     else if( s_rx != "success" ){
                                         continue;
                                     }
+                                    b_result = true;
+                                }while(false);
+                                if( b_result){
                                     console.log(" ++ _load_and_append_file : file_close : compete.");
                                     if( typeof cb_process === 'function'){
                                         cb_process( true,file_loaded.size,file_loaded.size,"complete");
                                     }
-                                }while(false);
+                                }
+                                else{
+                                    if( typeof cb_process === 'function'){
+                                        cb_process( false,-1,file_loaded.size,"file_close");
+                                    }
+                                }
                             })
                             .catch(function (event_error) {
                                 // error here
                                 console.log("-_load_and_append_file::file_close : " + event_error);
 
                                 if( typeof cb_process === 'function'){
-                                    cb_process( false,-1,file_loaded.size,"file_close::catch");
+                                    cb_process( false,-1,file_loaded.size,event_error.message);
                                 }
                             });
-                            return true;//complete
+                            return true;//last
                         }
                         else{
                             if( typeof cb_process === 'function'){
@@ -1813,15 +1843,16 @@
                      * @function file_Copy_callback
                      * @param {File} file_src source file for copying.
                      * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
+                     * @param {number} n_packet_size the size of one packet(unit byte)
                      * @param {function} cb_process callback function the progreess of copying file.
-                     * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_error_message).
+                     * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_message).
                      * @returns {bool} if true, success starting process.
                      * <br /> else fail starting process.
                      * 
                      * @description a file copy to virtual drive by callback method.
                     */
 
-                    file_Copy_callback : function ( file_src, s_virtual_file_path_dst,cb_progress ){
+                    file_Copy_callback : function ( file_src, s_virtual_file_path_dst,n_packet_size, cb_progress ){
                         if( typeof s_virtual_file_path_dst !== 'string'){
                             return false;
                         }
@@ -1846,7 +1877,7 @@
 
                                 if( b_result ){
                                     console.log(" ++ file_Copy::file_create : ");
-                                    _load_and_append_file(this_obj,file_src,cb_progress);
+                                    _load_and_append_file(this_obj,file_src,n_packet_size,cb_progress);
                                 }
                                 else{
                                     console.log(" -- file_Copy::file_create : ");
@@ -1860,7 +1891,7 @@
                             function(event_error){
                                 console.log("-file_Copy_callback::file_create : " + event_error);
                                 if( typeof cb_progress === 'function'){
-                                    cb_progress( false, -1, file_src.size, "file_create::catch");
+                                    cb_progress( false, -1, file_src.size, event_error.message );
                                 }
                             }
                         );
@@ -2883,7 +2914,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.5.0";
+        return "1.9.0";
     }
 
     /**

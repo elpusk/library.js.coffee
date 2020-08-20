@@ -118,6 +118,7 @@
 
     <script type="text/javascript">
         var n_system_event = 0;
+        var startTime, endTime;
 
         function cb_system_event( s_action_code,s_data_field ){
             do{
@@ -142,16 +143,28 @@
             }while(false);
         }
 
-        function cb_progress_file_copy( b_result , n_progress , n_file_size, s_error_message){
+        function cb_progress_file_copy( b_result , n_progress , n_file_size, s_message){
             do{
                 if( !b_result ){
+                    printMessage("error = " + s_message);
                     continue;
                 }
 
-                var s_percentage = n_progress*100/n_file_size;
-                s_percentage.toFixed(3);
+                var n_percentage = n_progress*100/n_file_size;
+                n_percentage.toFixed(3);
 
-                printMessage("copy offset = " + n_progress.toString() + "( " + s_percentage.toString() +"% ) : " + s_error_message);
+                printMessage("copy offset = " + n_progress.toString() + "( " + n_percentage.toString() +"% ) : " + s_message);
+
+                endTime = (new Date()).getTime();
+                var duration = (endTime - startTime) / 1000;
+                var bitsLoaded = n_progress * 8;
+                var speedBps = (bitsLoaded / duration).toFixed(2);
+                var speedKbps = (speedBps / 1024).toFixed(2);
+                var speedMbps = (speedKbps / 1024).toFixed(2);
+                addMessage( "Your connection speed is:" );
+                addMessage( speedBps.toString() + " bps");
+                addMessage( speedKbps + " kbps" );
+                addMessage( speedMbps + " Mbps");                
             }while(false);
         }   
 
@@ -197,11 +210,13 @@
                         continue;
                     }
                     var server = elpusk.framework.coffee.get_instance();
-                    if( !server.file_Copy_callback(file,s_virtual_path,cb_progress_file_copy) ){
-                        addMessage("file_Copy_callback : ERROR");
+                    var n_packet_size = 10*1024;//10K bytes 
+                    if( !server.file_Copy_callback(file,s_virtual_path,n_packet_size,cb_progress_file_copy) ){
+                        addMessage("file_Copy_callback : start bERROR");
                     }
                     else{
-                        addMessage("file_Copy_callback : SUCCESS");
+                        startTime = (new Date()).getTime();
+                        addMessage("file_Copy_callback : start SUCCESS");
                     }
                     /*
                     server.file_Copy_small_size(file,s_virtual_path).then(function(s_message){
