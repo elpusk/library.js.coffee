@@ -54,6 +54,10 @@
     this page supports elpusk coffee JavaScript library.
     <br />
     <!-- control area -->
+    <p id="p_top_text">
+        <!-- top text print area -->
+    </p>
+
     <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
 
     <br />
@@ -176,6 +180,7 @@
                 addMessage("ok promise");
             }
 
+            printTopMessage( "coffee library verion : " + elpusk.framework.coffee.get_this_library_version());
             var server1 = elpusk.framework.coffee.get_instance();
             var server2 = elpusk.framework.coffee.get_instance();
 
@@ -234,6 +239,13 @@
         }
 
         window.addEventListener("load", init, false);
+
+        function printTopMessage(Message){
+            var parag_main = document.getElementById("p_top_text");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
 
         function clearMessage() {
             var parag_main = document.getElementById("p_main");
