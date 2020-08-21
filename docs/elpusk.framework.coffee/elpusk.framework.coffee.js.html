@@ -51,7 +51,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.7.0
+ * @version 1.9.0
  * @description elpusk framework coffee javascript library.
  * &lt;br />  2020.3.5 - release 1.0.
  * &lt;br />  2020.3.25 - release 1.1. 
@@ -76,6 +76,12 @@
  * 
  * &lt;br />  2020.6.11 - release 1.7.
  * &lt;br />  : add - action code "C" system event when system enters hibernation mode.
+ *
+ * &lt;br />  2020.8.13 - release 1.8.
+ * &lt;br />  : add - action code "F" file operation
+ * 
+ * &lt;br />  2020.8.20 - release 1.9.
+ * &lt;br />  : add - file_Copy_callback() method for supporting big size file copy.
  * 
  * @namespace
  */
@@ -196,6 +202,7 @@
                     ECHO: "E",
                     DEVICE_LIST: "L",
                     CONTROL_SHOW: "S",
+                    FILE_OPERATION: "F",
                     DEVICE_PLUG_IN: "P",
                     SERVER_CLOSE:"C",//this value is only in JS library.
                     DEVICE_OPEN: "o",
@@ -503,6 +510,7 @@
                             case _type_action_code.DEVICE_SEND:
                             case _type_action_code.DEVICE_TRANSMIT:
                             case _type_action_code.ECHO:
+                            case _type_action_code.FILE_OPERATION:
                             case _type_action_code.UNKNOWN:
                                 break;
                             default:
@@ -797,6 +805,176 @@
             
                 /** 
                  * @private 
+                 * @function _promise_load_file
+                 * @param {object} file_loaded
+                 * @returns {Promise}
+                 * @description a file is loaded to ArrayBuffer object
+                */                
+                function _promise_load_file(file_loaded) {
+                    return new Promise(function (resolve, reject) {
+            
+                        do{
+                            if (!_b_connet) {
+                                //already websocket created.
+                                reject(_get_error_object('en_e_server_connect'));
+                                continue;
+                            }
+                            //
+                            var reader = new FileReader();
+        
+                            reader.onload = function(evt) {
+                                var array_data = evt.target.result;
+                                resolve(array_data);
+                            };// the end of onload event handler.
+
+                            reader.onerror = function(){
+                                reject(new Error("_promise_load_file"));
+                            };// the end of onerror event handler.
+                            //
+                            reader.readAsArrayBuffer(file_loaded);
+            
+                        }while(false);
+                    });
+                }
+
+                /** 
+                 * @private 
+                 * @function _load_and_append_file
+                 * @param {object} this_class_instance elpusk.framework.coffee's instance.
+                 * @param {object} file_loaded
+                 * @param {number} n_packet_size the size of one packet(unit byte)
+                 * @param {function} cb_process callback function the progreess of copying file.
+                 * &lt;br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_message).
+                 * @param {number} n_chunk the size of reading at one time.
+                 * @returns {Promise}
+                 * @description a file is loaded to ArrayBuffer object
+                */                
+                function _load_and_append_file(this_class_instance,file_loaded, n_packet_size,cb_process) {
+                    // 1 KB at a time
+                    var n_chunk = 1024;
+                    var n_offset = 0;
+
+                    if( typeof n_packet_size === 'number'){
+                        if( n_packet_size > 0 ){
+                            n_chunk = n_packet_size;
+                        }
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = function(evt) {
+                        var array_data = evt.target.result;
+                        var s_hex="";
+                        var s_hex_total="";
+                        var bytes  = new Uint8Array(array_data);
+                        var length = bytes.byteLength;
+                        for (var i = 0; i &lt; length; i++) {
+                            s_hex = bytes[i].toString(16);
+                            if( s_hex.length == 1){
+                                s_hex = "0"+s_hex;
+                            }
+                            s_hex_total += s_hex;
+                        }
+                        n_offset += length;
+
+                        this_class_instance.file_append(s_hex_total)
+                        .then(function (s_rx) {
+                            var b_result = false;
+                            do{
+                                if (!Array.isArray(s_rx)) {
+                                    continue;
+                                }
+                                if (s_rx === null) {
+                                    continue;
+                                }
+                                else if( s_rx != "success" ){
+                                    continue;
+                                }
+
+                                b_result = true;
+                            }while(false);
+
+                            if( b_result){
+                                if( _read_chunk_() ){
+                                    console.log(" ++ _load_and_append_file : last.");
+                                }
+                                else{
+                                    console.log(" ++ _load_and_append_file : more");
+                                }
+                            }
+                            else{
+                                if( typeof cb_process === 'function'){
+                                    cb_process( false,-1,file_loaded.size,"file_append");
+                                }
+                            }
+                        })
+                        .catch(function (event_error) {
+                            // error here
+                            console.log("-_load_and_append_file::file_append : " + event_error);
+                            if( typeof cb_progress === 'function'){
+                                cb_progress( false, -1, event_error.message);
+                            }
+                        });                        
+                    };
+                    reader.onerror = function() {
+                        if( typeof cb_process === 'function'){
+                            cb_process( false,-1,file_loaded.size,"FileReader::onerror");
+                        }
+                    };
+                    _read_chunk_();
+             
+                    function _read_chunk_() {
+                        if (n_offset >= file_loaded.size) {
+                            this_class_instance.file_close()
+                            .then(function (s_rx) {
+                                var b_result = false;
+
+                                do{
+                                    if (!Array.isArray(s_rx)) {
+                                        continue;
+                                    }
+                                    if (s_rx === null) {
+                                        continue;
+                                    }
+                                    else if( s_rx != "success" ){
+                                        continue;
+                                    }
+                                    b_result = true;
+                                }while(false);
+                                if( b_result){
+                                    console.log(" ++ _load_and_append_file : file_close : compete.");
+                                    if( typeof cb_process === 'function'){
+                                        cb_process( true,file_loaded.size,file_loaded.size,"complete");
+                                    }
+                                }
+                                else{
+                                    if( typeof cb_process === 'function'){
+                                        cb_process( false,-1,file_loaded.size,"file_close");
+                                    }
+                                }
+                            })
+                            .catch(function (event_error) {
+                                // error here
+                                console.log("-_load_and_append_file::file_close : " + event_error);
+
+                                if( typeof cb_process === 'function'){
+                                    cb_process( false,-1,file_loaded.size,event_error.message);
+                                }
+                            });
+                            return true;//last
+                        }
+                        else{
+                            if( typeof cb_process === 'function'){
+                                cb_process( true,n_offset,file_loaded.size,"copying");
+                            }
+                            var slice = file_loaded.slice(n_offset, n_offset + n_chunk);
+                            reader.readAsArrayBuffer(slice);
+                            return false;//read more
+                        }
+                    }
+                }
+
+                /** 
+                 * @private 
                  * @function _on_def_open
                  * @param {Event} evt
                  * @description default callback function of websocket open event.
@@ -888,6 +1066,22 @@
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                     break;
+                                case "file_create":
+                                case "file_open":
+                                case "file_close":
+                                case "file_delete":
+                                case "file_truncate":
+                                case "file_get_size":
+                                case "file_get_list":
+                                case "file_append":
+                                    if (json_obj.action_code == _type_action_code.FILE_OPERATION) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
+
                                 case "device_open":
                                     if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
                                         if(json_obj.data_field == "success"){
@@ -1039,6 +1233,14 @@
                                 case "disconnect":
                                 case "_promise_echo":
                                 case "get_device_list":
+                                case "file_create":
+                                case "file_open":
+                                case "file_close":
+                                case "file_delete":
+                                case "file_truncate":
+                                case "file_get_size":
+                                case "file_get_list":
+                                case "file_append":
                                 case "device_open":
                                     parameter.reject(evt);
                                     break;
@@ -1210,6 +1412,657 @@
                         return _promise_echo(_type_data_field_type.HEX_STRING, s_data);
                     },
                 
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_create
+                     * @param {string} s_file_name the created file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_create : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_create",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["create",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_open
+                     * @param {string} s_file_name the opened file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_open : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_open",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["open",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_close
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file close action to server by promise.
+                    */                
+                    file_close : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_close",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["close"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_delete
+                     * @param {string} s_file_name the deleted file name.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file delete action to server by promise.
+                    */                
+                   file_delete : function (s_file_name) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_delete",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["delete",s_file_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_truncate
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file truncate action to server by promise.
+                    */                
+                    file_truncate : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_truncate",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["truncate"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_get_size
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file get size action to server by promise.
+                    */                
+                   file_get_size : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_get_size",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["get","size"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_get_list
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file get list action to server by promise.
+                    */                
+                    file_get_list : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_get_list",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["get","list"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_append
+                     * @param {string} s_hex_string server will change this parameter to binary.
+                     * &lt;br /> each byte must be 2 characters, and seperator is space or empty.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description file crearte action to server by promise.
+                    */                
+                    file_append : function (s_hex_string) {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_append",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.HEX_STRING
+                                    , String(s_hex_string)
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_Copy_callback
+                     * @param {File} file_src source file for copying.
+                     * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
+                     * @param {number} n_packet_size the size of one packet(unit byte)
+                     * @param {function} cb_process callback function the progreess of copying file.
+                     * &lt;br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_message).
+                     * @returns {bool} if true, success starting process.
+                     * &lt;br /> else fail starting process.
+                     * 
+                     * @description a file copy to virtual drive by callback method.
+                    */
+
+                    file_Copy_callback : function ( file_src, s_virtual_file_path_dst,n_packet_size, cb_progress ){
+                        if( typeof s_virtual_file_path_dst !== 'string'){
+                            return false;
+                        }
+
+                        var this_obj = this;
+                        this.file_create(s_virtual_file_path_dst)
+                        .then(//file_create
+                            function(s_rx){
+                                var b_result=false;
+                                do{
+                                    if (!Array.isArray(s_rx)) {
+                                        continue;
+                                    }
+                                    if (s_rx === null) {
+                                        continue;
+                                    }
+                                    else if( s_rx != "success" ){
+                                        continue;
+                                    }
+                                    b_result = true;
+                                }while(false);
+
+                                if( b_result ){
+                                    console.log(" ++ file_Copy::file_create : ");
+                                    _load_and_append_file(this_obj,file_src,n_packet_size,cb_progress);
+                                }
+                                else{
+                                    console.log(" -- file_Copy::file_create : ");
+                                    if( typeof cb_progress === 'function'){
+                                        cb_progress( false, -1, file_src.size, "file_create");
+                                    }
+                                }
+                            }
+                        )
+                        .catch(
+                            function(event_error){
+                                console.log("-file_Copy_callback::file_create : " + event_error);
+                                if( typeof cb_progress === 'function'){
+                                    cb_progress( false, -1, file_src.size, event_error.message );
+                                }
+                            }
+                        );
+
+                        return true;
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_Copy_small_size
+                     * @param {File} file_src source file for copying.
+                     * @param {string} s_virtual_file_path_dst the destination file full path of virtual drive.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * &lt;br /> else reject with Error object.
+                     * 
+                     * @description a file copy to virtual drive. file size of less then 200K byets
+                    */
+                    file_Copy_small_size : function( file_src, s_virtual_file_path_dst ){
+                        var this_obj = this;
+                        return new Promise(function (resolve, reject){
+                            this_obj.file_create(s_virtual_file_path_dst)
+                            .then(//file_create
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                    }while(false);
+
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy_small_size::file_create : ");
+                                        return _promise_load_file(file_src);
+                                    }
+                                    else{
+                                        reject(new Error("file_create"));
+                                    }
+                                }
+                            )
+                            .catch(//file_create
+                                function(event_error){
+                                    console.log("- file_Copy_small_size::file_create : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//_promise_load_file
+                                function( ArrayBuffer_file_data ){
+                                    var s_hex="";
+                                    var s_hex_total="";
+                                    do{
+                                        var bytes  = new Uint8Array(ArrayBuffer_file_data);
+                                        var length = bytes.byteLength;
+                                        for (var i = 0; i &lt; length; i++) {
+                                            s_hex = bytes[i].toString(16);
+                                            if( s_hex.length == 1){
+                                                s_hex = "0"+s_hex;
+                                            }
+                                            s_hex_total += s_hex;
+                                        }
+                                    }while(false);
+                                    console.log(" ++ file_Copy_small_size::_promise_load_file : ");
+                                    return this_obj.file_append(s_hex_total);
+                                }
+    
+                            )
+                            .catch(//_promise_load_file
+                                function(event_error){
+                                    console.log("- file_Copy_small_size::_promise_load_file : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//file_append
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                    }while(false);
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy::file_append : ");
+                                        return this_obj.file_close();
+                                    }
+                                    else{
+                                        reject(new Error("file_append"));
+                                    }
+                                }
+                            )
+                            .catch(//file_append
+                                function(event_error){
+                                    console.log("-file_Copy_small_size::file_append : " + event_error);
+                                    throw(event_error);
+                                }
+                            )
+                            .then(//file_close
+                                function(s_rx){
+                                    var b_result=false;
+                                    do{
+                                        if (!Array.isArray(s_rx)) {
+                                            continue;
+                                        }
+                                        if (s_rx === null) {
+                                            continue;
+                                        }
+                                        else if( s_rx != "success" ){
+                                            continue;
+                                        }
+                                        b_result = true;
+                                    }while(false);
+                                    if( b_result ){
+                                        console.log(" ++ file_Copy_small_size::file_close : ");
+                                        resolve("success");
+                                    }
+                                    else{
+                                        reject("file_close");
+                                    }
+                                }
+                            )
+                            .catch(//file_close
+                                function(event_error){
+                                    console.log("-file_Copy_small_size::file_close : " + event_error);
+                                    reject(event_error);
+                                }
+                            );
+                        });
+
+                    },
+
                     /** 
                      * @public 
                      * @async
@@ -2089,7 +2942,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.5.0";
+        return "1.9.0";
     }
 
     /**
@@ -2131,13 +2984,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="coffee.html">coffee</a></li><li><a href="get_instance.html">get_instance</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_clear_promise_parameter">_clear_promise_parameter</a></li><li><a href="global.html#_delete_promise_parameter">_delete_promise_parameter</a></li><li><a href="global.html#_front_promise_parameter">_front_promise_parameter</a></li><li><a href="global.html#_generate_request_packet">_generate_request_packet</a></li><li><a href="global.html#_get_error_message">_get_error_message</a></li><li><a href="global.html#_get_error_object">_get_error_object</a></li><li><a href="global.html#_get_server_url">_get_server_url</a></li><li><a href="global.html#_is_chrome_or_firfox_or_opera">_is_chrome_or_firfox_or_opera</a></li><li><a href="global.html#_is_empty_promise_parameter">_is_empty_promise_parameter</a></li><li><a href="global.html#_is_valid_action_code">_is_valid_action_code</a></li><li><a href="global.html#_is_valid_data_field_type">_is_valid_data_field_type</a></li><li><a href="global.html#_is_valid_device_id">_is_valid_device_id</a></li><li><a href="global.html#_is_valid_device_index">_is_valid_device_index</a></li><li><a href="global.html#_is_valid_packet_owner">_is_valid_packet_owner</a></li><li><a href="global.html#_is_valid_request_type">_is_valid_request_type</a></li><li><a href="global.html#_is_valid_session_number">_is_valid_session_number</a></li><li><a href="global.html#_on_def_close">_on_def_close</a></li><li><a href="global.html#_on_def_error">_on_def_error</a></li><li><a href="global.html#_on_def_message_json_format">_on_def_message_json_format</a></li><li><a href="global.html#_on_def_open">_on_def_open</a></li><li><a href="global.html#_promise_echo">_promise_echo</a></li><li><a href="global.html#_push_promise_parameter">_push_promise_parameter</a></li><li><a href="global.html#_system_handlersystemeventhandlercallback">_system_handler system event handler callback</a></li><li><a href="global.html#connect">connect</a></li><li><a href="global.html#device_cancel">device_cancel</a></li><li><a href="global.html#device_cancel_with_callback">device_cancel_with_callback</a></li><li><a href="global.html#device_close">device_close</a></li><li><a href="global.html#device_open">device_open</a></li><li><a href="global.html#device_receive">device_receive</a></li><li><a href="global.html#device_receive_with_callback">device_receive_with_callback</a></li><li><a href="global.html#device_send">device_send</a></li><li><a href="global.html#device_transmit">device_transmit</a></li><li><a href="global.html#device_transmit_with_callback">device_transmit_with_callback</a></li><li><a href="global.html#disconnect">disconnect</a></li><li><a href="global.html#echo_hex">echo_hex</a></li><li><a href="global.html#echo_string">echo_string</a></li><li><a href="global.html#get_device_list">get_device_list</a></li><li><a href="global.html#get_error_message">get_error_message</a></li><li><a href="global.html#get_session_number">get_session_number</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="coffee.html">coffee</a></li><li><a href="get_instance.html">get_instance</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_clear_promise_parameter">_clear_promise_parameter</a></li><li><a href="global.html#_delete_promise_parameter">_delete_promise_parameter</a></li><li><a href="global.html#_front_promise_parameter">_front_promise_parameter</a></li><li><a href="global.html#_generate_request_packet">_generate_request_packet</a></li><li><a href="global.html#_get_error_message">_get_error_message</a></li><li><a href="global.html#_get_error_object">_get_error_object</a></li><li><a href="global.html#_get_server_url">_get_server_url</a></li><li><a href="global.html#_is_chrome_or_firfox_or_opera">_is_chrome_or_firfox_or_opera</a></li><li><a href="global.html#_is_empty_promise_parameter">_is_empty_promise_parameter</a></li><li><a href="global.html#_is_valid_action_code">_is_valid_action_code</a></li><li><a href="global.html#_is_valid_data_field_type">_is_valid_data_field_type</a></li><li><a href="global.html#_is_valid_device_id">_is_valid_device_id</a></li><li><a href="global.html#_is_valid_device_index">_is_valid_device_index</a></li><li><a href="global.html#_is_valid_packet_owner">_is_valid_packet_owner</a></li><li><a href="global.html#_is_valid_request_type">_is_valid_request_type</a></li><li><a href="global.html#_is_valid_session_number">_is_valid_session_number</a></li><li><a href="global.html#_load_and_append_file">_load_and_append_file</a></li><li><a href="global.html#_on_def_close">_on_def_close</a></li><li><a href="global.html#_on_def_error">_on_def_error</a></li><li><a href="global.html#_on_def_message_json_format">_on_def_message_json_format</a></li><li><a href="global.html#_on_def_open">_on_def_open</a></li><li><a href="global.html#_promise_echo">_promise_echo</a></li><li><a href="global.html#_promise_load_file">_promise_load_file</a></li><li><a href="global.html#_push_promise_parameter">_push_promise_parameter</a></li><li><a href="global.html#_system_handlersystemeventhandlercallback">_system_handler system event handler callback</a></li><li><a href="global.html#connect">connect</a></li><li><a href="global.html#device_cancel">device_cancel</a></li><li><a href="global.html#device_cancel_with_callback">device_cancel_with_callback</a></li><li><a href="global.html#device_close">device_close</a></li><li><a href="global.html#device_open">device_open</a></li><li><a href="global.html#device_receive">device_receive</a></li><li><a href="global.html#device_receive_with_callback">device_receive_with_callback</a></li><li><a href="global.html#device_send">device_send</a></li><li><a href="global.html#device_transmit">device_transmit</a></li><li><a href="global.html#device_transmit_with_callback">device_transmit_with_callback</a></li><li><a href="global.html#disconnect">disconnect</a></li><li><a href="global.html#echo_hex">echo_hex</a></li><li><a href="global.html#echo_string">echo_string</a></li><li><a href="global.html#file_append">file_append</a></li><li><a href="global.html#file_close">file_close</a></li><li><a href="global.html#file_Copy_callback">file_Copy_callback</a></li><li><a href="global.html#file_Copy_small_size">file_Copy_small_size</a></li><li><a href="global.html#file_create">file_create</a></li><li><a href="global.html#file_delete">file_delete</a></li><li><a href="global.html#file_get_list">file_get_list</a></li><li><a href="global.html#file_get_size">file_get_size</a></li><li><a href="global.html#file_open">file_open</a></li><li><a href="global.html#file_truncate">file_truncate</a></li><li><a href="global.html#get_device_list">get_device_list</a></li><li><a href="global.html#get_error_message">get_error_message</a></li><li><a href="global.html#get_session_number">get_session_number</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jul 17 2020 13:51:19 GMT+0900 (GMT+09:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Aug 21 2020 09:05:35 GMT+0900 (GMT+09:00)
 </footer>
 
 <script> prettyPrint(); </script>
