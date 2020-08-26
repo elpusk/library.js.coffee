@@ -1387,6 +1387,118 @@
                     /** 
                      * @public 
                      * @async
+                     * @function file_firmware_create
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description create a temporary file for firmware.
+                    */                
+                    file_firmware_create : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_create",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["firmware","create"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_firmware_delete
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description delete a temporary file for firmware.
+                    */                
+                    file_firmware_delete : function () {
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.FILE_OPERATION;
+                
+               
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "file_create",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["firmware","delete"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
                      * @function file_create
                      * @param {string} s_file_name the created file name.
                      * @returns {Promise} if success, resolve with echo data from server.
@@ -2035,6 +2147,62 @@
 
                     },
 
+                    /** 
+                     * @public 
+                     * @async
+                     * @function file_Copy_firmware_callback
+                     * @param {File} file_src source file for copying.
+                     * @param {number} n_packet_size the size of one packet(unit byte)
+                     * @param {function} cb_process callback function the progreess of copying file.
+                     * <br /> cb_progress prototype void ( boolean b_result , number n_progress , number n_file_size, string s_message).
+                     * @returns {bool} if true, success starting process.
+                     * <br /> else fail starting process.
+                     * 
+                     * @description a file copy to virtual drive as temporary by callback method.
+                    */
+
+                   file_Copy_firmware_callback : function ( file_src,n_packet_size, cb_progress ){
+                        var this_obj = this;
+                        this.file_firmware_create()
+                        .then(//file_create
+                            function(s_rx){
+                                var b_result=false;
+                                do{
+                                    if (!Array.isArray(s_rx)) {
+                                        continue;
+                                    }
+                                    if (s_rx === null) {
+                                        continue;
+                                    }
+                                    else if( s_rx != "success" ){
+                                        continue;
+                                    }
+                                    b_result = true;
+                                }while(false);
+
+                                if( b_result ){
+                                    console.log(" ++ file_Copy_firmware_callback::file_firmware_create : ");
+                                    _load_and_append_file(this_obj,file_src,n_packet_size,cb_progress);
+                                }
+                                else{
+                                    console.log(" -- file_Copy_firmware_callback::file_firmware_create : ");
+                                    if( typeof cb_progress === 'function'){
+                                        cb_progress( false, -1, file_src.size, "file_firmware_create");
+                                    }
+                                }
+                            }
+                        )
+                        .catch(
+                            function(event_error){
+                                console.log("-file_Copy_firmware_callback::file_firmware_create : " + event_error);
+                                if( typeof cb_progress === 'function'){
+                                    cb_progress( false, -1, file_src.size, event_error.message );
+                                }
+                            }
+                        );
+
+                        return true;
+                    },                    
                     /** 
                      * @public 
                      * @async

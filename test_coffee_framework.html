@@ -92,6 +92,12 @@
     input destination file path : 
     <input type="text" id="dst_virtual_path" value="" />
     <br />
+    <br />
+    Select the your firmware file : 
+    <input type="file" id="src_firmware" accept="." />
+    <br />
+    <input type="button" id="button_promise_firmware_delete" onclick="on_button_promise_firmware_delete();" value="delete firmware" />
+    <br />
 
     <br />
     <br />
@@ -235,6 +241,33 @@
                     */
                 }while(false);
             };
+
+            //////////////////////////////////////
+            // copy firmware
+            document.getElementById("src_firmware").onclick = function () {
+                this.value='';
+            };
+
+            document.getElementById("src_firmware").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+
+                addMessage("firmware file size "+size.toString()+" bytes.");
+                addMessage("firmware file size "+(size/1024).toString()+" Kbytes.");
+                //
+                do{
+                    var server = elpusk.framework.coffee.get_instance();
+                    var n_packet_size = 10*1024;//10K bytes 
+                    if( !server.file_Copy_firmware_callback(file,n_packet_size,cb_progress_file_copy) ){
+                        addMessage("file_Copy_firmware_callback : start bERROR");
+                    }
+                    else{
+                        startTime = (new Date()).getTime();
+                        addMessage("file_Copy_firmware_callback : start SUCCESS");
+                    }
+                }while(false);
+            };            
 
         }
 
@@ -619,6 +652,32 @@
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : file_append : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_firmware_delete(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.file_firmware_delete().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("firmware delete failure : ");
+                        continue;
+                    }
+
+                    addMessage("firmware delete success : ");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : delete : "+ server.get_error_message(event_error));
             });
         }
 

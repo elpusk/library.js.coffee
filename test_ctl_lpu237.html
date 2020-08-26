@@ -102,6 +102,13 @@
     <input type="button" id="button_disable_read_with_callback" onclick="on_button_disable_read_with_callback();" value="disable read with callback." />
     <br />
 
+    <br />
+    <input type="button" id="button_save_to_sessionStorage" onclick="on_button_save_to_sessionStorage();" value="save to sessionStorage." />
+    <br />
+    <br />
+    <input type="button" id="button_set_from_sessionStorage" onclick="on_button_set_from_sessionStorage();" value="set from sessionStorage." />
+    <br />
+
     <p id="p_pre_main">
         <!-- pre main print area -->
     </p>
@@ -593,6 +600,14 @@
             else{
                 _print_message("p_main","error : cancel.");
             }
+        }
+
+        function on_button_save_to_sessionStorage(){
+            ctl_lpu237.get_device().save_to_sessionStorage();
+        }
+
+        function on_button_set_from_sessionStorage(){
+            ctl_lpu237.get_device().set_from_sessionStorage();
         }
 
     </script>

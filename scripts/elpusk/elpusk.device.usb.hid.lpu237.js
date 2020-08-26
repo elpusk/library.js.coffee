@@ -8789,6 +8789,100 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.save_to_sessionStorage
+         * @description the data of this object instance save to sessionStorage.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.save_to_sessionStorage = function(){
+            var s_key_p = "{EB7BECC9-E37D-4F41-BDBF-104D5AD624E6}";
+            var ss = window.sessionStorage;
+
+            ss.setItem(s_key_p+'_b_global_pre_postfix_send_condition',JSON.stringify(this._b_global_pre_postfix_send_condition));
+    
+            ///////////////////////////////
+            //device parameters
+            ss.setItem(s_key_p+'_n_interface',JSON.stringify(this._n_interface));
+            ss.setItem(s_key_p+'_dw_buzzer_frequency',JSON.stringify(this._dw_buzzer_frequency));
+            ss.setItem(s_key_p+'_dw_boot_run_time',JSON.stringify(this._dw_boot_run_time));
+            ss.setItem(s_key_p+'_n_language_index',JSON.stringify(this._n_language_index));
+    
+            ss.setItem(s_key_p+'_b_enable_iso',JSON.stringify(this._b_enable_iso));
+    
+            ss.setItem(s_key_p+'_n_direction',JSON.stringify(this._n_direction));
+    
+            ss.setItem(s_key_p+'_s_global_prefix',JSON.stringify(this._s_global_prefix));
+            ss.setItem(s_key_p+'_s_global_postfix',JSON.stringify(this._s_global_postfix));
+    
+            ss.setItem(s_key_p+'_n_number_combination',JSON.stringify(this._n_number_combination ));
+            ss.setItem(s_key_p+'_n_max_size',JSON.stringify(this._n_max_size));
+            ss.setItem(s_key_p+'_n_bit_size',JSON.stringify(this._n_bit_size));
+            ss.setItem(s_key_p+'_c_data_mask',JSON.stringify(this._c_data_mask));
+            ss.setItem(s_key_p+'_b_use_parity',JSON.stringify(this._b_use_parity));
+            ss.setItem(s_key_p+'_n_parity_type',JSON.stringify(this._n_parity_type));
+            ss.setItem(s_key_p+'_c_stxl',JSON.stringify(this._c_stxl));
+            ss.setItem(s_key_p+'_c_etxl',JSON.stringify(this._c_etxl));
+            ss.setItem(s_key_p+'_b_use_ecm',JSON.stringify(this._b_use_ecm));
+            ss.setItem(s_key_p+'_n_ecm_type',JSON.stringify(this._n_ecm_type));
+            ss.setItem(s_key_p+'_n_add_value',JSON.stringify(this._n_add_value));
+
+            ss.setItem(s_key_p+'_s_private_prefix',JSON.stringify(this._s_private_prefix));
+            ss.setItem(s_key_p+'_s_private_postfix',JSON.stringify(this._s_private_postfix));
+
+            //i-button
+            ss.setItem(s_key_p+'_s_prefix_ibutton',JSON.stringify(this._s_prefix_ibutton));
+            ss.setItem(s_key_p+'_s_postfix_ibutton',JSON.stringify(this._s_postfix_ibutton));
+
+            ss.setItem(s_key_p+'_n_ibutton_mode',JSON.stringify(this._n_ibutton_mode));
+            ss.setItem(s_key_p+'_c_blank',JSON.stringify(this._c_blank));
+
+            //rs232
+            ss.setItem(s_key_p+'_s_prefix_uart',JSON.stringify(this._s_prefix_uart));
+            ss.setItem(s_key_p+'_s_postfix_uart',JSON.stringify(this._s_postfix_uart));
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.set_from_sessionStorage
+         * @description the data of this object instance load from sessionStorage.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.set_from_sessionStorage = function(){
+            var s_key_p = "{EB7BECC9-E37D-4F41-BDBF-104D5AD624E6}";
+            var ss = window.sessionStorage;
+            
+            this._b_global_pre_postfix_send_condition = JSON.parse(ss.getItem(s_key_p+'_b_global_pre_postfix_send_condition'));
+    
+            ///////////////////////////////
+            //device parameters
+            this._n_interface = JSON.parse(ss.getItem(s_key_p+'_n_interface'));
+            this._dw_buzzer_frequency = JSON.parse(ss.getItem(s_key_p+'_dw_buzzer_frequency'));
+            this._dw_boot_run_time = JSON.parse(ss.getItem(s_key_p+'_dw_boot_run_time'));
+            this._n_language_index = JSON.parse(ss.getItem(s_key_p+'_n_language_index'));
+            this._b_enable_iso = JSON.parse(ss.getItem(s_key_p+'_b_enable_iso'));
+            this._n_direction = JSON.parse(ss.getItem(s_key_p+'_n_direction'));
+            this._s_global_prefix = JSON.parse(ss.getItem(s_key_p+'_s_global_prefix'));
+            this._s_global_postfix = JSON.parse(ss.getItem(s_key_p+'_s_global_postfix'));
+            this._n_number_combination = JSON.parse(ss.getItem(s_key_p+'_n_number_combination'));
+            this._n_max_size = JSON.parse(ss.getItem(s_key_p+'_n_max_size'));
+            this._n_bit_size = JSON.parse(ss.getItem(s_key_p+'_n_bit_size'));
+            this._c_data_mask = JSON.parse(ss.getItem(s_key_p+'_c_data_mask'));
+            this._b_use_parity = JSON.parse(ss.getItem(s_key_p+'_b_use_parity'));
+            this._n_parity_type = JSON.parse(ss.getItem(s_key_p+'_n_parity_type'));
+            this._c_stxl = JSON.parse(ss.getItem(s_key_p+'_c_stxl'));
+            this._c_etxl = JSON.parse(ss.getItem(s_key_p+'_c_etxl'));
+            this._b_use_ecm = JSON.parse(ss.getItem(s_key_p+'_b_use_ecm'));
+            this._n_ecm_type = JSON.parse(ss.getItem(s_key_p+'_n_ecm_type'));
+            this._n_add_value = JSON.parse(ss.getItem(s_key_p+'_n_add_value'));
+            this._s_private_prefix = JSON.parse(ss.getItem(s_key_p+'_s_private_prefix'));
+            this._s_private_postfix = JSON.parse(ss.getItem(s_key_p+'_s_private_postfix'));
+            this._s_prefix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_prefix_ibutton'));
+            this._s_postfix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_postfix_ibutton'));
+            this._n_ibutton_mode = JSON.parse(ss.getItem(s_key_p+'_n_ibutton_mode'));
+            this._c_blank = JSON.parse(ss.getItem(s_key_p+'_c_blank'));
+            this._s_prefix_uart = JSON.parse(ss.getItem(s_key_p+'_s_prefix_uart'));
+            this._s_postfix_uart = JSON.parse(ss.getItem(s_key_p+'_s_postfix_uart'));
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.set_from_file
          * @param {File} file_xml xml file format setting file.
          * @return {Promise} processing result.
