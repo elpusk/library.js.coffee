@@ -182,7 +182,8 @@
                     DEVICE_SEND: "s",
                     DEVICE_RECEIVE: "r",
                     DEVICE_TRANSMIT: "t",
-                    DEVICE_CANCEL: "x"
+                    DEVICE_CANCEL: "x",
+                    DEVICE_BOOTLOADER: "0"
                 };
 
                 /** 
@@ -483,6 +484,7 @@
                             case _type_action_code.DEVICE_TRANSMIT:
                             case _type_action_code.ECHO:
                             case _type_action_code.FILE_OPERATION:
+                            case _type_action_code.DEVICE_BOOTLOADER:
                             case _type_action_code.UNKNOWN:
                                 break;
                             default:
@@ -1176,6 +1178,14 @@
                                     }
                                 }
                                 break;
+                            case "device_update_set_parameter":
+                                if (json_obj.action_code == _type_action_code.DEVICE_BOOTLOADER) {
+                                    parameter.resolve(json_obj.data_field);
+                                }
+                                else {
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                }
+                                break;
                             default:
                                 break;
                         }//end switch
@@ -1241,6 +1251,9 @@
                                 else{
                                     parameter.reject(evt);
                                 }
+                                break;
+                            case "device_update_set_parameter":
+                                parameter.reject(evt);
                                 break;
                             default:
                                 break;
@@ -3047,8 +3060,150 @@
                         } while (false);
 
                         return b_result;
-                    }
+                    },
 
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_update_set_parameter
+                     * @param {number} device_update_with_callback device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * 
+                     * @returns {Promise} if success, resolve with "success" string.
+                     * <br /> else reject with Error object or resolve with "error" string.
+                     * 
+                     * @description set parameters for updating firmware.
+                    */                
+                    device_update_set_parameter : function( n_device_index, s_key, s_value ){
+                        return new Promise(function (resolve, reject) {
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.DEVICE_BOOTLOADER;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                if (n_device_index === const_n_undefined_device_index) {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(n_device_index,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_update_set_parameter",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.DEVICE
+                                    , n_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["set",s_key,s_value]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function device_update_start_with_callback
+                     * @param {number} device_update_with_callback device index number.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * 
+                     * @returns {Promise} if success, resolve with "success" string.
+                     * <br /> else reject with Error object or resolve with "error" string.
+                     * 
+                     * @description start update-firmware.
+                     * <br /> this process can't be canceled.
+                    */                
+                    device_update_start : function( n_device_index, n_in_id, n_out_id){
+                        return new Promise(function (resolve, reject) {
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.DEVICE_BOOTLOADER;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                if (n_device_index === const_n_undefined_device_index) {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(n_device_index,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "device_update_set_parameter",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.DEVICE
+                                    , n_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["start"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    }
                     ////////////////////////////////////////////////////////////////////////
                     //public variables
 

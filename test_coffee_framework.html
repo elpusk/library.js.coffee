@@ -96,6 +96,10 @@
     Select the your firmware file : 
     <input type="file" id="src_firmware" accept="." />
     <br />
+    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter();" value="firmware set parameter" />
+    <br />
+    <input type="button" id="button_firmware_update" onclick="on_button_firmware_update();" value="update firmware" />
+    <br />
     <input type="button" id="button_promise_firmware_delete" onclick="on_button_promise_firmware_delete();" value="delete firmware" />
     <br />
 
@@ -678,6 +682,77 @@
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : delete : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_firmware_update(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_update_start(n_opened_device_index,0,0).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_start failure : ");
+                        continue;
+                    }
+
+                    addMessage("device_update_start success : ");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_start : "+ server.get_error_message(event_error));
+            });            
+        }
+
+        function on_button_firmware_set_parameter(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_update_set_parameter( n_opened_device_index,"model_name","ganymede").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"system_version","1.0.0.0");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : version");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
             });
         }
 
