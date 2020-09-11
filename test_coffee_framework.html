@@ -182,6 +182,57 @@
             }while(false);
         }   
 
+        function cb_progress_fw_copy( b_result , n_progress , n_fw_size, s_message){
+            do{
+                if( !b_result ){
+                    printMessage("error = " + s_message);
+                    continue;
+                }
+
+                var n_percentage = n_progress*100/n_fw_size;
+                n_percentage.toFixed(3);
+
+                printMessage(
+                    "fw offset = " + n_progress.toString() + "/" + n_fw_size.toString()
+                     + "( " + n_percentage.toString() +"% ) : " + s_message);
+
+                endTime = (new Date()).getTime();
+                var duration = (endTime - startTime) / 1000;
+                var bitsLoaded = n_progress * 8;
+                var speedBps = (bitsLoaded / duration).toFixed(2);
+                var speedKbps = (speedBps / 1024).toFixed(2);
+                var speedMbps = (speedKbps / 1024).toFixed(2);
+                addMessage( "Your connection speed is:" );
+                addMessage( speedBps.toString() + " bps");
+                addMessage( speedKbps + " kbps" );
+                addMessage( speedMbps + " Mbps");
+                //
+                if( n_progress > 0 && n_progress === n_fw_size ){
+                    //the end of fw copy.
+                    on_button_firmware_set_parameter();
+                } 
+            }while(false);
+        }   
+
+        function cb_update_firmware( b_result , n_current_step , n_total_step, s_message){
+            do{
+                if( !b_result ){
+                    printMessage("error = " + s_message);
+                    continue;
+                }
+
+                if( n_total_step > 0 ){
+                    var n_percentage = (n_current_step+1)*100/n_total_step;
+                    n_percentage.toFixed(3);
+                    printMessage("update = " + n_current_step.toString() + "( " + n_percentage.toString() +"% ) : " + s_message);
+                    if( (n_current_step+1) === n_total_step ){
+                        addMessage( "======= update complete. =======")
+                    }
+                }
+
+            }while(false);
+        }   
+
         function init() {
             if( typeof Promise === 'undefined'){
                 addMessage("none promise");
@@ -263,7 +314,7 @@
                 do{
                     var server = elpusk.framework.coffee.get_instance();
                     var n_packet_size = 10*1024;//10K bytes 
-                    if( !server.file_Copy_firmware_callback(file,n_packet_size,cb_progress_file_copy) ){
+                    if( !server.file_Copy_firmware_callback(file,n_packet_size,cb_progress_fw_copy) ){
                         addMessage("file_Copy_firmware_callback : start bERROR");
                     }
                     else{
@@ -687,28 +738,12 @@
 
         function on_button_firmware_update(){
             var server = elpusk.framework.coffee.get_instance();
-            server.device_update_start(n_opened_device_index,0,0).then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("erro reponse : " + s_rx);
-                        continue;
-                    }
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-                    else if( s_rx != "success" ){
-                        addMessage("device_update_start failure : ");
-                        continue;
-                    }
-
-                    addMessage("device_update_start success : ");
-
-                }while(false);
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : device_update_start : "+ server.get_error_message(event_error));
-            });            
+            if( server.device_update_start_with_callback(n_opened_device_index,0,0,cb_update_firmware) ){
+                addMessage("success : device_update_start_with_callback");
+            }
+            else{
+                addMessage("fail : device_update_start_with_callback.");
+            }
         }
 
         function on_button_firmware_set_parameter(){
@@ -749,16 +784,38 @@
                         continue;
                     }
                     addMessage("device_update_set_parameter success : version");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_progress_","true");
                 }while(false);
             }).catch(function (event_error) {
                 // error here
-                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
-            });
+                addMessage("fail : device_update_set_parameter version : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_progress_");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
+            })
+            ;
         }
 
         function on_button_promise_get_device_list() {
             var server = elpusk.framework.coffee.get_instance();
-            server.get_device_list("hid").then(function (s_rx) {
+            server.get_device_list("hid#vid_134b&pid_0206&mi_01").then(function (s_rx) {
                 var select_dev = document.getElementById("drop_get_device_list");
                 var length = select_dev.options.length;
                 for (var i = length - 1; i >= 0; i--) {

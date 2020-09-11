@@ -1180,10 +1180,73 @@
                                 break;
                             case "device_update_set_parameter":
                                 if (json_obj.action_code == _type_action_code.DEVICE_BOOTLOADER) {
-                                    parameter.resolve(json_obj.data_field);
+                                    if( parameter.resolve === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
                                 }
                                 else {
-                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    if( parameter.reject === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
+                            case "device_update_start":
+                                if (json_obj.action_code == _type_action_code.DEVICE_BOOTLOADER) {
+                                    if( parameter.cb_progress ){
+                                        //callback for progress
+                                        if( !Array.isArray( json_obj.data_field ) ){
+                                            parameter.cb_progress(false,0,0,'en_e_server_mismatch_data_field');
+                                        }
+                                        else{
+                                            var n_cur = 0;
+                                            var n_total = 0;
+                                            var s_message = "";
+                                            var b_result = false;
+
+                                            if( json_obj.data_field[0] === 'success' ){
+                                                b_result = true;
+                                            }
+                                            if( json_obj.data_field.length === 4 ){
+                                                n_cur = Number( json_obj.data_field[1] );
+                                                n_total = Number( json_obj.data_field[2] );
+                                                s_message = json_obj.data_field[3];
+                                            }
+                                            if( b_result ){
+                                                if( json_obj.data_field.length ===1 ){
+                                                    //the first respose
+                                                    _push_promise_parameter(n_device_index,parameter);//repush
+                                                }
+                                                else if( n_cur<(n_total-1)){
+                                                    _push_promise_parameter(n_device_index,parameter);//repush
+                                                }
+                                            }
+                                            parameter.cb_progress(b_result,n_cur,n_total,s_message);
+                                        }
+                                        
+                                    }
+
+                                }
+                                else{
+                                    if( parameter.cb_progress ){
+                                        //callback for error
+                                        parameter.cb_progress("false",0,0,'en_e_server_mismatch_action');
+                                    }
                                 }
                                 break;
                             default:
@@ -3137,72 +3200,70 @@
                      * @public 
                      * @async
                      * @function device_update_start_with_callback
-                     * @param {number} device_update_with_callback device index number.
+                     * @param {number} n_device_index device index number.
                      * @param {number} n_in_id
                      * <br /> if the target device is hid class, n_out_id is in report id.
                      * <br /> if it is winusb class, n_out_id is in end-point number.
                      * @param {number} n_out_id
                      * <br /> if the target device is hid class, n_out_id is out report id.
                      * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {function} cb_progress callback function the progreess of copying file.
+                     * <br /> cb_progress prototype void ( boolean b_result , number n_current_step , number n_total_step, string s_message).
                      * 
-                     * @returns {Promise} if success, resolve with "success" string.
-                     * <br /> else reject with Error object or resolve with "error" string.
+                     * @returns {boolean} true - success of update_start process.
+                     * <br /> false - failure of update_start process.
                      * 
                      * @description start update-firmware.
                      * <br /> this process can't be canceled.
                     */                
-                    device_update_start : function( n_device_index, n_in_id, n_out_id){
-                        return new Promise(function (resolve, reject) {
+                    device_update_start_with_callback : function( n_device_index, n_in_id, n_out_id,cb_progress){
+                        var b_result = false;
+                        do {
+                            if (!_b_connet) {
+                                continue;
+                            }
+            
+                            var action_code = _type_action_code.DEVICE_BOOTLOADER;
+            
+                            if (typeof n_device_index !== 'number') {
+                                continue;
+                            }
+                            if (n_device_index === const_n_undefined_device_index) {
+                                continue;
+                            }
+            
+                            _websocket.onerror = function(evt){
+                                _on_def_error(n_device_index,evt);
+                            }
+
+                            _websocket.onmessage = function (evt) {
+                                _on_def_message_json_format(n_device_index,evt);
+                            }
                 
-                            do {
-                                if (!_b_connet) {
-                                    reject(_get_error_object('en_e_server_connect'));
-                                    continue;
-                                }
-                
-                                var action_code = _type_action_code.DEVICE_BOOTLOADER;
-                
-                                if (typeof n_device_index !== 'number') {
-                                    reject(_get_error_object('en_e_device_index'));
-                                    continue;
-                                }
-                                if (n_device_index === const_n_undefined_device_index) {
-                                    reject(_get_error_object('en_e_device_index'));
-                                    continue;
-                                }
-                
-                                _websocket.onerror = function(evt){
-                                    _on_def_error(n_device_index,evt);
-                                }
-    
-                                _websocket.onmessage = function (evt) {
-                                    _on_def_message_json_format(n_device_index,evt);
-                                }
-                    
-                                var parameter = {
-                                    "n_device_index" : n_device_index,
-                                    "method" : "device_update_set_parameter",
-                                    "resolve" : resolve,
-                                    "reject" : reject
-                                };
-                                _push_promise_parameter(n_device_index,parameter);
-                
-                                //send request
-                                var json_packet = _generate_request_packet(
-                                    _type_packet_owner.DEVICE
-                                    , n_device_index
-                                    , action_code
-                                    , 0
-                                    , 0
-                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["start"]
-                                );
-                
-                                var s_json_packet = JSON.stringify(json_packet);
-                                _websocket.send(s_json_packet);
-                
-                            } while (false);
-                        });
+                            var parameter = {
+                                "n_device_index" : n_device_index,
+                                "method" : "device_update_start",
+                                "cb_progress" : cb_progress
+                            };
+                            _push_promise_parameter(n_device_index,parameter);
+            
+                            //send request
+                            var json_packet = _generate_request_packet(
+                                _type_packet_owner.DEVICE
+                                , n_device_index
+                                , action_code
+                                , n_in_id
+                                , n_out_id
+                                , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                , ["start"]
+                            );
+            
+                            var s_json_packet = JSON.stringify(json_packet);
+                            _websocket.send(s_json_packet);
+            
+                            b_result = true;
+                        } while (false);
+                        return b_result;
                     }
                     ////////////////////////////////////////////////////////////////////////
                     //public variables
