@@ -805,10 +805,31 @@
                         continue;
                     }
                     addMessage("device_update_set_parameter success : _cf_bl_progress_");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_window_","true");
                 }while(false);
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_window_");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_window_ : "+ server.get_error_message(event_error));
             })
             ;
         }
