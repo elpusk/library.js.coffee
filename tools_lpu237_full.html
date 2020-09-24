@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {box-sizing: border-box}
+body {font-family: "Lato", sans-serif;}
+
+/* Style the tab */
+.tab {
+  float: left;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  width: 20%;
+  height: 400px;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  display: block;
+  background-color: inherit;
+  color: black;
+  padding: 22px 16px;
+  width: 100%;
+  border: none;
+  outline: none;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current "tab button" class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  float: left;
+  padding: 0px 12px;
+  border: 1px solid #ccc;
+  width: 80%;
+  border-left: none;
+  height: 400px;
+}
+</style>
+</head>
+
+<!-- ************************ the body ******************************** -->
+
+<body>
+    <script type="text/javascript">
+        if (typeof Promise === "undefined") {
+            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
+
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');
+        }
+        else{
+            document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
+            
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');            
+        }
+    </script> 
+
+
+<!-- ************************ screen ******************************** -->
+<h2>Elpusk card reader web mapper</h2>
+<p>the supported device : lpu237, lpu-207, lpu208</p>
+
+<div class="tab">
+  <button class="tablinks" onclick="fun_open_tab_page(event, 'id_device')" id="defaultOpen">device</button>
+  <button class="tablinks" onclick="fun_open_tab_page(event, 'id_system')">system</button>
+  <button class="tablinks" onclick="fun_open_tab_page(event, 'id_iso1')">ISO1 track</button>
+  <button class="tablinks" onclick="fun_open_tab_page(event, 'id_iso2')">ISO2 track</button>
+  <button class="tablinks" onclick="fun_open_tab_page(event, 'id_iso3')">ISO3 track</button>
+</div>
+
+<div id="id_device" class="tabcontent">
+  <h3>device</h3>
+  <p>
+    <input type="button" id="id_button_connect" onclick="fun_connect();" value="connect device" />
+    <select id="id_drop_get_device_list"></select>
+  </p>
+  <p id="id_p_page_device">
+
+  </p>
+  <label for="id_file_select_setting">the setting file : </label>
+  <input type="file" id="id_file_select_setting" value="select" accept=".xml" disabled="ture" placeholder="select a setting file"/>
+
+  <br/>
+  <label id = "id_lable_progress_page_device" for="id_progress_page_device">loading system parameters : </label>
+  <progress id="id_progress_page_device" value="0" max="100"></progress>
+
+</div>
+
+<div id="id_system" class="tabcontent">
+  <h3>system</h3>
+  <p>Please connects a device.</p> 
+</div>
+
+<div id="id_iso1" class="tabcontent">
+  <h3>ISO1 track</h3>
+  <p>Please connects a device.</p>
+</div>
+
+<div id="id_iso2" class="tabcontent">
+    <h3>ISO2 track</h3>
+    <p>Please connects a device.</p>
+</div>
+
+<div id="id_iso3" class="tabcontent">
+    <h3>ISO3 track</h3>
+    <p>Please connects a device.</p>
+</div>
+
+<!-- ************************ scripts ******************************** -->
+<script type="text/javascript">
+    var n_system_event = 0;
+    var ctl_lpu237 = null;
+    var array_device_list = [];
+
+    function cb_system_event( s_action_code,s_data_field ){
+        do{
+            if( typeof s_action_code === 'undefined'){
+                continue;
+            }
+
+            if( s_action_code === "c"){
+                //removed event
+                ++n_system_event;
+                
+                do{
+                    if( s_data_field.length <= 0 ){
+                        continue;
+                    }
+                    if( !ctl_lpu237 ){
+                        continue;
+                    }
+                    if( !ctl_lpu237.get_device() ){
+                        continue;
+                    }
+
+                    for( var i = 0; i<s_data_field.length; i++  ){
+
+                        if( ctl_lpu237.get_device().get_path() === s_data_field[i] ){
+                            //remove object
+                            ctl_lpu237 = null;
+                            printMessage_pre("system event [" + n_system_event.toString() + "] : removed." + s_data_field[i] );
+                            break;//exit for
+                        }
+                    }//end for
+                    
+                }while(false);
+            }
+            if( s_action_code === "P"){
+                //plugged in event
+                ++n_system_event;
+                printMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                continue;
+            }
+            //
+
+        }while(false);
+    }
+
+    function init() {
+        if( typeof Promise === 'undefined'){
+            addMessage("none promise");
+        }
+        fun_init();
+        // 
+        console.log("the end of init");
+    }
+
+    window.addEventListener("load", init, false);
+
+    function fun_print( s_id, s_message ){
+        var page = document.getElementById(s_id);
+        page.style.wordWrap = "break-word";
+        page.style.fontWeight = "normal";
+        page.style.fontSize = "12px";
+        page.innerHTML = s_message + "<br />";
+    }
+    function fun_print_add( s_id, s_message ){
+        var page = document.getElementById(s_id);
+        page.style.wordWrap = "break-word";
+        page.style.fontWeight = "normal";
+        page.style.fontSize = "12px";
+        page.innerHTML += s_message + "<br />";
+    }
+
+    function set_progress_get_parameters( n_cur, n_max ){
+        var prog = document.getElementById("progress_get_parameters");
+        prog.setAttribute("max",String(n_max));
+        prog.value = n_cur;
+    }
+
+    function increase_progress_get_parameters(){
+        var prog = document.getElementById("progress_get_parameters");
+        var n_cur = prog.value;
+        n_cur++;
+        prog.value = n_cur;
+    }
+
+    function set_progress_set_parameters( n_cur, n_max ){
+        var prog = document.getElementById("progress_set_parameters");
+        prog.setAttribute("max",String(n_max));
+        prog.value = n_cur;
+    }
+
+    function increase_progress_set_parameters(){
+        var prog = document.getElementById("progress_set_parameters");
+        var n_cur = prog.value;
+        n_cur++;
+        prog.value = n_cur;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // callback functions
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // basic functions
+    function _fun_init_coffee_framework() {
+
+        elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+        //
+        var device = new elpusk.device("device");
+        var usb = new elpusk.device.usb("usb");
+        var hid = new elpusk.device.usb.hid("hid");
+
+        console.log(device);
+        console.log(usb);
+        console.log(hid);
+
+        console.log(device.get_path());
+        console.log(usb.get_path());
+        console.log(hid.get_path());
+
+        //
+        array_device_list.length = 0;
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        server.connect("wss","443").then(
+            function(s_session_number){
+                console.log("session : " + s_session_number);
+                return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+            }
+        )
+        .catch(
+            function(event_error){
+                console.log("connect : " + event_error);
+                throw(event_error);
+            }
+        )
+        .then(
+            function(s_rx){
+                var select_dev = document.getElementById("id_drop_get_device_list");
+                var length = select_dev.options.length;
+                for (var i = length - 1; i >= 0; i--) {
+                    select_dev.options[i] = null;
+                }
+
+                if (Array.isArray(s_rx)) {
+                    var array_device_list = new Array();
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_device_index;
+                        option.text = s_rx[n_device_index];
+                        select_dev.add(option, 0);
+                    }
+
+                }
+                else {
+                    if (s_rx === null) {
+                        fun_print('id_p_page_device',"none device.");
+                    }
+                    else {
+                        fun_print('id_p_page_device',"error response : " + s_rx);
+                    }
+                }
+            }
+        )
+        .catch(
+            function(event_error){
+                fun_print('id_p_page_device',"error response : " + event_error);
+                console.log("get device list : "+event_error);
+            }
+        );
+    }
+
+
+    function fun_init() {
+
+        _fun_init_coffee_framework();
+
+        if(!(File && FileReader && FileList && Blob)) {
+            addMessage("Not Supported File API");
+        }
+        
+        //
+        document.getElementById("id_file_select_setting").onclick = function () {
+            this.value='';
+        };
+
+        document.getElementById("id_file_select_setting").onchange = function () {
+            var file = this.files[0];
+            var name = file.name;
+            var size = file.size;
+            //
+            ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
+                //alway true.
+                clearMessage();
+                fun_print('id_p_page_device',"success : loading the setting file.");
+                //addMessage( ctl_lpu237.get_device().get_string_html_table() );
+                //addMultiMessage(ctl_lpu237.get_device().get_string());
+
+            }).catch(function (event_error) {
+                // error here
+                fun_print('id_p_page_device', "failure : loading setting file : "+ ctl_lpu237.get_device().get_error_message(event_error));
+            });
+
+        };
+        
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    function _cb_progress_get_parameters( n_device_index, n_max_stage, n_cur_stage ){
+        if( n_cur_stage <= 1){
+            set_progress_get_parameters(n_cur_stage,n_max_stage);
+        }
+        else{
+            increase_progress_get_parameters();
+        }
+    }
+
+    function fun_connect(){
+        var select_dev = document.getElementById("id_drop_get_device_list");
+        var s_device_path = select_dev.options[select_dev.selectedIndex].text;
+
+        ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(
+            elpusk.framework.coffee.get_instance()
+            ,new elpusk.device.usb.hid.lpu237(s_device_path) 
+        );
+        console.log("create device controller : "+ctl_lpu237.toString());
+
+        ctl_lpu237.open_with_promise()
+        .then(
+            function( s_message ){
+                //s_message is always "success"
+                fun_print('id_p_page_device'," the connected : "+ctl_lpu237.get_device().get_path());
+                fun_print_add('id_p_page_device'," device index : "+ctl_lpu237.get_device().get_device_index());
+
+                var bt = document.getElementById("id_file_select_setting");
+                bt.disabled = false;
+            }
+        )
+        .catch(
+            function(event_error){
+                fun_print('id_p_page_device', "failure : connect : "+ ctl_lpu237.get_device().get_error_message(event_error));
+            }
+        );
+    }
+
+    function on_button_get_parameters(){
+        
+        ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+            clearMessage();
+            //s_message always "success".
+            addMessage_bold(" = system parameters");
+            addMessage( ctl_lpu237.get_device().get_string_html_table() );
+            //addMultiMessage( ctl_lpu237.get_device().get_string() );
+            //alert(ctl_lpu237.get_device().get_string());
+
+            //addMessage("0x"+ctl_lpu237.get_device().get_tag_by_ascii_hex_string(ctl_lpu237.get_device().get_private_prefix(0)));
+            //addMessage(ctl_lpu237.get_device().get_tag_by_ascii_string(ctl_lpu237.get_device().get_private_prefix(0)));
+
+        }).catch(function (event_error) {
+            // error here
+            clearMessage();
+            addMessage_bold("fail : loading system parameters : "+ event_error.message);
+        });
+    }        
+
+    function _cb_progress_set_parameters( n_device_index, n_max_stage, n_cur_stage ){
+        if( n_cur_stage <= 1){
+            set_progress_set_parameters(n_cur_stage,n_max_stage);
+        }
+        else{
+            increase_progress_set_parameters();
+        }
+    }
+    function on_button_set_parameters(){
+        ctl_lpu237.save_parameter_to_device_with_promise(_cb_progress_set_parameters).then(function (s_message) {
+            //s_message always "success".
+            clearMessage();
+            addMessage_bold("success : save system parameter to device.");
+            addMessage( ctl_lpu237.get_device().get_string_html_table() );
+            //addMultiMessage( ctl_lpu237.get_device().get_string() );
+        }).catch(function (event_error) {
+            // error here
+            clearMessage();
+            addMessage_bold("fail : save system parameter to device : "+ event_error.message);
+        });
+    }
+
+</script>
+
+<script>
+function fun_open_tab_page(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+   
+</body>
+</html> 

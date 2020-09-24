@@ -96,9 +96,12 @@
     Select the your firmware file : 
     <input type="file" id="src_firmware" accept="." />
     <br />
-    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter();" value="firmware set parameter" />
-    <br />
     <input type="button" id="button_firmware_update" onclick="on_button_firmware_update();" value="update firmware" />
+    <progress id="progress_firmware_update" max="100" value="0"></progress>
+    <br />
+    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter_with_native_dialog();" value="firmware set parameter with native dialog" />
+    <br />
+    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter_without_native_dialog();" value="firmware set parameter without native dialog" />
     <br />
     <input type="button" id="button_promise_firmware_delete" onclick="on_button_promise_firmware_delete();" value="delete firmware" />
     <br />
@@ -209,7 +212,7 @@
                 //
                 if( n_progress > 0 && n_progress === n_fw_size ){
                     //the end of fw copy.
-                    on_button_firmware_set_parameter();
+                    on_button_firmware_set_parameter_without_native_dialog();
                 } 
             }while(false);
         }   
@@ -223,11 +226,13 @@
 
                 if( n_total_step > 0 ){
                     var n_percentage = (n_current_step+1)*100/n_total_step;
-                    n_percentage.toFixed(3);
-                    printMessage("update = " + n_current_step.toString() + "( " + n_percentage.toString() +"% ) : " + s_message);
+                    n_percentage.toFixed(1);
+                    printMessage("update = " + n_current_step.toString() + "( " + n_percentage.toFixed(1).toString() +"% ) : " + s_message);
                     if( (n_current_step+1) === n_total_step ){
                         addMessage( "======= update complete. =======")
                     }
+
+                    document.getElementById("progress_firmware_update").value = n_percentage.toFixed(1);
                 }
 
             }while(false);
@@ -739,6 +744,7 @@
         function on_button_firmware_update(){
             var server = elpusk.framework.coffee.get_instance();
             if( server.device_update_start_with_callback(n_opened_device_index,0,0,cb_update_firmware) ){
+                document.getElementById("progress_firmware_update").value = 0;
                 addMessage("success : device_update_start_with_callback");
             }
             else{
@@ -746,7 +752,7 @@
             }
         }
 
-        function on_button_firmware_set_parameter(){
+        function on_button_firmware_set_parameter_with_native_dialog(){
             var server = elpusk.framework.coffee.get_instance();
             server.device_update_set_parameter( n_opened_device_index,"model_name","ganymede").then(function (s_rx) {
                 do{
@@ -830,6 +836,73 @@
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : device_update_set_parameter _cf_bl_window_ : "+ server.get_error_message(event_error));
+            })
+            ;
+        }
+
+        function on_button_firmware_set_parameter_without_native_dialog(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_update_set_parameter( n_opened_device_index,"model_name","ganymede").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"system_version","1.0.0.0");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : version");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_progress_","true");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter version : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_progress_");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
             })
             ;
         }
