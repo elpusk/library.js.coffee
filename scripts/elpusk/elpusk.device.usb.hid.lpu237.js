@@ -9857,11 +9857,12 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_string_html_table
+         * @param {string} s_section can be null , "system", "iso1", "iso2" or "iso3". another value is null
          * @return {string} the system parameters
          * @description return the string of system parameters. 
          * <br /> this string is html-table format."\n".
         */
-       _elpusk.device.usb.hid.lpu237.prototype.get_string_html_table = function(){
+       _elpusk.device.usb.hid.lpu237.prototype.get_string_html_table = function(s_section){
             var s_description = "";
             var as_name = [];
             var as_value = [];
@@ -9870,156 +9871,174 @@
             var as_n = [];
             var as_v = [];
 
+            var b_system = true;
+            var b_iso = [true,true,true];
+
+            if( s_section === "system"){
+                b_iso[0] = b_iso[1] = b_iso[2] = false;
+            }
+            else if( s_section === "iso1"){
+                b_system = false;
+                b_iso[1] = b_iso[2] = false;
+            }
+            else if( s_section === "iso2"){
+                b_system = false;
+                b_iso[0] = b_iso[2] = false;
+            }
+            else if( s_section === "iso3"){
+                b_system = false;
+                b_iso[0] = b_iso[1] = false;
+            }
+
             do{
                 var ver = [0,0,0,0];
                 var n_value = 0;
                 //
                 n_count = 0;
-                as_name[n_count] = "System name";
-                as_value[n_count] = this._s_name;
-                //
-                ++n_count;
-                as_name[n_count] = "System version";
-                as_value[n_count] = _get_version_string(this._version);
-                //
-                ++n_count;
-                as_name[n_count] = "System UID";
-                as_value[n_count] = this._s_uid;
-                //
-                ++n_count;
-                as_name[n_count] = "Used bootloader";
-                if( this._b_is_hid_boot ){
-                    as_value[n_count] = "Hid";
-                }
-                else{
-                    as_value[n_count] = "MSD";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "System interface";
-                as_value[n_count] = _get_system_inferface_string(this._n_interface);
-                //
-                ++n_count;
-                as_name[n_count] = "Language";
-                as_value[n_count] = _get_keyboard_language_index_string(this._n_language_index);
-                //
-                ++n_count;
-                as_name[n_count] = "Manufacture";
-                as_value[n_count] = _get_manufacturer_string( this._n_manufacture );
-                //
-                ++n_count;
-                as_name[n_count] = "MSD bootloader running time";
-                as_value[n_count] = String(this._dw_boot_run_time);
-                //
-                ++n_count;
-                as_name[n_count] = "Buzzer frequency";
-                as_value[n_count] = String(this._dw_buzzer_frequency);
-                //
-                ++n_count;
-                as_name[n_count] = "The supported functions";
-                as_value[n_count] = _get_function_string(this._n_device_function);
-                //
-                ++n_count;
-                as_name[n_count] = "i-Button mode";
-                as_value[n_count] = _get_ibutton_mode_string(this._n_ibutton_mode);
-                //
-                ++n_count;
-                as_name[n_count] = "blank data";
-                as_value[n_count] = "0x" + this._c_blank[0].toString(16)
-                +" : 0x" + this._c_blank[1].toString(16)
-                +" : 0x" + this._c_blank[2].toString(16)
-                +" : 0x" + this._c_blank[0].toString(16);
-                //
-                ++n_count;
-                as_name[n_count] = "MSR global pre/postfixs sending condition";
-                if(this._b_global_pre_postfix_send_condition){
-                    as_value[n_count] = "send when all track have not a error.";
-                }
-                else{
-                    as_value[n_count] = "send when any track isn't error.";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "indication error condition";
-                if(this._c_blank[1]&0x01){
-                    as_value[n_count] = "If any track is not error, it is success.";
-                }
-                else{
-                    as_value[n_count] = "If all track are not error, it is success.";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "Ignore ISO1";
-                if(this._c_blank[1]&0x02){
-                    as_value[n_count] = "If 1 & 2 track data is equal, send 2 track data only.";
-                }
-                else{
-                    as_value[n_count] = "Ignore ISO1 : not ignore iso1 track.";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "Ignore ISO3";
-                if(this._c_blank[1]&0x04){
-                    as_value[n_count] = "If 3 & 2 track data is equal, send 2 track data only.";
-                }
-                else{
-                    as_value[n_count] = "Ignore ISO3 : not ignore iso3 track.";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "remove colon";
-                if(this._c_blank[1]&0x08){
-                    as_value[n_count] = "If a track ETXL is 0xe0 and the first data is ASCII ':',then track's ':' isn't sent.";
-                }
-                else{
-                    as_value[n_count] = "remove colon : not remove colon.";
-                }
-                //
-                ++n_count;
-                as_name[n_count] = "MSR global prefixs";
-                as_value[n_count] = this._s_global_prefix;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_prefix);
-                //
-                ++n_count;
-                as_name[n_count] = "MSR global postfixs";
-                as_value[n_count] = this._s_global_postfix;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_postfix);
-                //
-                ++n_count;
-                as_name[n_count] = "i-button prefixs";
-                as_value[n_count] = this._s_prefix_ibutton;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_ibutton);
-                //
-                ++n_count;
-                as_name[n_count] = "i-button postfixs";
-                as_value[n_count] = this._s_postfix_ibutton;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_ibutton);
-                //
-                ++n_count;
-                as_name[n_count] = "Uart prefixs";
-                as_value[n_count] = this._s_prefix_uart;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_uart);
-                //
-                ++n_count;
-                as_name[n_count] = "Uart postfixs";
-                as_value[n_count] = this._s_postfix_uart;
-                as_value[n_count] += "<br/>";
-                as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_uart);
+                if( b_system ){
+                    as_name[n_count] = "System name";
+                    as_value[n_count] = this._s_name;
+                    //
+                    ++n_count;
+                    as_name[n_count] = "System version";
+                    as_value[n_count] = _get_version_string(this._version);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "System UID";
+                    as_value[n_count] = this._s_uid;
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Used bootloader";
+                    if( this._b_is_hid_boot ){
+                        as_value[n_count] = "Hid";
+                    }
+                    else{
+                        as_value[n_count] = "MSD";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "System interface";
+                    as_value[n_count] = _get_system_inferface_string(this._n_interface);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Language";
+                    as_value[n_count] = _get_keyboard_language_index_string(this._n_language_index);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Manufacture";
+                    as_value[n_count] = _get_manufacturer_string( this._n_manufacture );
+                    //
+                    ++n_count;
+                    as_name[n_count] = "MSD bootloader running time";
+                    as_value[n_count] = String(this._dw_boot_run_time);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Buzzer frequency";
+                    as_value[n_count] = String(this._dw_buzzer_frequency);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "The supported functions";
+                    as_value[n_count] = _get_function_string(this._n_device_function);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "i-Button mode";
+                    as_value[n_count] = _get_ibutton_mode_string(this._n_ibutton_mode);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "blank data";
+                    as_value[n_count] = "0x" + this._c_blank[0].toString(16)
+                    +" : 0x" + this._c_blank[1].toString(16)
+                    +" : 0x" + this._c_blank[2].toString(16)
+                    +" : 0x" + this._c_blank[0].toString(16);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "MSR global pre/postfixs sending condition";
+                    if(this._b_global_pre_postfix_send_condition){
+                        as_value[n_count] = "send when all track have not a error.";
+                    }
+                    else{
+                        as_value[n_count] = "send when any track isn't error.";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "indication error condition";
+                    if(this._c_blank[1]&0x01){
+                        as_value[n_count] = "If any track is not error, it is success.";
+                    }
+                    else{
+                        as_value[n_count] = "If all track are not error, it is success.";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Ignore ISO1";
+                    if(this._c_blank[1]&0x02){
+                        as_value[n_count] = "If 1 & 2 track data is equal, send 2 track data only.";
+                    }
+                    else{
+                        as_value[n_count] = "Ignore ISO1 : not ignore iso1 track.";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Ignore ISO3";
+                    if(this._c_blank[1]&0x04){
+                        as_value[n_count] = "If 3 & 2 track data is equal, send 2 track data only.";
+                    }
+                    else{
+                        as_value[n_count] = "Ignore ISO3 : not ignore iso3 track.";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "remove colon";
+                    if(this._c_blank[1]&0x08){
+                        as_value[n_count] = "If a track ETXL is 0xe0 and the first data is ASCII ':',then track's ':' isn't sent.";
+                    }
+                    else{
+                        as_value[n_count] = "remove colon : not remove colon.";
+                    }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "MSR global prefixs";
+                    as_value[n_count] = this._s_global_prefix;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_prefix);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "MSR global postfixs";
+                    as_value[n_count] = this._s_global_postfix;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_global_postfix);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "i-button prefixs";
+                    as_value[n_count] = this._s_prefix_ibutton;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_ibutton);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "i-button postfixs";
+                    as_value[n_count] = this._s_postfix_ibutton;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_ibutton);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Uart prefixs";
+                    as_value[n_count] = this._s_prefix_uart;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_uart);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Uart postfixs";
+                    as_value[n_count] = this._s_postfix_uart;
+                    as_value[n_count] += "<br/>";
+                    as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_uart);
+                }//system section
                 ////////////////////////////////////////////////////
 
                 for( var i = 0; i<_const_the_number_of_track; i++ ){
-
                     as_n.push([]);
                     as_n[i].push("ISO track " + String(i+1) + " Information");
                     as_v.push([]);
                     as_v[i].push("ISO track " + String(i+1) + " Information");//for colspan 2
-
-
                     
                     as_n[i].push("MSR enabled track");
                     if( this._b_enable_iso[i] ){
@@ -10097,20 +10116,25 @@
                 /////////////////////////////////////////////////////////////////
                 s_description +="<table border=1>";
 
-                s_description +="<tr> <th colspan = '2' bgcolor='#E6E6E6'>";
-                s_description += "System information";
-                s_description +="</th> </tr>";
-                //
-                for( var i=0; i<as_name.length; i++ ){
-                    s_description +="<tr> <td>";
-                    s_description += as_name[i];
-                    s_description += "</td><td>";
-                    s_description += as_value[i] ;
-                    s_description +="</td> </tr>";
-                }//end for
+                if( b_system ){
+                    s_description +="<tr> <th colspan = '2' bgcolor='#E6E6E6'>";
+                    s_description += "System information";
+                    s_description +="</th> </tr>";
+                    //
+                    for( var i=0; i<as_name.length; i++ ){
+                        s_description +="<tr> <td>";
+                        s_description += as_name[i];
+                        s_description += "</td><td>";
+                        s_description += as_value[i] ;
+                        s_description +="</td> </tr>";
+                    }//end for
+                }
 
                 //
                 for( var i=0; i<as_n.length; i++ ){
+                    if( !b_iso[i] ){
+                        continue;
+                    }
                     for( var j=0; j<as_n[i].length; j++ ){
                         if( as_n[i][j] === as_v[i][j]){
                             s_description +="<tr> <th colspan = '2' bgcolor='#FAFAFA'>";
