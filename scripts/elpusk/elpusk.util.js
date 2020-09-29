@@ -56,6 +56,30 @@
         }
 
         /**
+         * @private
+         * @function _elpusk.util.get_version_string_from_version
+         * @param {number[]} version 4 number array
+         * @returns {string} version string
+         */
+        _elpusk.util.get_version_string_from_version = function( version ){
+            var s_value = "0.0.0.0";
+            do{
+                if( !Array.isArray(version)){
+                    continue;
+                }
+                if( version.length !== 4 ){
+                    continue;
+                }
+
+                s_value = version[0].toString(10) + "." 
+                + version[1].toString(10) + "." 
+                + version[2].toString(10) + "." 
+                + version[3].toString(10);
+            }while(false);
+            return s_value;
+        }
+
+        /**
          * @public
          * @function elpusk.util.get_dword_hex_string_from_number
          * @param {number} dw_data unsigned int - double word number.
