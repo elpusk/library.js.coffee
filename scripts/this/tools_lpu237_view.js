@@ -220,12 +220,18 @@ function _tools_dom_button_status( b_connected ){
         if( b_connected ){
             document.getElementById("id_file_fw_select_updating").disabled = false;
             document.getElementById("id_file_select_setting").disabled = false;
-            document.getElementById("id_button_connect").disabled = true;;
+            document.getElementById("id_button_reload_parameters").disabled = false;
+            //document.getElementById("id_button_enable_read").disabled = false;
+            //document.getElementById("id_button_disable_read").disabled = false;
+            document.getElementById("id_button_connect").disabled = true;
             continue;
         }
         //disconnected
         document.getElementById("id_file_fw_select_updating").disabled = true;
         document.getElementById("id_file_select_setting").disabled = true;
+        document.getElementById("id_button_reload_parameters").disabled = true;
+        //document.getElementById("id_button_enable_read").disabled = true;
+        //document.getElementById("id_button_disable_read").disabled = true;
         document.getElementById("id_button_connect").disabled = false;
 
     }while(false);

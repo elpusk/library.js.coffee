@@ -363,6 +363,155 @@
                 target_map.clear();
             }
         }
+
+        _elpusk.util.ascii_symbol_map = [
+             "NUL"
+            ,"SOH"
+            ,"STX"
+            ,"ETX"
+            ,"EOT"
+            ,"ENQ"
+            ,"ACK"
+            ,"BEL"
+            ,"BS"
+            ,"HT"
+            ,"LF"
+            ,"VT"
+            ,"FF"
+            ,"CR"
+            ,"SO"
+            ,"SI"
+            ,"DLE"
+            ,"DC1"
+            ,"DC2"
+            ,"DC3"
+            ,"DC4"
+            ,"NAK"
+            ,"SYN"
+            ,"ETB"
+            ,"CAN"
+            ,"EM"
+            ,"SUB"
+            ,"ESC"
+            ,"FS"
+            ,"GS"
+            ,"RS"
+            ,"US"
+            ,"SP"
+            ,"!"
+            ,'"'
+            ,'#'
+            ,'%'
+            ,'&'
+            ,"'"
+            ,"("
+            ,")"
+            ,"*"
+            ,"+"
+            ,","
+            ,"-"
+            ,"."
+            ,"/"
+            ,"0"
+            ,"1"
+            ,"2"
+            ,"3"
+            ,"4"
+            ,"5"
+            ,"6"
+            ,"7"
+            ,"8"
+            ,"9"
+            ,":"
+            ,";"
+            ,"<"
+            ,"="
+            ,">"
+            ,"?"
+            ,"@"
+            ,"A"
+            ,"B"
+            ,"C"
+            ,"D"
+            ,"E"
+            ,"F"
+            ,"G"
+            ,"H"
+            ,"I"
+            ,"J"
+            ,"K"
+            ,"L"
+            ,"M"
+            ,"N"
+            ,"O"
+            ,"P"
+            ,"Q"
+            ,"R"
+            ,"S"
+            ,"T"
+            ,"U"
+            ,"V"
+            ,"W"
+            ,"X"
+            ,"Y"
+            ,"Z"
+            ,"["
+            ,"\\"
+            ,"]"
+            ,"^"
+            ,"_"
+            ,"`"
+            ,"a"
+            ,"b"
+            ,"c"
+            ,"d"
+            ,"e"
+            ,"f"
+            ,"g"
+            ,"h"
+            ,"i"
+            ,"j"
+            ,"k"
+            ,"l"
+            ,"m"
+            ,"n"
+            ,"o"
+            ,"p"
+            ,"q"
+            ,"u"
+            ,"v"
+            ,"w"
+            ,"x"
+            ,"y"
+            ,"z"
+            ,"{"
+            ,"|"
+            ,"}"
+            ,"~"
+            ,"DEL"
+        ];     
+        /** 
+         * @public 
+         * @function elpusk.util.get_ascii_symbol_from_char_code
+         * @param {number} one byte ascii code.
+         * @returns {string} ascii symbol string
+         * @description ASCII symbol from ascii code.
+        */                
+        _elpusk.util.get_ascii_symbol_from_char_code = function(n_ascii){
+            var s_symbol = "";
+
+            do{
+                if( typeof n_ascii !== 'number'){
+                    continue;
+                }
+                if( n_ascii <0 || n_ascii >127){
+                    continue;
+                }
+                s_symbol = _elpusk.util.ascii_symbol_map[n_ascii];
+            }while(false);
+            return s_symbol;
+        }
+
         ////////////////////////////////
         ////////////////////////////////
     }//the end of _elpusk.util

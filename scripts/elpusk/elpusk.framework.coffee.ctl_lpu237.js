@@ -1,5 +1,5 @@
 /**
- * 2020.5.14
+ * 2020.10.8
  * @license MIT
  * Copyright (c) 2020 Elpusk.Co.,Ltd.
  *
@@ -39,6 +39,9 @@
  * <br />            - add : cancel before enable/disable reading.
  * <br />  2020.6.12 - release 1.3
  * <br />            - add : run_bootloader_of_device_with_promise().
+ * <br />  2020.10.08 -release 1.4
+ *                    - support lpu237 hid bootloader.
+ * 
  * @namespace elpusk.framework.coffee.ctl_lpu237
  */
 
@@ -1443,7 +1446,50 @@
         return b_result;
     };
 
-    
+    /**
+     * @public
+     * @function disable_read_card_from_device_with_promise
+     * @return {object} return promise object.
+     * @description disable the waiting read a card.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.disable_read_card_from_device_with_promise = function(){
+
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            device.reset_msr_data();
+
+            switch(_get_status(device.get_device_index())){
+                case _type_status.ST_IDLE:
+                    if( !_check_server_and_device(server,device)){
+                        continue;
+                    }
+                    _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
+                    break;
+                case _type_status.ST_WAIT_CARD:
+                    break;
+                default:
+                    continue;
+            }//end switch
+
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        else{
+            return server.device_cancel(device.get_device_index(),0,0,);
+        } 
+    };    
 
     ////////////////////////////////////////////////////////////////////////////
     // the end of function

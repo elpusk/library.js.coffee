@@ -1,5 +1,5 @@
 /**
- * 2020.4.10
+ * 2020.10.08
  * @license MIT
  * Copyright (c) 2020 Elpusk.Co.,Ltd.
  *
@@ -44,6 +44,8 @@
  * <br />   2020.7.17 - release 1.7
  *                    - support system parameter table view.
  *                    - bugfix always displayed even parity.
+ * <br />   2020.10.08 -release 1.8
+ *                    - support lpu237 hid bootloader.
  * @namespace
  */
 'use strict';
@@ -5524,7 +5526,9 @@
                     if(n_tag[i]===0xff ){
                         //ascii code format
                         s_symbols = s_symbols
-                        + String.fromCharCode(n_tag[i+1]);
+                        + "[]["
+                        + elpusk.util.get_ascii_symbol_from_char_code(n_tag[i+1])//String.fromCharCode(n_tag[i+1]);
+                        + "]";
                         continue;
                     }
                     //hid keyboard code.

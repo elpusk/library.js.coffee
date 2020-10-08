@@ -1,5 +1,5 @@
 /**
- * 2020.4.10
+ * 2020.10.08
  * @license MIT
  * Copyright (c) 2020 Elpusk.Co.,Ltd.
  *
@@ -55,6 +55,12 @@
  * <br />  2020.8.20 - release 1.9.
  * <br />  : add - file_Copy_callback() method for supporting big size file copy.
  * 
+ * <br />  2020.8.20 - release 1.10. - for supporting bootloader operation.
+ * <br />  : add - device_update_set_parameter().
+ * <br />  : add - device_update_start_with_callback().
+ * <br />  : add - file_Copy_firmware_callback().
+ * <br />  : add - file_firmware_create().
+ * <br />  : add - file_firmware_delete().
  * @namespace
  */
 
@@ -1232,7 +1238,7 @@
                                                     //the first respose
                                                     _push_promise_parameter(n_device_index,parameter);//repush
                                                 }
-                                                else if( n_cur<(n_total-1)){
+                                                else if( (n_cur+1)<n_total){
                                                     _push_promise_parameter(n_device_index,parameter);//repush
                                                 }
                                             }
@@ -3298,7 +3304,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.9.0";
+        return "1.10.0";
     }
 
     /**

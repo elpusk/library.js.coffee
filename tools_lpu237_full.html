@@ -120,7 +120,10 @@ body {font-family: "Lato", sans-serif;}
   <progress id="id_progress_page_device" value="0" max="100"></progress>
   <br />
   <label for="id_file_select_setting">the setting file : </label>
-  <input type="file" id="id_file_select_setting" value="select" accept=".xml" disabled="ture" placeholder="select a setting file"/>
+  <input type="file" id="id_file_select_setting" value="select" accept=".xml" disabled="true" placeholder="select a setting file"/>
+  <br />
+  <label for="id_button_reload_parameters">reload system parameter from device : </label>
+  <input type="button" id="id_button_reload_parameters" onclick="on_button_reload_parameters()" value="reload parameters" disabled="true"/>
 
   <br />
   <br />
@@ -129,7 +132,19 @@ body {font-family: "Lato", sans-serif;}
   <progress id="id_progress_fw_update" value="0" max="100"></progress>
   <br />
   <label for="id_file_fw_select_updating">the rom file : </label>
-  <input type="file" id="id_file_fw_select_updating" value="select" accept=".rom" disabled="ture" placeholder="select a rom file"/>
+  <input type="file" id="id_file_fw_select_updating" value="select" accept=".rom" disabled="true" placeholder="select a rom file"/>
+  <br>
+  <input type="checkbox" id="id_checkbox_auto_remove_fw" unchecked>
+  <label for="id_checkbox_auto_remove_fw">If the temp-rom file of session is existed, remove it. </label>
+
+  <br />
+  <br />
+  <input type="button" id="id_button_enable_read" onclick="fun_enable_read_with_callback()" value="read card" disabled="true"/>
+  <input type="button" id="id_button_disable_read" onclick="fun_disable_read_with_callback()" value="stop read card" disabled="true"/>
+  <br />
+  <p id="id_p_page_device_ms_data">
+
+  </p>
 
 </div>
 
@@ -155,39 +170,15 @@ body {font-family: "Lato", sans-serif;}
 
 <!-- ************************ scripts ******************************** -->
 <script type="text/javascript">
+  window.addEventListener("load", init, false);
 
-    window.addEventListener("load", init, false);
+  // when loading the page.
+  // Get the element with id="id_device" and click on it
+  document.getElementById("id_tab_device").click();
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    // callback functions
-    function _cb_progress_set_parameters( n_device_index, n_max_stage, n_cur_stage ){
-        if( n_cur_stage <= 1){
-            set_progress_set_parameters(n_cur_stage,n_max_stage);
-        }
-        else{
-            increase_progress_set_parameters();
-        }
-    }
-    function on_button_set_parameters(){
-        ctl_lpu237.save_parameter_to_device_with_promise(_cb_progress_set_parameters).then(function (s_message) {
-            //s_message always "success".
-            clearMessage();
-            addMessage_bold("success : save system parameter to device.");
-            addMessage( ctl_lpu237.get_device().get_string_html_table() );
-            //addMultiMessage( ctl_lpu237.get_device().get_string() );
-        }).catch(function (event_error) {
-            // error here
-            clearMessage();
-            addMessage_bold("fail : save system parameter to device : "+ event_error.message);
-        });
-    }
-
-</script>
-
-<script>
-    // Get the element with id="id_device" and click on it
-    document.getElementById("id_tab_device").click();
-
+  function on_button_reload_parameters(){
+    fun_load_system_parameters();
+  }
 </script>
    
 </body>
