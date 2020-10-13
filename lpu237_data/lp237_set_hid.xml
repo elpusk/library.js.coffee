@@ -7,7 +7,7 @@
 tag	:	attribute	:	values
 =====================================================================================================================================================
 common	:	interface	: "usb_kb" , "usb_hid" or "rs232"
-common	:	buzzer		: "on" or "off"
+common	:	buzzer		: "on" , "off" or frequency number 1000 ~ 30000( unit Hz )
 common	:	language	: "usa_english" , "spanish", "danish", "french", "german", "italian", "norwegian", "swedish", "hebrew" or "turkey"
 common	:	iso1		: "enable" or "disable"
 common	:	iso2		: "enable" or "disable"	

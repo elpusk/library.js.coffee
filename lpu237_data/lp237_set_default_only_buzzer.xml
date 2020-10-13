@@ -13,11 +13,11 @@ common	:	iso1		: "enable" or "disable"
 common	:	iso2		: "enable" or "disable"	
 common	:	iso3		: "enable" or "disable"
 common	:	condition	: "and" or "or"( and - if all track are not error,global pro/postfix will be sent. )
-common	:	indication	: "and" or "or"( and - When all track are not a error, reader indicate success-processing.)=
+common	:	indication	: "and" or "or"( and - When all track are not a error, reader indicate success-processing.)
 common	:	ignore1		: "enable" or "disable"( if ISO1 data is equal to ISO2 data, don't send ISO1 data.)
 common	:	ignore3		: "enable" or "disable"( if ISO2 data is equal to ISO3 data, don't send ISO3 data.)
 common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first character is colon,  don't send colon.)
-common :	direction:  : "bidirectional","forward" or "backward"
+common 	:	direction:  : "bidirectional","forward" or "backward"
 common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
 =====================================================================================================================================================
 global	:	prefix		: pair[][], the first [] - modifier, the second [] - keycode of USB HID keybaord or the symbol of keycode.
@@ -197,23 +197,23 @@ ibutton	:	postfix		: hex-format : use lower case.
 <lpu237>
 	<common
 		interface	="usb_kb"
-		buzzer		="on"
+		buzzer		="2000"
 		language	="usa_english"
-		iso1		="disable"
+		iso1		="enable"
 		iso2		="enable"
 		iso3		="enable"
-		condition	="or"
-		indication  ="or"
+		condition	="and"
+		indication  ="and"
 		ignore1 	= "disable"
 		ignore3 	= "disable"
-		rm_colon	= "enable"
+		rm_colon	= "disable"
 		direction	="bidirectional"
 		ibutton		="zeros"
 	/>
 
 	<global
-		prefix		="[c][b]"
-		postfix		="[c][b]"
+		prefix		=""
+		postfix		="[][][][]"
 	/>
 
 	<iso1
@@ -312,8 +312,8 @@ ibutton	:	postfix		: hex-format : use lower case.
 		add_value1	="48"
 		add_value2	="48"
 
-		prefix0		="[][a]"
-		postfix0	=""
+		prefix0		="[][;]"
+		postfix0	="[s][/][][enter]"
 
 		prefix1		="[][;]"
 		postfix1	="[s][/][][enter]"
@@ -323,7 +323,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 	/>
 
 	<iso3
-		combination	="2"
+		combination	="1"
 
 		max_size0	="104"
 		max_size1	="45"
@@ -365,14 +365,14 @@ ibutton	:	postfix		: hex-format : use lower case.
 		add_value1	="48"
 		add_value2	="48"
 
-		prefix0		="[][b]"
-		postfix0	=""
+		prefix0		="[][;]"
+		postfix0	="[s][/][][enter]"
 
-		prefix1		="[][c]"
-		postfix1	=""
+		prefix1		="[][;]"
+		postfix1	="[s][/][][enter]"
 
-		prefix2		="[][d]"
-		postfix2	=""
+		prefix2		="[][;]"
+		postfix2	="[s][/][][enter]"
 	/>
 
 	<ibutton

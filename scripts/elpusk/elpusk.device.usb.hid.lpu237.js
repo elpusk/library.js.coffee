@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.4.0
+ * @version 1.9.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -46,6 +46,8 @@
  *                    - bugfix always displayed even parity.
  * <br />   2020.10.08 -release 1.8
  *                    - support lpu237 hid bootloader.
+ * <br />   2020.10.13 -release 1.9
+ *                     - support buzzer frequency input on xml setting file.
  * @namespace
  */
 'use strict';
@@ -82,16 +84,16 @@
         var _const_the_size_of_uid = 4 * 4;
         var _const_the_size_of_system_blank = 4;
         var _const_the_number_of_frequency = 22;
-        var _const_the_frequency_of_off_buzzer = 5000;
-        var _const_the_frequency_of_on_buzzer = 26000;
         var _const_the_number_of_support_language = 11;	//the number of supported language.
         var _const_max_size_tag_byte = 14;
         var _const_max_size_tag_key = _const_max_size_tag_byte/2;
 
         var _const_address_system_hid_key_map_offset = 0x400;	//size 1K
         var _const_address_system_ps2_key_map_offset = 0x800;	//size 1K
-        var _const_default_buzzer_frequency = 25000;	// default buzzer frequency.
-        var _const_default_buzzer_frequency_for_wiznova_board = 16000;	// default buzzer frequency. ganymede.
+        var _const_default_buzzer_count_old = 25000; //at less then callisto 3.15, ganymede 5.7.
+        var _const_default_buzzer_count = 26000;    // default buzzer count of plus generator.
+        var _const_default_buzzer_count_for_wiznova_board = 16000;	// default buzzer count. ganymede.
+        var _const_default_buzzer_count_for_off = 5000;    // default buzzer count of plus generator for buzzer off status.
 
         /**
          * enum for changed paramemter type.
@@ -205,7 +207,7 @@
             //
 			gt_get_interface : 17,
 			gt_get_language : 18,
-			gt_get_buzzer_frequency : 19,
+			gt_get_buzzer_count : 19,
 			gt_get_boot_run_time : 20,
 			gt_get_enable_iso1 : 21, gt_get_enable_iso2 : 22, gt_get_enable_iso3 : 23,
 			gt_get_direction1 : 24, gt_get_direction2 : 25, gt_get_direction3 : 26,
@@ -272,7 +274,7 @@
             //
 			gt_set_interface : 150,
 			gt_set_language : 151, get_set_keymap : 152,
-			gt_set_buzzer_frequency : 153,
+			gt_set_buzzer_count : 153,
 			gt_set_enable_iso1 : 154, gt_set_enable_iso2 : 155, gt_set_enable_iso3 : 156,
 			gt_set_direction1 : 157, gt_set_direction2 : 158, gt_set_direction3 : 159,
             gt_set_global_prefix : 160,  gt_set_global_postfix : 161,
@@ -1397,6 +1399,26 @@
             return s_value;
         }
 
+        /**
+         * @private
+         * @function _get_freqency_from_timer_count
+         * @param {number} the count number of HW timer
+         * @returns {number} frequency(unit : Hz)
+         */
+        function _get_freqency_from_timer_count( n_count ){
+            var n_freq = 0;
+            do{
+                if( typeof n_count !== 'number'){
+                    continue;
+                }
+                if( n_count <= 0 ){
+                    continue;
+                }
+                n_freq = (n_count/8.67);
+            }while(false);
+            return n_freq;
+        }
+
         /** 
          * @private 
          * @readonly
@@ -2385,12 +2407,12 @@
         
         /**
          * @private
-         * @function _get_buzzer_frequency_from_response
+         * @function _get_buzzer_count_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {number} buzzer frequency.
+         * @returns {number} buzzer count.
          * <br /> negative value is error.
          */
-		function _get_buzzer_frequency_from_response(s_response){
+		function _get_buzzer_count_from_response(s_response){
 			var n_value = -1;
 
 			do {
@@ -3423,29 +3445,32 @@
         
         /**
          * @private
-         * @function _get_buzzer_frequency_from_string
-         * @param {string} s_string - "on" or "off"
-         * @returns {boolean} true - buzzer on,
-         * false - buzzer off
+         * @function _get_buzzer_count_from_string
+         * @param {string} s_string - "on" or "off" or digit string for frequency
+         * @returns {number} the frequency counter,
          * <br /> null is error
          */
-		function _get_buzzer_frequency_from_string(s_string){
-			var b_value = null;
+		function _get_buzzer_count_from_string(s_string){
+			var n_value = null;
 
 			do {
-				if (typeof s_string !== 'string'){
-                    continue;
-                }
                 if( s_string === "on"){
-                    b_value = true;
+                    n_value = _const_default_buzzer_count;
                     continue;
                 }
                 if( s_string === "off"){
-                    b_value = false;
+                    n_value = _const_default_buzzer_count_for_off;
                     continue;
                 }
+                //convert frequency to counter
+                var n_freq = parseInt(s_string,10);
+                if( isNaN(n_freq)){
+                    continue;
+                }
+
+                n_value = 8.67*n_freq;
 			} while (false);
-			return b_value;
+			return n_value;
         }
         
         /**
@@ -4000,11 +4025,11 @@
 
         /**
          * @private
-         * @function _generate_get_buzzer_frequency
+         * @function _generate_get_buzzer_count
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
         */
-        function _generate_get_buzzer_frequency(queue_s_tx){
+        function _generate_get_buzzer_count(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_BUZZER_FREQ;
             var n_size = _type_system_size.SYS_SIZE_BUZZER_FREQ;
             return _generate_config_get(queue_s_tx,n_offset,n_size);
@@ -4867,12 +4892,12 @@
 
         /**
          * @private
-         * @function _generate_set_buzzer_frequency
+         * @function _generate_set_buzzer_count
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number} n_buzzer setting data.
          * @returns {boolean} true(success) or false(failure).
          */        
-        function _generate_set_buzzer_frequency(queue_s_tx,n_buzzer){
+        function _generate_set_buzzer_count(queue_s_tx,n_buzzer){
             var n_offset = _type_system_offset.SYS_OFFSET_BUZZER_FREQ;
             var n_size = _type_system_size.SYS_SIZE_BUZZER_FREQ;
             var s_data = elpusk.util.get_dword_hex_string_from_number(n_buzzer);
@@ -5582,7 +5607,7 @@
             this._b_device_is_standard = false;
     
             this._n_interface = _type_system_interface.system_interface_usb_keyboard;
-            this._dw_buzzer_frequency = _const_default_buzzer_frequency;
+            this._dw_buzzer_count = _const_default_buzzer_count;
             this._dw_boot_run_time = 15000;
             this._n_language_index = _type_keyboard_language_index.language_map_index_english;
     
@@ -5939,11 +5964,11 @@
 
         /**
          * @public
-         * @function elpusk.device.usb.hid.lpu237.get_buzzer_frequency
-         * @returns {number} return buzzer frequency
+         * @function elpusk.device.usb.hid.lpu237.get_buzzer_count
+         * @returns {number} return buzzer count
          */        
-		_elpusk.device.usb.hid.lpu237.prototype.get_buzzer_frequency = function(){ 
-            return this._dw_buzzer_frequency; 
+		_elpusk.device.usb.hid.lpu237.prototype.get_buzzer_count = function(){ 
+            return this._dw_buzzer_count; 
         }
 
         /**
@@ -6627,8 +6652,8 @@
                         s_description = "get interface"; break;
                     case _type_generated_tx_type.gt_get_language:
                         s_description = "get language"; break;
-                    case _type_generated_tx_type.gt_get_buzzer_frequency:
-                        s_description = "get buzzer frequency"; break;
+                    case _type_generated_tx_type.gt_get_buzzer_count:
+                        s_description = "get buzzer count"; break;
                     case _type_generated_tx_type.gt_get_boot_run_time:
                         s_description = "get MSD boot run time"; break;
                     case _type_generated_tx_type.gt_get_enable_iso1:
@@ -6912,8 +6937,8 @@
                         s_description = "set language"; break;
                     case _type_generated_tx_type.get_set_keymap:
                         s_description = "set keymap"; break;
-                    case _type_generated_tx_type.gt_set_buzzer_frequency:
-                        s_description = "set buzzer frequency"; break;
+                    case _type_generated_tx_type.gt_set_buzzer_count:
+                        s_description = "set buzzer count"; break;
                     case _type_generated_tx_type.gt_set_enable_iso1:
                         s_description = "set enable iso1"; break;
                     case _type_generated_tx_type.gt_set_enable_iso2:
@@ -7276,8 +7301,8 @@
                 if( !_generate_get_language(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_language );
                 
-                if( !_generate_get_buzzer_frequency(this._dequeu_s_tx) ){continue;}
-                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_buzzer_frequency );
+                if( !_generate_get_buzzer_count(this._dequeu_s_tx) ){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_buzzer_count );
 
                 if( !_generate_get_boot_run_time(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_boot_run_time );
@@ -7548,8 +7573,8 @@
 
                 // . set buzzer
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency ) >= 0 ){
-                    if(!_generate_set_buzzer_frequency(this._dequeu_s_tx,this._dw_buzzer_frequency)){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_buzzer_frequency );
+                    if(!_generate_set_buzzer_count(this._dequeu_s_tx,this._dw_buzzer_count)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_buzzer_count );
                 }
 
                 // .enable 1
@@ -8098,10 +8123,10 @@
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_buzzer_frequency:
-                    n_value = _get_buzzer_frequency_from_response(s_response);
+                case _type_generated_tx_type.gt_get_buzzer_count:
+                    n_value = _get_buzzer_count_from_response(s_response);
                     if( n_value >= 0 ){
-                        this._dw_buzzer_frequency = n_value;
+                        this._dw_buzzer_count = n_value;
                         b_result = true;
                     }
                     break;
@@ -8590,7 +8615,7 @@
                 case _type_generated_tx_type.gt_set_interface:
                 case _type_generated_tx_type.gt_set_language:
                 case _type_generated_tx_type.get_set_keymap:
-                case _type_generated_tx_type.gt_set_buzzer_frequency:
+                case _type_generated_tx_type.gt_set_buzzer_count:
                 case _type_generated_tx_type.gt_set_enable_iso1:
                 case _type_generated_tx_type.gt_set_enable_iso2:
                 case _type_generated_tx_type.gt_set_enable_iso3:
@@ -8805,7 +8830,7 @@
             ///////////////////////////////
             //device parameters
             ss.setItem(s_key_p+'_n_interface',JSON.stringify(this._n_interface));
-            ss.setItem(s_key_p+'_dw_buzzer_frequency',JSON.stringify(this._dw_buzzer_frequency));
+            ss.setItem(s_key_p+'_dw_buzzer_count',JSON.stringify(this._dw_buzzer_count));
             ss.setItem(s_key_p+'_dw_boot_run_time',JSON.stringify(this._dw_boot_run_time));
             ss.setItem(s_key_p+'_n_language_index',JSON.stringify(this._n_language_index));
     
@@ -8857,7 +8882,7 @@
             ///////////////////////////////
             //device parameters
             this._n_interface = JSON.parse(ss.getItem(s_key_p+'_n_interface'));
-            this._dw_buzzer_frequency = JSON.parse(ss.getItem(s_key_p+'_dw_buzzer_frequency'));
+            this._dw_buzzer_count = JSON.parse(ss.getItem(s_key_p+'_dw_buzzer_count'));
             this._dw_boot_run_time = JSON.parse(ss.getItem(s_key_p+'_dw_boot_run_time'));
             this._n_language_index = JSON.parse(ss.getItem(s_key_p+'_n_language_index'));
             this._b_enable_iso = JSON.parse(ss.getItem(s_key_p+'_b_enable_iso'));
@@ -8921,7 +8946,7 @@
                         var array_ele = [];
 
                         var n_interface = null;
-                        var b_buzzer = null;
+                        var n_buzzer = null;
                         var n_language = null;
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
@@ -8972,8 +8997,8 @@
                                 s_attr_name = "buzzer";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    b_buzzer = _get_buzzer_frequency_from_string(s_attr);
-                                    if( b_buzzer === null ){
+                                    n_buzzer = _get_buzzer_count_from_string(s_attr);
+                                    if( n_buzzer === null ){
                                         continue;
                                     }
                                 }
@@ -9365,18 +9390,10 @@
                                     this._device._n_interface = n_interface;
                                 }
                             }
-                            if( b_buzzer !== null ){
-                                if( b_buzzer ){
-                                    if( this._device._dw_buzzer_frequency !== _const_the_frequency_of_on_buzzer){
-                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
-                                        this._device._dw_buzzer_frequency = _const_the_frequency_of_on_buzzer;
-                                    }
-                                }
-                                else{
-                                    if( this._device._dw_buzzer_frequency === _const_the_frequency_of_on_buzzer){
-                                        elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency )
-                                        this._device._dw_buzzer_frequency = _const_the_frequency_of_off_buzzer;
-                                    }
+                            if( n_buzzer !== null ){
+                                if( this._device._dw_buzzer_count !== n_buzzer){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_BuzzerFrequency );
+                                    this._device._dw_buzzer_count = n_buzzer;
                                 }
                             }
                             if( n_language !== null ){
@@ -9754,7 +9771,7 @@
 
                 s_description = s_description + "MSD bootloader running time : " + String(this._dw_boot_run_time) + "\n";
 
-                s_description = s_description + "Buzzer frequency : " + String(this._dw_buzzer_frequency) + "\n";
+                s_description = s_description + "Buzzer frequency : " + (_get_freqency_from_timer_count(this._dw_buzzer_count)/1000).toFixed(0) + " KHz(" + String(this._dw_buzzer_count) + ")\n";
                 s_description = s_description + "The supported functions : " + _get_function_string(this._n_device_function) + "\n";
                 
                 s_description = s_description + "i-Button mode : " + _get_ibutton_mode_string(this._n_ibutton_mode) + "\n";
@@ -9938,7 +9955,7 @@
                     //
                     ++n_count;
                     as_name[n_count] = "Buzzer frequency";
-                    as_value[n_count] = String(this._dw_buzzer_frequency);
+                    as_value[n_count] = (_get_freqency_from_timer_count(this._dw_buzzer_count)/1000).toFixed(0) + " KHz(" + String(this._dw_buzzer_count) + ")";
                     //
                     ++n_count;
                     as_name[n_count] = "The supported functions";
