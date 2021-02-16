@@ -182,6 +182,7 @@
                     CONTROL_SHOW: "S",
                     FILE_OPERATION: "F",
                     DEVICE_PLUG_IN: "P",
+                    ADVANCE_OPERATION: "A",
                     SERVER_CLOSE:"C",//this value is only in JS library.
                     DEVICE_OPEN: "o",
                     DEVICE_CLOSE: "c",
@@ -491,6 +492,7 @@
                             case _type_action_code.ECHO:
                             case _type_action_code.FILE_OPERATION:
                             case _type_action_code.DEVICE_BOOTLOADER:
+                            case _type_action_code.ADVANCE_OPERATION:
                             case _type_action_code.UNKNOWN:
                                 break;
                             default:
@@ -1061,7 +1063,17 @@
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                     break;
-
+                                case "advance_set_session_name":
+                                case "advance_get_session_name":
+                                case "advance_send_data_to_session":    
+                                case "advance_send_data_to_all":                                    
+                                    if (json_obj.action_code == _type_action_code.ADVANCE_OPERATION) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
                                 case "device_open":
                                     if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
                                         if(json_obj.data_field == "success"){
@@ -1292,6 +1304,10 @@
                                 case "file_get_size":
                                 case "file_get_list":
                                 case "file_append":
+                                case "advance_set_session_name":
+                                case "advance_get_session_name":
+                                case "advance_send_data_to_session":    
+                                case "advance_send_data_to_all":                                    
                                 case "device_open":
                                     parameter.reject(evt);
                                     break;
@@ -2284,7 +2300,235 @@
                         );
 
                         return true;
-                    },                    
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function advance_set_session_name
+                     * @param {string} s_session_name session name
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description set the name of current session.
+                    */                
+                    advance_set_session_name : function(s_session_name){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.ADVANCE_OPERATION;
+                
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "advance_set_session_name",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["set_session_name",s_session_name]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function advance_get_session_name
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description get the current session name.
+                    */                
+                    advance_get_session_name : function(){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.ADVANCE_OPERATION;
+                
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "advance_get_session_name",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["get_session_name"]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function advance_send_data_to_session
+                     * @param {string} s_target_session_name target session name( destination of message )
+                     * @param {array} sa_data string array type ,  some data for sending.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description send a data to the target session.
+                    */                
+                    advance_send_data_to_session : function(s_target_session_name, sa_data){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.ADVANCE_OPERATION;
+                
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "advance_send_data_to_session",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["send_data_to_session",s_target_session_name].concat(sa_data)
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },  
+                    
+                    /** 
+                     * @public 
+                     * @async
+                     * @function advance_send_data_to_all
+                     * @param {array} sa_data string array type ,  some data for sending.
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description send a data to all session( except current session )  
+                    */                
+                    advance_send_data_to_all : function(s_target_session_name, sa_data){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    //already websocket created.
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.ADVANCE_OPERATION;
+                
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "advance_send_data_to_all",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["send_data_to_all"].concat(sa_data)
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },                     
                     /** 
                      * @public 
                      * @async
@@ -3304,7 +3548,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.10.0";
+        return "1.11.0";
     }
 
     /**

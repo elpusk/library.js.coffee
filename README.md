@@ -1,6 +1,6 @@
 # elpusk.framework.coffee
 coffee manager interface JavaScript  library( = cmi-js )
-v1.10
+v1.11 - add advance operation.
 For generating API document, run "js_doc_coffee.bat" on windows console.
 
 # elpusk.device.usb.hid.lpu237

@@ -70,6 +70,20 @@
     <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
     <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
     <br />
+    <input type="button" id="button_promise_get_session_name" onclick="on_button_promise_get_session_name();" value="get currnet session name by promise" />
+    <br />
+    <input type="button" id="button_promise_set_session_name" onclick="on_button_promise_set_session_name();" value="set currnet session name by promise" />
+    input session name  : 
+    <input type="text" id="text_session_name" value="" />
+    <br />
+    target session name : <input type="text" id="text_target_session_name" value="" />
+    <br />
+    <input type="button" id="button_promise_send_data_to_session" onclick="on_button_promise_send_data_to_session();" value="send a data to the target session by promise" />
+    <input type="text" id="text_send_data_to_session" value="" />
+    <br />
+    <input type="button" id="button_promise_send_data_to_all" onclick="on_button_promise_send_data_to_all();" value="send a data to all session by promise" />
+    <input type="text" id="text_send_data_to_all" value="" />
+    <br />
     <br />
     <input type="button" id="button_promise_file_get_list" onclick="on_button_promise_file_get_list();" value="get file list" />
     <select id="drop_get_file_list">
@@ -153,6 +167,11 @@
                     //plugged in event
                     ++n_system_event;
                     addMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "A"){
+                    //send data to session of advance operation.
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
                     continue;
                 }
                 //
@@ -905,6 +924,98 @@
                 addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
             })
             ;
+        }
+
+        function on_button_promise_get_session_name() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.advance_get_session_name().then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_get_session_name result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_session_name : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_set_session_name() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_session_name = document.getElementById("text_session_name").value;
+            if( s_session_name.length==0 ){
+                addMessage("please input session name.");
+                return;
+            }
+
+            server.advance_set_session_name(s_session_name).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_set_session_name result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : set_session_name : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_send_data_to_session() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_session_name = document.getElementById("text_target_session_name").value;
+            var s_data = document.getElementById("text_send_data_to_session").value;
+            server.advance_send_data_to_session(s_session_name,[s_data]).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_send_data_to_session result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : advance_send_data_to_session : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_send_data_to_all() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_data = document.getElementById("text_send_data_to_all").value;
+            server.advance_send_data_to_all([s_data]).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_send_data_to_all result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : advance_send_data_to_all : "+ server.get_error_message(event_error));
+            });
         }
 
         function on_button_promise_get_device_list() {
