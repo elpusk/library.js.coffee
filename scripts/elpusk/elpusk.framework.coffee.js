@@ -1,7 +1,7 @@
 /**
- * 2020.10.08
+ * 2021.07.01
  * @license MIT
- * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ * Copyright (c) 2021 Elpusk.Co.,Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,6 +61,16 @@
  * <br />  : add - file_Copy_firmware_callback().
  * <br />  : add - file_firmware_create().
  * <br />  : add - file_firmware_delete().
+ * 
+ * <br />  2021.7.1 - release 1.12
+ * <br />  : add - kernel_load()
+ * <br />  : add - kernel_unload()
+ * <br />  : add - kernel_execute()
+ * <br />  : add - kernel_cancel()
+ * <br />  : add - kernel_list()
+ * <br />  : add - kernel_open()
+ * <br />  : add - kernel_close()
+ * 
  * @namespace
  */
 
@@ -184,6 +194,8 @@
                     DEVICE_PLUG_IN: "P",
                     ADVANCE_OPERATION: "A",
                     SERVER_CLOSE:"C",//this value is only in JS library.
+                    KERNEL_OPERATION: "K",
+                    DEVICE_INDEPENDENT_BOOTLOADER: "b",
                     DEVICE_OPEN: "o",
                     DEVICE_CLOSE: "c",
                     DEVICE_SEND: "s",
@@ -493,6 +505,7 @@
                             case _type_action_code.FILE_OPERATION:
                             case _type_action_code.DEVICE_BOOTLOADER:
                             case _type_action_code.ADVANCE_OPERATION:
+                            case _type_action_code.KERNEL_OPERATION:
                             case _type_action_code.UNKNOWN:
                                 break;
                             default:
@@ -1074,6 +1087,18 @@
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                     break;
+                                case "kernel_load":
+                                case "kernel_unload":
+                                case "kernel_execute":
+                                case "kernel_cancel":
+                                case "kernel_list":
+                                    if (json_obj.action_code == _type_action_code.KERNEL_OPERATION) {
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
                                 case "device_open":
                                     if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
                                         if(json_obj.data_field == "success"){
@@ -1094,6 +1119,7 @@
                             continue;
                         }//the end of manager request.
 
+                        //device request
                         switch(parameter.method){
                             case "device_close":
                                 if (json_obj.action_code == _type_action_code.DEVICE_CLOSE) {
@@ -1267,6 +1293,37 @@
                                     }
                                 }
                                 break;
+                            case "kernel_open":
+                            case "kernel_close":
+                            case "kernel_execute":
+                            case "kernel_cancel":
+                                if (json_obj.action_code == _type_action_code.KERNEL_OPERATION) {
+                                    if( parameter.resolve === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_received(n_device_index,json_obj.data_field);
+                                        }
+                                        else{
+                                            parameter.cb_received(json_obj.data_field);
+                                        }
+                                    }
+                                    else{
+                                        parameter.resolve(json_obj.data_field);
+                                    }
+                                }
+                                else {
+                                    if( parameter.reject === null ){
+                                        if( parameter.b_device_index ){
+                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                        else{
+                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
+                                        }
+                                    }
+                                    else{
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                }
+                                break;
                             default:
                                 break;
                         }//end switch
@@ -1309,6 +1366,11 @@
                                 case "advance_send_data_to_session":    
                                 case "advance_send_data_to_all":                                    
                                 case "device_open":
+                                case "kernel_load":
+                                case "kernel_unload":
+                                case "kernel_execute":
+                                case "kernel_cancel":
+                                case "kernel_list":
                                     parameter.reject(evt);
                                     break;
                                 default:
@@ -1325,6 +1387,10 @@
                             case "device_receive":
                             case "device_transmit":
                             case "device_cancel":
+                            case "kernel_open":
+                            case "kernel_close":
+                            case "kernel_execute":
+                            case "kernel_cancel":
                                 if( parameter.reject === null ){
                                     if( parameter.b_device_index ){
                                         parameter.cb_error(n_device_index,evt);
@@ -1481,7 +1547,497 @@
                     echo_hex : function (s_data) {
                         return _promise_echo(_type_data_field_type.HEX_STRING, s_data);
                     },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_load
+                     * @param {string} s_category may be "service"
+                     * @param {string} s_target service dll path.
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description binding a service dll.
+                    */                
+                    kernel_load : function(s_category,s_target){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
                 
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "kernel_load",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["load",s_category,s_target]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_unload
+                     * @param {string} s_category may be "service"
+                     * @param {string} s_target service dll path.
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description unbinding a service dll.
+                    */                
+                    kernel_unload : function(s_category,s_target){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "kernel_unload",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["unload",s_category,s_target]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_execute
+                     * @param {number} n_device_index device index number.
+                     * <br /> if n_device_index is zero, this is processed by manager.
+                     * <br /> else dose by device.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {string} s_category may be "service"
+                     * @param {string} s_target service dll path.
+                     * @param {string} sa_data - string array of "sd_execute" function parameters
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description run "sd_execute" function of service dll.
+                    */                
+                    kernel_execute : function(n_device_index,n_in_id, n_out_id,s_category,s_target,sa_data){
+                        return new Promise(function (resolve, reject){
+                    
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                if (typeof n_in_id !== 'number') {
+                                    reject(_get_error_object('en_e_device_in_id'));
+                                    continue;
+                                }
+                                if (typeof n_out_id !== 'number') {
+                                    reject(_get_error_object('en_e_device_out_id'));
+                                    continue;
+                                }
+            
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(n_device_index,evt);
+                                }
+
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "kernel_execute",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+                
+                                var c_owner = _type_packet_owner.MANAGER;
+                                if(n_device_index != const_n_undefined_device_index){
+                                    c_owner = _type_packet_owner.DEVICE;
+                                }
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    c_owner
+                                    , n_device_index
+                                    , action_code
+                                    , n_in_id
+                                    , n_out_id
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["execute",s_category,s_target].concat(sa_data)
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_cancel
+                     * @param {number} n_device_index device index number.
+                     * <br /> if n_device_index is zero, this is processed by manager.
+                     * <br /> else dose by device.
+                     * @param {number} n_in_id
+                     * <br /> if the target device is hid class, n_out_id is in report id.
+                     * <br /> if it is winusb class, n_out_id is in end-point number.
+                     * @param {number} n_out_id
+                     * <br /> if the target device is hid class, n_out_id is out report id.
+                     * <br /> if it is winusb class, n_out_id is out end-point number.
+                     * @param {string} s_category may be "service"
+                     * @param {string} s_target service dll path.
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description run "sd_cancel" function of service dll.
+                    */                
+                    kernel_cancel : function(n_device_index,n_in_id,n_out_id,s_category,s_target){
+                        return new Promise(function (resolve, reject) {
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                if (typeof n_in_id !== 'number') {
+                                    reject(_get_error_object('en_e_device_in_id'));
+                                    continue;
+                                }
+                                if (typeof n_out_id !== 'number') {
+                                    reject(_get_error_object('en_e_device_out_id'));
+                                    continue;
+                                }
+                
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(n_device_index,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "kernel_cancel",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+                
+                                var c_owner = _type_packet_owner.MANAGER;
+                                if(n_device_index != const_n_undefined_device_index){
+                                    c_owner = _type_packet_owner.DEVICE;
+                                }
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    c_owner
+                                    , n_device_index
+                                    , action_code
+                                    , n_in_id
+                                    , n_out_id
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["cancel",s_category,s_target]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_list
+                     * @param {string} s_category may be "service"
+                     * @param {string} s_filter This filter is used to represent the desired USB device.
+                     * <br />the filter format is class#vid_xxxx&pid_yyyy&mi_zz".  
+                     * <br />"class" is "hid" or "winusb".
+                     * <br />"vid" is usb device vendor ID hex code.
+                     * <br />"pid" is usb device product ID hex code.
+                     * <br />"mi" is the interfce number of usb device.
+                     * <br />ex) if you want to get all device that vendor ID is 0x134b and class device is hid,
+                     * <br /> filter string is "hid#vid_134b".
+                     * 
+                     * @returns {Promise} if success, resolve with device path list.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description run get device list action to server by promise with filter.
+                     * <br /> server return the connected device paths list.
+                     * <br /> this list contains only the managed device on server. 
+                    */                
+                    kernel_list : function(s_category,s_filter){
+                        return new Promise(function (resolve, reject){
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var s_used_filter = "hid";
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+                
+                                if (typeof s_filter !== 'undefined') {
+                                    s_used_filter = s_filter;
+                                }
+                
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "kernel_list",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.MANAGER
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["list",s_category,String(s_used_filter)]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_open
+                     * @param {number} n_device_index device index number.
+                     * <br /> if n_device_index is zero, this is processed by manager.
+                     * <br /> else dose by device.
+                     * @param {string} s_category may be "device"
+                     * @param {string} s_target service dll path.
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with device index number.
+                     * <br /> else reject with Error object or resolve with zero number.
+                     * 
+                     * @description run device open action to server by promise.
+                     * <br /> the device index number cannot be zero.
+                     * <br /> if this function resolve with zero device index, this case also have to be process as error.
+                    */                
+                    kernel_open : function(s_category,s_path){
+                        return new Promise(function (resolve, reject) {
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+                
+                                if (typeof s_path === 'undefined') {
+                                    reject(_get_error_object('en_e_server_unsupport_data'));
+                                    continue;
+                                }
+     
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(0,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(0,evt);
+                                }
+    
+                                var parameter = {
+                                    "n_device_index" : 0,
+                                    "method" : "kernel_open",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(0,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.DEVICE
+                                    , const_n_undefined_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    , ["open",s_category,String(s_path)]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
+                    /** 
+                     * @public 
+                     * @async
+                     * @function kernel_close
+                     * @param {number} n_device_index device index number must be greater then zero.
+                     * @param {string} s_category may be "device"
+                     * <br />  .
+                     * 
+                     * @returns {Promise} if success, resolve with echo data from server.
+                     * <br /> else reject with Error object.
+                     * 
+                     * @description run device close action to server by promise.
+                    */                
+                    kernel_close : function(n_device_index,s_category){
+                        return new Promise(function (resolve, reject) {
+                
+                            do {
+                                if (!_b_connet) {
+                                    reject(_get_error_object('en_e_server_connect'));
+                                    continue;
+                                }
+                
+                                var action_code = _type_action_code.KERNEL_OPERATION;
+                
+                                if (typeof n_device_index !== 'number') {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                if (n_device_index === const_n_undefined_device_index) {
+                                    reject(_get_error_object('en_e_device_index'));
+                                    continue;
+                                }
+                                _websocket.onerror = function(evt){
+                                    _on_def_error(n_device_index,evt);
+                                }
+    
+                                _websocket.onmessage = function (evt) {
+                                    _on_def_message_json_format(n_device_index,evt);
+                                }
+                    
+                                var parameter = {
+                                    "n_device_index" : n_device_index,
+                                    "method" : "kernel_close",
+                                    "resolve" : resolve,
+                                    "reject" : reject
+                                };
+                                _push_promise_parameter(n_device_index,parameter);
+                
+                                //send request
+                                var json_packet = _generate_request_packet(
+                                    _type_packet_owner.DEVICE
+                                    , n_device_index
+                                    , action_code
+                                    , 0
+                                    , 0
+                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                    ,["close",s_category]
+                                );
+                
+                                var s_json_packet = JSON.stringify(json_packet);
+                                _websocket.send(s_json_packet);
+                
+                            } while (false);
+                        });
+                    },
+
                     /** 
                      * @public 
                      * @async
@@ -2534,7 +3090,7 @@
                      * @async
                      * @function get_device_list
                      * @param {string} s_filter This filter is used to represent the desired USB device.
-                     * <br />the filter format is “class#vid_xxxx&pid_yyyy&mi_zz".  
+                     * <br />the filter format is class#vid_xxxx&pid_yyyy&mi_zz".  
                      * <br />"class" is "hid" or "winusb".
                      * <br />"vid" is usb device vendor ID hex code.
                      * <br />"pid" is usb device product ID hex code.
@@ -3515,6 +4071,8 @@
                         } while (false);
                         return b_result;
                     }
+
+
                     ////////////////////////////////////////////////////////////////////////
                     //public variables
 
@@ -3548,7 +4106,7 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.11.0";
+        return "1.12.0";
     }
 
     /**
