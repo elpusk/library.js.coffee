@@ -1,0 +1,1222 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2021 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>the testing coffee framework of javascript library</TITLE>
+
+</HEAD>
+<BODY>
+    <script type="text/javascript">
+        if (typeof Promise === "undefined") {
+            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
+
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+        }
+        else{
+            document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
+            document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
+        }
+    </script>    
+
+    <!-- fixed message area -->
+    this page supports elpusk coffee JavaScript library.
+    <br />
+    <!-- control area -->
+    <p id="p_top_text">
+        <!-- top text print area -->
+    </p>
+
+    <input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
+
+    <br />
+    <br />
+    <input type="button" id="button_promise_connect_server_ws" onclick="on_button_promise_connect_server_ws();" value="connect websocket server by promise" />
+    <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+    <input type="button" id="button_promise_echo_server" onclick="on_button_promise_echo_server();" value="echo server by promise" />
+    <input type="button" id="button_promise_echo_server_hex" onclick="on_button_promise_echo_server_hex();" value="echo hex data server by promise" />
+    <br />
+    <input type="button" id="button_promise_get_session_name" onclick="on_button_promise_get_session_name();" value="get currnet session name by promise" />
+    <br />
+    <input type="button" id="button_promise_set_session_name" onclick="on_button_promise_set_session_name();" value="set currnet session name by promise" />
+    input session name  : 
+    <input type="text" id="text_session_name" value="" />
+    <br />
+    target session name : <input type="text" id="text_target_session_name" value="" />
+    <br />
+    <input type="button" id="button_promise_send_data_to_session" onclick="on_button_promise_send_data_to_session();" value="send a data to the target session by promise" />
+    <input type="text" id="text_send_data_to_session" value="" />
+    <br />
+    <input type="button" id="button_promise_send_data_to_all" onclick="on_button_promise_send_data_to_all();" value="send a data to all session by promise" />
+    <input type="text" id="text_send_data_to_all" value="" />
+    <br />
+    <br />
+    <input type="button" id="button_promise_file_get_list" onclick="on_button_promise_file_get_list();" value="get file list" />
+    <select id="drop_get_file_list">
+    </select>
+    <br />
+    <br />
+    <input type="button" id="button_promise_file_create" onclick="on_button_promise_file_create();" value="create file" />
+    <input type="button" id="button_promise_file_open" onclick="on_button_promise_file_open();" value="open file" />
+    <input type="button" id="button_promise_file_close" onclick="on_button_promise_file_close();" value="close file" />
+    <br />
+    <input type="button" id="button_promise_file_delete" onclick="on_button_promise_file_delete();" value="delete file" />
+    <input type="button" id="button_promise_file_truncate" onclick="on_button_promise_file_truncate();" value="truncate file" />
+    <input type="button" id="button_promise_file_get_size" onclick="on_button_promise_file_get_size();" value="get file size" />
+    
+    <input type="button" id="button_promise_file_append" onclick="on_button_promise_file_append();" value="append file" />
+    <br />
+    Select the your source file : 
+    <input type="file" id="src_file" accept="." />
+    <br />
+    input destination file path : 
+    <input type="text" id="dst_virtual_path" value="" />
+    <br />
+    <br />
+    Select the your firmware file : 
+    <input type="file" id="src_firmware" accept="." />
+    <br />
+    <input type="button" id="button_firmware_update" onclick="on_button_firmware_update();" value="update firmware" />
+    <progress id="progress_firmware_update" max="100" value="0"></progress>
+    <br />
+    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter_with_native_dialog();" value="firmware set parameter with native dialog" />
+    <br />
+    <input type="button" id="button_firmware_set_parameter" onclick="on_button_firmware_set_parameter_without_native_dialog();" value="firmware set parameter without native dialog" />
+    <br />
+    <input type="button" id="button_promise_firmware_delete" onclick="on_button_promise_firmware_delete();" value="delete firmware" />
+    <br />
+
+    <br />
+    <br />
+    the registered usb device in coffee manager.
+    <br />
+    <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+    <input type="button" id="button_promise_device_open" onclick="on_button_promise_device_open();" value="open device by promise" />
+    <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
+    <br />
+    <input type="button" id="button_promise_device_send" onclick="on_button_promise_device_send();" value="send data to device by promise" />
+    <input type="button" id="button_promise_device_receive" onclick="on_button_promise_device_receive();" value="receive data from device by promise" />
+    <input type="button" id="button_promise_device_transmit" onclick="on_button_promise_device_transmit();" value="send and receive data .. device by promise" />
+    <input type="button" id="button_promise_device_cancel" onclick="on_button_promise_device_cancel();" value="cancel operation of  device by promise" />
+    <br />
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+        var startTime, endTime;
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : removed : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "A"){
+                    //send data to session of advance operation.
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
+                    continue;
+                }
+                //
+
+            }while(false);
+        }
+
+        function cb_progress_file_copy( b_result , n_progress , n_file_size, s_message){
+            do{
+                if( !b_result ){
+                    printMessage("error = " + s_message);
+                    continue;
+                }
+
+                var n_percentage = n_progress*100/n_file_size;
+                n_percentage.toFixed(3);
+
+                printMessage("copy offset = " + n_progress.toString() + "( " + n_percentage.toString() +"% ) : " + s_message);
+
+                endTime = (new Date()).getTime();
+                var duration = (endTime - startTime) / 1000;
+                var bitsLoaded = n_progress * 8;
+                var speedBps = (bitsLoaded / duration).toFixed(2);
+                var speedKbps = (speedBps / 1024).toFixed(2);
+                var speedMbps = (speedKbps / 1024).toFixed(2);
+                addMessage( "Your connection speed is:" );
+                addMessage( speedBps.toString() + " bps");
+                addMessage( speedKbps + " kbps" );
+                addMessage( speedMbps + " Mbps");                
+            }while(false);
+        }   
+
+        function cb_progress_fw_copy( b_result , n_progress , n_fw_size, s_message){
+            do{
+                if( !b_result ){
+                    printMessage("error = " + s_message);
+                    continue;
+                }
+
+                var n_percentage = n_progress*100/n_fw_size;
+                n_percentage.toFixed(3);
+
+                printMessage(
+                    "fw offset = " + n_progress.toString() + "/" + n_fw_size.toString()
+                     + "( " + n_percentage.toString() +"% ) : " + s_message);
+
+                endTime = (new Date()).getTime();
+                var duration = (endTime - startTime) / 1000;
+                var bitsLoaded = n_progress * 8;
+                var speedBps = (bitsLoaded / duration).toFixed(2);
+                var speedKbps = (speedBps / 1024).toFixed(2);
+                var speedMbps = (speedKbps / 1024).toFixed(2);
+                addMessage( "Your connection speed is:" );
+                addMessage( speedBps.toString() + " bps");
+                addMessage( speedKbps + " kbps" );
+                addMessage( speedMbps + " Mbps");
+                //
+                if( n_progress > 0 && n_progress === n_fw_size ){
+                    //the end of fw copy.
+                    on_button_firmware_set_parameter_without_native_dialog();
+                } 
+            }while(false);
+        }   
+
+        function cb_update_firmware( b_result , n_current_step , n_total_step, s_message){
+            do{
+                if( !b_result ){
+                    printMessage("error = " + s_message);
+                    continue;
+                }
+
+                if( n_total_step > 0 ){
+                    var n_percentage = (n_current_step+1)*100/n_total_step;
+                    n_percentage.toFixed(1);
+                    printMessage("update = " + n_current_step.toString() + "( " + n_percentage.toFixed(1).toString() +"% ) : " + s_message);
+                    if( (n_current_step+1) === n_total_step ){
+                        addMessage( "======= update complete. =======")
+                    }
+
+                    document.getElementById("progress_firmware_update").value = n_percentage.toFixed(1);
+                }
+
+            }while(false);
+        }   
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                addMessage("ok promise");
+            }
+
+            printTopMessage( "coffee library verion : " + elpusk.framework.coffee.get_this_library_version());
+            var server1 = elpusk.framework.coffee.get_instance();
+            var server2 = elpusk.framework.coffee.get_instance();
+
+            if( server1 === server2 ){
+                addMessage( "server1 and 2 identical." );
+            }
+            else{
+                addMessage( "server1 and 2 different." );
+            }
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+
+            //
+            //////////////////////////////////////
+            // copy file
+            document.getElementById("src_file").onclick = function () {
+                this.value='';
+            };
+
+            document.getElementById("src_file").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+
+                addMessage("source file size "+size.toString()+" bytes.");
+                addMessage("source file size "+(size/1024).toString()+" Kbytes.");
+                //
+                do{
+                    var s_virtual_path = document.getElementById("dst_virtual_path").value;
+                    if( s_virtual_path.length==0 ){
+                        addMessage("please input destination file path.");
+                        continue;
+                    }
+                    var server = elpusk.framework.coffee.get_instance();
+                    var n_packet_size = 10*1024;//10K bytes 
+                    if( !server.file_Copy_callback(file,s_virtual_path,n_packet_size,cb_progress_file_copy) ){
+                        addMessage("file_Copy_callback : start bERROR");
+                    }
+                    else{
+                        startTime = (new Date()).getTime();
+                        addMessage("file_Copy_callback : start SUCCESS");
+                    }
+                    /*
+                    server.file_Copy_small_size(file,s_virtual_path).then(function(s_message){
+                        addMessage("copy ok : " + s_message );
+                    })
+                    .catch( 
+                        function(event_error){
+                            console.log("error copy file : "+event_error);
+                        }
+                    );
+                    */
+                }while(false);
+            };
+
+            //////////////////////////////////////
+            // copy firmware
+            document.getElementById("src_firmware").onclick = function () {
+                this.value='';
+            };
+
+            document.getElementById("src_firmware").onchange = function () {
+                var file = this.files[0];
+                var name = file.name;
+                var size = file.size;
+
+                addMessage("firmware file size "+size.toString()+" bytes.");
+                addMessage("firmware file size "+(size/1024).toString()+" Kbytes.");
+                //
+                do{
+                    var server = elpusk.framework.coffee.get_instance();
+                    var n_packet_size = 10*1024;//10K bytes 
+                    if( !server.file_Copy_firmware_callback(file,n_packet_size,cb_progress_fw_copy) ){
+                        addMessage("file_Copy_firmware_callback : start bERROR");
+                    }
+                    else{
+                        startTime = (new Date()).getTime();
+                        addMessage("file_Copy_firmware_callback : start SUCCESS");
+                    }
+                }while(false);
+            };            
+
+        }
+
+        window.addEventListener("load", init, false);
+
+        function printTopMessage(Message){
+            var parag_main = document.getElementById("p_top_text");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function clearMessage() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage(Message){
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function printMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function on_button_promise_connect_server_ws(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("ws").then(function (s_session_number) {
+                // server is ready here
+                addMessage("websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_connect_server_wss(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss").then(function (s_session_number) {
+                // server is ready here
+                addMessage("security websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : security websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is ready here
+                addMessage("disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_echo_server() {
+            var server = elpusk.framework.coffee.get_instance();
+            //elpusk.framework.coffee.promise_echo_string(["abc", "a1b1c1", "a2b2c2"]).then(function (s_rx) {
+            server.echo_string("I am echo data.").then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("echo string array data : " + s_rx);
+                }
+                else {
+                    addMessage("echo string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : echo : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_echo_server_hex() {
+            var server = elpusk.framework.coffee.get_instance();
+            //"00 01 02 03 04 05 06 07 08 09 0a 0B 0c 0D 0f"
+            server.echo_hex("000102030405060708090a0B0c0D0f").then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("echo array data : " + s_rx);
+                }
+                else{
+                    addMessage("echo data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : echo : "+ server.get_error_message(event_error));
+            });
+        }
+
+        var file_current_path = null;
+
+        function on_button_promise_file_create(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_create("test1.aaa").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file create failure");
+                        continue;
+                    }
+
+                    addMessage("file create success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file create : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_open(){
+            var server = elpusk.framework.coffee.get_instance();
+            var select_file = document.getElementById("drop_get_file_list");
+
+            if( select_file.length <= 0 ){
+                addMessage("none file");
+                return;
+            }
+            if( file_current_path !== null ){
+                addMessage("error : for opening a file, you must close the opened file.");
+                return;
+            }
+
+            var s_file_path = select_file.options[select_file.selectedIndex].text;
+
+            server.file_open(s_file_path).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file open failure");
+                        continue;
+                    }
+
+                    file_current_path = s_file_path;
+                    addMessage("file open success : "+file_current_path);
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file open : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_close(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
+
+            server.file_close().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file close failure");
+                        continue;
+                    }
+                    addMessage("file close success : "+ file_current_path);
+                    file_current_path = null;
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file close : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_delete(){
+            var server = elpusk.framework.coffee.get_instance();
+            var select_file = document.getElementById("drop_get_file_list");
+
+            if( select_file.length <= 0 ){
+                addMessage("none file");
+                return;
+            }
+            var s_file_path = select_file.options[select_file.selectedIndex].text;
+
+            server.file_delete(s_file_path).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file delete failure : "+ s_file_path);
+                        continue;
+                    }
+
+                    addMessage("file delete success : "+ s_file_path);
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : delete : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_truncate(){
+            var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
+
+            server.file_truncate().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file truncate failure");
+                        continue;
+                    }
+
+                    addMessage("file truncate success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : truncate : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_get_list(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.file_get_list().then(function (s_rx) {
+                do{
+                    var select_file = document.getElementById("drop_get_file_list");
+                    var length = select_file.options.length;
+                    for (var i = length - 1; i >= 0; i--) {
+                        select_file.options[i] = null;
+                    }
+                                        
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    if( s_rx[0] != "success" ){
+                        addMessage("file get_list failure");
+                        continue;
+                    }
+
+                    if( s_rx.length == 1){
+                        addMessage("none file in virtual drive");
+                        continue;
+                    }
+                    addMessage(s_rx.toString());
+
+                    var n_file = s_rx.length;
+                    //except the first string - success or error
+                    for (var n_file_index = 1; n_file_index < n_file; n_file_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_file_index;
+                        option.text = s_rx[n_file_index];
+                        select_file.add(option, 0);
+                    }
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_list : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_get_size(){
+            var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
+
+            server.file_get_size().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    if( s_rx[0] != "success" ){
+                        addMessage("file get_size failure");
+                        continue;
+                    }
+
+                    addMessage(s_rx.toString());
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_size : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_file_append(){
+            var server = elpusk.framework.coffee.get_instance();
+            if( file_current_path === null ){
+                addMessage("fail : not opened file.");
+                return;
+            }
+
+            server.file_append("3031323334353637383930").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("file_append failure");
+                        continue;
+                    }
+
+                    addMessage("file_append success");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : file_append : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_firmware_delete(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.file_firmware_delete().then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("firmware delete failure : ");
+                        continue;
+                    }
+
+                    addMessage("firmware delete success : ");
+
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : delete : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_firmware_update(){
+            var server = elpusk.framework.coffee.get_instance();
+            if( server.device_update_start_with_callback(n_opened_device_index,0,0,cb_update_firmware) ){
+                document.getElementById("progress_firmware_update").value = 0;
+                addMessage("success : device_update_start_with_callback");
+            }
+            else{
+                addMessage("fail : device_update_start_with_callback.");
+            }
+        }
+
+        function on_button_firmware_set_parameter_with_native_dialog(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_update_set_parameter( n_opened_device_index,"model_name","ganymede").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"system_version","1.0.0.0");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : version");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_progress_","true");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter version : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_progress_");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_window_","true");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_window_");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_window_ : "+ server.get_error_message(event_error));
+            })
+            ;
+        }
+
+        function on_button_firmware_set_parameter_without_native_dialog(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_update_set_parameter( n_opened_device_index,"model_name","ganymede").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"system_version","1.0.0.0");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter send : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : version");
+                    return elpusk.framework.coffee.get_instance().device_update_set_parameter( n_opened_device_index,"_cf_bl_progress_","true");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter version : "+ server.get_error_message(event_error));
+            })
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("device_update_set_parameter failure");
+                        continue;
+                    }
+                    addMessage("device_update_set_parameter success : _cf_bl_progress_");
+                }while(false);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
+            })
+            ;
+        }
+
+        function on_button_promise_get_session_name() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.advance_get_session_name().then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_get_session_name result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_session_name : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_set_session_name() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_session_name = document.getElementById("text_session_name").value;
+            if( s_session_name.length==0 ){
+                addMessage("please input session name.");
+                return;
+            }
+
+            server.advance_set_session_name(s_session_name).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_set_session_name result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : set_session_name : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_send_data_to_session() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_session_name = document.getElementById("text_target_session_name").value;
+            var s_data = document.getElementById("text_send_data_to_session").value;
+            server.advance_send_data_to_session(s_session_name,[s_data]).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_send_data_to_session result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : advance_send_data_to_session : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_send_data_to_all() {
+            var server = elpusk.framework.coffee.get_instance();
+            var s_data = document.getElementById("text_send_data_to_all").value;
+            server.advance_send_data_to_all([s_data]).then(function (s_rx) {
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("advance_send_data_to_all result : " + s_rx);
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("invalied.");
+                    }
+                    else {
+                        addMessage("invalied : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : advance_send_data_to_all : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_get_device_list() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.get_device_list("hid#vid_134b&pid_0206&mi_01").then(function (s_rx) {
+                var select_dev = document.getElementById("drop_get_device_list");
+                var length = select_dev.options.length;
+                for (var i = length - 1; i >= 0; i--) {
+                    select_dev.options[i] = null;
+                }
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("array data paths : " + s_rx);
+
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_device_index;
+                        option.text = s_rx[n_device_index];
+                        select_dev.add(option, 0);
+                    }
+
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("no connect device.");
+                    }
+                    else {
+                        addMessage("string path : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : get_device_list : "+ server.get_error_message(event_error));
+            });
+        }
+
+        var n_opened_device_index = 0;
+
+        function on_button_promise_device_open() {
+            var select_dev = document.getElementById("drop_get_device_list");
+            var s_device_path = select_dev.options[select_dev.selectedIndex].text;
+
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_open(s_device_path).then(function (n_device_index) {
+                if( typeof n_device_index === 'undefined'){
+                    //error
+                    addMessage("error : open.");
+
+                }
+                else{
+                    if( n_device_index!==0){
+                        n_opened_device_index = n_device_index;
+                        addMessage("opened device index : " + n_device_index);
+                    }
+                    else{
+                        addMessage("opened device index : unknown - may be used in the other.");
+                    }
+                }
+            }).catch(function (event_error) {
+                n_opened_device_index = 0;
+                // error here
+                addMessage("fail : open device : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_close() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_close(n_opened_device_index).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("close failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("close success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device close : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_send(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_send(n_opened_device_index,0,"49 00 00").then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("send failure");
+                        continue;
+                    }
+
+                    addMessage("send success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device send : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_device_receive(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_receive(n_opened_device_index,0).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("received : " + s_rx);
+                        continue;
+                    }
+
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+
+                    addMessage("receive failure : "+s_rx);
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device receive : "+ server.get_error_message(event_error));
+            });
+
+        }
+        function on_button_promise_device_transmit(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_transmit(n_opened_device_index,0,0,"49 00 00")
+            .then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("received : " + s_rx);
+                        continue;
+                    }
+
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+
+                    addMessage("receive failure : "+s_rx);
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device transmit : "+ server.get_error_message(event_error));
+            });
+
+        }
+        function on_button_promise_device_cancel(){
+            var server = elpusk.framework.coffee.get_instance();
+            server.device_cancel(n_opened_device_index,0,0).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("error reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("cancel failure");
+                        continue;
+                    }
+
+                    addMessage("cancel success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : device cancel : "+ server.get_error_message(event_error));
+            });
+        }
+
+
+
+    </script>
+</BODY>
+</HTML>
