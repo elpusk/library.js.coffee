@@ -63,13 +63,13 @@
  * <br />  : add - file_firmware_delete().
  * 
  * <br />  2021.7.1 - release 1.12
- * <br />  : add - kernel_load()
- * <br />  : add - kernel_unload()
- * <br />  : add - kernel_execute()
- * <br />  : add - kernel_cancel()
- * <br />  : add - kernel_list()
- * <br />  : add - kernel_open()
- * <br />  : add - kernel_close()
+ * <br />  : add - kernel_load(s_category,s_target)
+ * <br />  : add - kernel_unload(s_category,s_target)
+ * <br />  : add - kernel_execute(n_device_index,n_in_id, n_out_id,s_category,s_target,sa_data)
+ * <br />  : add - kernel_cancel(n_device_index,n_in_id,n_out_id,s_category,s_target)
+ * <br />  : add - kernel_list(s_category,s_filter)
+ * <br />  : add - kernel_open(s_category,s_path)
+ * <br />  : add - kernel_close(n_device_index,s_category)
  * 
  * @namespace
  */
@@ -1589,6 +1589,7 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
+                                var s_data = "load"+" "+s_category+" "+s_target;
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.MANAGER
                                     , const_n_undefined_device_index
@@ -1596,7 +1597,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["load",s_category,s_target]
+                                    , [s_data]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -1647,6 +1648,7 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
+                                var s_data = "unload"+" "+s_category+" "+s_target;
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.MANAGER
                                     , const_n_undefined_device_index
@@ -1654,7 +1656,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["unload",s_category,s_target]
+                                    , [s_data]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -1732,6 +1734,7 @@
                                     c_owner = _type_packet_owner.DEVICE;
                                 }
                                 //send request
+                                var s_data = "execute"+" "+s_category+" "+s_target;
                                 var json_packet = _generate_request_packet(
                                     c_owner
                                     , n_device_index
@@ -1739,7 +1742,7 @@
                                     , n_in_id
                                     , n_out_id
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["execute",s_category,s_target].concat(sa_data)
+                                    , [s_data].concat(sa_data)
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -1816,6 +1819,7 @@
                                     c_owner = _type_packet_owner.DEVICE;
                                 }
                                 //send request
+                                var s_data = "cancel"+" "+s_category+" "+s_target;
                                 var json_packet = _generate_request_packet(
                                     c_owner
                                     , n_device_index
@@ -1823,7 +1827,7 @@
                                     , n_in_id
                                     , n_out_id
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["cancel",s_category,s_target]
+                                    , [s_data]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -1887,6 +1891,7 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
+                                var s_data = "list"+" "+s_category;
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.MANAGER
                                     , const_n_undefined_device_index
@@ -1894,7 +1899,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["list",s_category,String(s_used_filter)]
+                                    , [s_data,String(s_used_filter)]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -1955,6 +1960,7 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
+                                var s_data = "open"+" "+s_category;
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
                                     , const_n_undefined_device_index
@@ -1962,7 +1968,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["open",s_category,String(s_path)]
+                                    , [s_data,String(s_path)]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);
@@ -2021,6 +2027,7 @@
                                 _push_promise_parameter(n_device_index,parameter);
                 
                                 //send request
+                                var s_data = "close"+" "+s_category;
                                 var json_packet = _generate_request_packet(
                                     _type_packet_owner.DEVICE
                                     , n_device_index
@@ -2028,7 +2035,7 @@
                                     , 0
                                     , 0
                                     , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    ,["close",s_category]
+                                    ,[s_data]
                                 );
                 
                                 var s_json_packet = JSON.stringify(json_packet);

@@ -1,0 +1,16 @@
+<h1>header HTML</h1>
+
+<input type="button" id="button_clear_message" onclick="clearMessage();" value="clear message" />
+<br />
+<input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
+
+<script type="text/javascript">
+function clearMessage() {
+    var parag_main = document.getElementById("p_main");
+    if(parag_main){
+        parag_main.style.wordWrap = "break-word";
+        parag_main.style.fontSize = "12px";
+        parag_main.innerHTML ="";
+    }
+}
+</script>
