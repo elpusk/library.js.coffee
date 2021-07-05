@@ -1235,13 +1235,21 @@
                 addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
             });
         }
+
+        var _n_cnt_info = 0;
+
         function on_button_promise_kernel_service_execute(){
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "service";
             var s_target = "default/sd_helloworld.dll";
-            var sa_data = ["inform0","inform1","inform2"];
-            server.kernel_execute(n_opened_device_index,0,0,s_category,s_target,sa_data).then(function (s_rx) {
+            //var sa_data = ["inform2","inform1","inform0"];
+            var sa_data = [3];
+            sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+
+            server.kernel_execute(0,0,0,s_category,s_target,sa_data).then(function (s_rx) {
                 if (Array.isArray(s_rx)) {
                     addMessage("kernel_execute string array data : " + s_rx);
                 }
@@ -1254,22 +1262,164 @@
             });
         }
         function on_button_promise_kernel_service_cancel(){
-            
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "service";
+            var s_target = "default/sd_helloworld.dll";
+
+            server.kernel_cancel(0,0,0,s_category,s_target).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_cancel string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_cancel string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
+            });
         }
         function on_button_promise_kernel_device_list(){
-            
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "device";
+            var s_filter = "hid#vid_134b&pid_0206&mi_01";
+
+            server.kernel_list(s_category,s_filter).then(function (s_rx) {
+                var select_dev = document.getElementById("drop_get_device_list");
+                var length = select_dev.options.length;
+                for (var i = length - 1; i >= 0; i--) {
+                    select_dev.options[i] = null;
+                }
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("array data paths : " + s_rx);
+
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_device_index;
+                        option.text = s_rx[n_device_index];
+                        select_dev.add(option, 0);
+                    }
+
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("no connect device.");
+                    }
+                    else {
+                        addMessage("string path : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_list : "+ server.get_error_message(event_error));
+            });
         }
         function on_button_promise_kernel_device_open(){
-            
+            var select_dev = document.getElementById("drop_get_device_list");
+            var s_device_path = select_dev.options[select_dev.selectedIndex].text;
+
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "device";
+            var s_path = "hid#vid_134b&pid_0206&mi_01";
+
+            server.kernel_open(s_category,s_path).then(function (n_device_index) {
+                if( typeof n_device_index === 'undefined'){
+                    //error
+                    addMessage("error : open.");
+
+                }
+                else{
+                    if( n_device_index!==0){
+                        n_opened_device_index = n_device_index;
+                        addMessage("opened device index : " + n_device_index);
+                    }
+                    else{
+                        addMessage("opened device index : unknown - may be used in the other.");
+                    }
+                }
+            }).catch(function (event_error) {
+                n_opened_device_index = 0;
+                // error here
+                addMessage("fail : kernel_open : "+ server.get_error_message(event_error));
+            });
         }
         function on_button_promise_kernel_device_close(){
-            
+
+            var server = elpusk.framework.coffee.get_instance();
+            var s_category = "device";
+
+            server.kernel_close(n_opened_device_index,s_category).then(function (s_rx) {
+                do{
+                    if (!Array.isArray(s_rx)) {
+                        addMessage("erro reponse : " + s_rx);
+                        continue;
+                    }
+                    if (s_rx === null) {
+                        addMessage("invalied response");
+                        continue;
+                    }
+                    else if( s_rx != "success" ){
+                        addMessage("close failure");
+                        continue;
+                    }
+
+                    n_opened_device_index = 0;
+                    addMessage("close success");
+
+                }while(false);
+
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_close : "+ server.get_error_message(event_error));
+            });
         }
         function on_button_promise_kernel_device_execute(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "device";
+            var s_target = "default/sd_helloworld.dll";
+            //var sa_data = ["inform2","inform1","inform0"];
+            var sa_data = [3];
+            sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+
+            server.kernel_execute(n_opened_device_index,0,0,s_category,s_target,sa_data).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_execute string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_execute string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            });
             
         }
         function on_button_promise_kernel_device_cancel(){
-            
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "device";
+            var s_target = "default/sd_helloworld.dll";
+
+            server.kernel_cancel(n_opened_device_index,0,0,s_category,s_target).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_cancel string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_cancel string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
+            });
         }
 
     </script>

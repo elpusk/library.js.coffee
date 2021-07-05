@@ -1841,7 +1841,7 @@
                      * @public 
                      * @async
                      * @function kernel_list
-                     * @param {string} s_category may be "service"
+                     * @param {string} s_category may be "device"
                      * @param {string} s_filter This filter is used to represent the desired USB device.
                      * <br />the filter format is class#vid_xxxx&pid_yyyy&mi_zz".  
                      * <br />"class" is "hid" or "winusb".
