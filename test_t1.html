@@ -122,19 +122,35 @@
 
     <br />
     <br />
-    kernel test.
+    kernel test. (sd_helloworld.dll)
     <br />   For manager    <br />
-    <input type="button" id="button_promise_kernel_service_load" onclick="on_button_promise_kernel_service_load();" value="load service dll" />
-    <input type="button" id="button_promise_kernel_service_unload" onclick="on_button_promise_kernel_service_unload();" value="unload service dll" />
-    <input type="button" id="button_promise_kernel_service_execute" onclick="on_button_promise_kernel_service_execute();" value="execute service dll" />
-    <input type="button" id="button_promise_kernel_service_cancel" onclick="on_button_promise_kernel_service_cancel();" value="cancel service dll" />
+    <input type="button" id="button_promise_kernel_service_load" onclick='on_button_promise_kernel_service_load("default/sd_helloworld.dll");' value="load service dll" />
+    <input type="button" id="button_promise_kernel_service_unload" onclick='on_button_promise_kernel_service_unload("default/sd_helloworld.dll");' value="unload service dll" />
+    <input type="button" id="button_promise_kernel_service_execute" onclick='on_button_promise_kernel_service_execute("default/sd_helloworld.dll");' value="execute service dll" />
+    <input type="button" id="button_promise_kernel_service_cancel" onclick='on_button_promise_kernel_service_cancel("default/sd_helloworld.dll");' value="cancel service dll" />
     <br />
-    <input type="button" id="button_promise_kernel_device_list" onclick="on_button_promise_kernel_device_list();" value="list device" />
-    <br />   For device    <br />
+    <input type="button" id="button_promise_kernel_device_list" onclick='on_button_promise_kernel_device_list("hid#vid_134b&pid_0206&mi_01");' value="list device" />
+    <br />   For device   (sd_helloworld.dll)  <br />
     <input type="button" id="button_promise_kernel_device_open" onclick="on_button_promise_kernel_device_open();" value="open device" />
     <input type="button" id="button_promise_kernel_device_close" onclick="on_button_promise_kernel_device_close();" value="close device" />
-    <input type="button" id="button_promise_kernel_device_execute" onclick="on_button_promise_kernel_device_execute();" value="execute device" />
-    <input type="button" id="button_promise_kernel_device_cancel" onclick="on_button_promise_kernel_device_cancel();" value="cancel device" />
+    <input type="button" id="button_promise_kernel_device_execute" onclick='on_button_promise_kernel_device_execute("default/sd_helloworld.dll");' value="execute device" />
+    <input type="button" id="button_promise_kernel_device_cancel" onclick='on_button_promise_kernel_device_cancel("default/sd_helloworld.dll");' value="cancel device" />
+
+    <br />
+    <br />
+    kernel test. (sd_post_office.dll)
+    <br />   For manager    <br />
+    <input type="button" id="button_promise_kernel_service_load" onclick='on_button_promise_kernel_service_load("3thpart/sd_post_office.dll");' value="load service dll" />
+    <input type="button" id="button_promise_kernel_service_unload" onclick='on_button_promise_kernel_service_unload("3thpart/sd_post_office.dll");' value="unload service dll" />
+    <input type="button" id="button_promise_kernel_service_execute" onclick='on_button_promise_kernel_service_execute("3thpart/sd_post_office.dll");' value="execute service dll" />
+    <input type="button" id="button_promise_kernel_service_cancel" onclick='on_button_promise_kernel_service_cancel("3thpart/sd_post_office.dll");' value="cancel service dll" />
+    <br />
+    <input type="button" id="button_promise_kernel_device_list" onclick='on_button_promise_kernel_device_list("hid#vid_134b&pid_0206&mi_01");' value="list device" />
+    <br />   For device   (sd_post_office.dll)  <br />
+    <input type="button" id="button_promise_kernel_device_open" onclick="on_button_promise_kernel_device_open();" value="open device" />
+    <input type="button" id="button_promise_kernel_device_close" onclick="on_button_promise_kernel_device_close();" value="close device" />
+    <input type="button" id="button_promise_kernel_device_execute" onclick='on_button_promise_kernel_device_execute("3thpart/sd_post_office.dll");' value="execute device" />
+    <input type="button" id="button_promise_kernel_device_cancel" onclick='on_button_promise_kernel_device_cancel("3thpart/sd_post_office.dll");' value="cancel device" />
 
     <p id="p_pre_main">
         <!-- pre main print area -->
@@ -1201,11 +1217,10 @@
             });
         }
 
-        function on_button_promise_kernel_service_load(){
+        function on_button_promise_kernel_service_load(s_target){
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
             server.kernel_load(s_category,s_target).then(function (s_rx) {
                 if (Array.isArray(s_rx)) {
                     addMessage("kernel_service_load string array data : " + s_rx);
@@ -1218,11 +1233,10 @@
                 addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
             });
         }
-        function on_button_promise_kernel_service_unload(){
+        function on_button_promise_kernel_service_unload(s_target){
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
             server.kernel_unload(s_category,s_target).then(function (s_rx) {
                 if (Array.isArray(s_rx)) {
                     addMessage("kernel_unload string array data : " + s_rx);
@@ -1238,11 +1252,10 @@
 
         var _n_cnt_info = 0;
 
-        function on_button_promise_kernel_service_execute(){
+        function on_button_promise_kernel_service_execute(s_target){
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
             //var sa_data = ["inform2","inform1","inform0"];
             var sa_data = [3];
             sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
@@ -1261,11 +1274,10 @@
                 addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
             });
         }
-        function on_button_promise_kernel_service_cancel(){
+        function on_button_promise_kernel_service_cancel(s_target){
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
 
             server.kernel_cancel(0,0,0,s_category,s_target).then(function (s_rx) {
                 if (Array.isArray(s_rx)) {
@@ -1279,11 +1291,9 @@
                 addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
             });
         }
-        function on_button_promise_kernel_device_list(){
+        function on_button_promise_kernel_device_list(s_filter){
             var server = elpusk.framework.coffee.get_instance();
-
             var s_category = "device";
-            var s_filter = "hid#vid_134b&pid_0206&mi_01";
 
             server.kernel_list(s_category,s_filter).then(function (s_rx) {
                 var select_dev = document.getElementById("drop_get_device_list");
@@ -1378,11 +1388,9 @@
                 addMessage("fail : kernel_close : "+ server.get_error_message(event_error));
             });
         }
-        function on_button_promise_kernel_device_execute(){
+        function on_button_promise_kernel_device_execute(s_target){
             var server = elpusk.framework.coffee.get_instance();
-
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
             //var sa_data = ["inform2","inform1","inform0"];
             var sa_data = [3];
             sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
@@ -1402,11 +1410,9 @@
             });
             
         }
-        function on_button_promise_kernel_device_cancel(){
+        function on_button_promise_kernel_device_cancel(s_target){
             var server = elpusk.framework.coffee.get_instance();
-
             var s_category = "service";
-            var s_target = "default/sd_helloworld.dll";
 
             server.kernel_cancel(n_opened_device_index,0,0,s_category,s_target).then(function (s_rx) {
                 if (Array.isArray(s_rx)) {
