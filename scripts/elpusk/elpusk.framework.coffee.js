@@ -1099,6 +1099,25 @@
                                         parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                     }
                                     break;
+                                case "kernel_open":
+                                    if (json_obj.action_code == _type_action_code.KERNEL_OPERATION) {
+                                        if (Array.isArray(json_obj.data_field)) {
+                                            if(json_obj.data_field[0] === "success"){
+                                                _delete_promise_parameter(json_obj.device_index);
+                                                parameter.resolve(json_obj.device_index);
+                                            }
+                                            else{
+                                                parameter.resolve(const_n_undefined_device_index);
+                                            }
+                                        }
+                                        else{
+                                            parameter.reject(_get_error_object('en_e_server_data_field_format'));
+                                        }
+                                    }
+                                    else {
+                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
+                                    }
+                                    break;
                                 case "device_open":
                                     if (json_obj.action_code == _type_action_code.DEVICE_OPEN) {
                                         if(json_obj.data_field == "success"){
@@ -1293,35 +1312,14 @@
                                     }
                                 }
                                 break;
-                            case "kernel_open":
                             case "kernel_close":
                             case "kernel_execute":
                             case "kernel_cancel":
                                 if (json_obj.action_code == _type_action_code.KERNEL_OPERATION) {
-                                    if( parameter.resolve === null ){
-                                        if( parameter.b_device_index ){
-                                            parameter.cb_received(n_device_index,json_obj.data_field);
-                                        }
-                                        else{
-                                            parameter.cb_received(json_obj.data_field);
-                                        }
-                                    }
-                                    else{
-                                        parameter.resolve(json_obj.data_field);
-                                    }
+                                    parameter.resolve(json_obj.data_field);
                                 }
                                 else {
-                                    if( parameter.reject === null ){
-                                        if( parameter.b_device_index ){
-                                            parameter.cb_error(n_device_index,_get_error_object('en_e_server_mismatch_action'));
-                                        }
-                                        else{
-                                            parameter.cb_error(_get_error_object('en_e_server_mismatch_action'));
-                                        }
-                                    }
-                                    else{
-                                        parameter.reject(_get_error_object('en_e_server_mismatch_action'));
-                                    }
+                                    parameter.reject(_get_error_object('en_e_server_mismatch_action'));
                                 }
                                 break;
                             default:
@@ -1371,6 +1369,7 @@
                                 case "kernel_execute":
                                 case "kernel_cancel":
                                 case "kernel_list":
+                                case "kernel_open":
                                     parameter.reject(evt);
                                     break;
                                 default:
@@ -1387,10 +1386,6 @@
                             case "device_receive":
                             case "device_transmit":
                             case "device_cancel":
-                            case "kernel_open":
-                            case "kernel_close":
-                            case "kernel_execute":
-                            case "kernel_cancel":
                                 if( parameter.reject === null ){
                                     if( parameter.b_device_index ){
                                         parameter.cb_error(n_device_index,evt);
@@ -1402,6 +1397,12 @@
                                 else{
                                     parameter.reject(evt);
                                 }
+                                break;
+                            case "kernel_open":
+                            case "kernel_close":
+                            case "kernel_execute":
+                            case "kernel_cancel":
+                                parameter.reject(evt);
                                 break;
                             case "device_update_set_parameter":
                                 parameter.reject(evt);

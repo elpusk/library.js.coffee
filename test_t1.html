@@ -1326,9 +1326,8 @@
             var server = elpusk.framework.coffee.get_instance();
 
             var s_category = "device";
-            var s_path = "hid#vid_134b&pid_0206&mi_01";
 
-            server.kernel_open(s_category,s_path).then(function (n_device_index) {
+            server.kernel_open(s_category,s_device_path).then(function (n_device_index) {
                 if( typeof n_device_index === 'undefined'){
                     //error
                     addMessage("error : open.");
@@ -1364,7 +1363,7 @@
                         addMessage("invalied response");
                         continue;
                     }
-                    else if( s_rx != "success" ){
+                    else if( s_rx[0] != "success" ){
                         addMessage("close failure");
                         continue;
                     }
@@ -1382,7 +1381,7 @@
         function on_button_promise_kernel_device_execute(){
             var server = elpusk.framework.coffee.get_instance();
 
-            var s_category = "device";
+            var s_category = "service";
             var s_target = "default/sd_helloworld.dll";
             //var sa_data = ["inform2","inform1","inform0"];
             var sa_data = [3];
@@ -1406,7 +1405,7 @@
         function on_button_promise_kernel_device_cancel(){
             var server = elpusk.framework.coffee.get_instance();
 
-            var s_category = "device";
+            var s_category = "service";
             var s_target = "default/sd_helloworld.dll";
 
             server.kernel_cancel(n_opened_device_index,0,0,s_category,s_target).then(function (s_rx) {
