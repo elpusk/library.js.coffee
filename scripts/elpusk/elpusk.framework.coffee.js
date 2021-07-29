@@ -366,6 +366,7 @@
                  * @function _is_chrome_or_firfox_or_opera
                  * @returns {boolean}
                  * @description check whether or not current brower is firfox or opera.
+                 * Warning replace the usage of navigator.userAgent, navigator.appVersion, and navigator.platform with feature detection, progressive enhancement, or migrate to navigator.userAgentData.
                 */                
                 function _is_chrome_or_firfox_or_opera() {
                     var isChrome = !!window.chrome && !!window.chrome.webstore,
