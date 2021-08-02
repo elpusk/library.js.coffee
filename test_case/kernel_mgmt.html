@@ -64,6 +64,10 @@
     <br />
 
     <br />
+    input number <input type="number" id="id_input_number" value="1" min="1" max="1000000" />
+    <br />
+    
+    <br />
     TC.000.001 : load and unload
     <input type="button" id="button_tc_000_001" onclick='on_button_tc_000_001("default/sd_helloworld.dll");' value="TC.000.001" />
     <br />
@@ -451,10 +455,17 @@
         var s_target = s_sd_dll;
         var sa_data = new Array();
         
-        fetch('http://www.elpusk.co.kr')
+        fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits')
         .then(function (response) {
             console.log("fetched.......");
-            return response.json();
+            if( response.ok ){
+                //HTTO status code 200-299
+                return response.json();
+            }
+            else{
+                alert("HTTP-Error: " + response.status);
+            }
+            
         })
         .catch(function (event_error) {
             // error here
@@ -463,7 +474,8 @@
         })
         .then(function (json) {
             console.log("JSON.......");
-            sa_data.push(JSON.stringify(json));
+            var _s_d = JSON.stringify(json);
+            sa_data.push(_s_d);
             return elpusk.framework.coffee.get_instance().kernel_load(s_category,s_target);
         })
         .catch(function (event_error) {
@@ -475,6 +487,19 @@
             if (Array.isArray(s_rx)) {
                 if( s_rx[0] === "success" ){
                     addMessage("pass : kernel_service_load");
+                    console.log("kernel_execute : tx size = "+sa_data[0].length.toString());
+                    if(sa_data[0].length > 100 ){
+                        sa_data[0] = "";//document.getElementById
+                        var _n_loop = Number(document.getElementById("id_input_number").value);
+                        console.log(_n_loop);
+
+                        for( var j=0; j<_n_loop; j++ ){
+                            for( var i=0; i<10; i++ ){
+                                sa_data[0] += i.toString();    
+                            }
+                        }//end for j
+                        console.log("kernel_execute : tx size(reduce) = "+sa_data[0].length.toString());
+                    }
                     return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
                 }
                 else{
