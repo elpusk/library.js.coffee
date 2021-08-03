@@ -64,7 +64,7 @@
     <br />
 
     <br />
-    input number <input type="number" id="id_input_number" value="1" min="1" max="1000000" />
+    input number(max 1M characters) <input type="number" id="id_input_number" value="1048576" min="1" max="104857600" />
     <br />
     
     <br />
@@ -74,8 +74,11 @@
     TC.000.002 : load , execute and unload
     <input type="button" id="button_tc_000_002" onclick='on_button_tc_000_002("default/sd_helloworld.dll");' value="TC.000.002" />
     <br />
-    TC.000.003 : load , big data execute and unload
+    TC.000.003 : load , remote big data execute and unload
     <input type="button" id="button_tc_000_003" onclick='on_button_tc_000_003("default/sd_helloworld.dll");' value="TC.000.003" />
+    <br />
+    TC.000.004 : load , local big data execute and unload
+    <input type="button" id="button_tc_000_004" onclick='on_button_tc_000_004("default/sd_helloworld.dll");' value="TC.000.004" />
     <br />
 
 
@@ -444,10 +447,10 @@
         });           
     }//on_button_tc_000_002()
 
-    //TC.000.003 : load , big data execute and unload (Web-Scraping)
+    //TC.000.003 : load , remote big data execute and unload (Web-Scraping)
     function on_button_tc_000_003(s_sd_dll) {
         addMessage("========================");
-        addMessage("TC.000.003 : load , big data execute and unload");
+        addMessage("TC.000.003 : load , remote big data execute and unload");
 
         var server = elpusk.framework.coffee.get_instance();
 
@@ -488,18 +491,22 @@
                 if( s_rx[0] === "success" ){
                     addMessage("pass : kernel_service_load");
                     console.log("kernel_execute : tx size = "+sa_data[0].length.toString());
+                    /*
                     if(sa_data[0].length > 100 ){
                         sa_data[0] = "";//document.getElementById
-                        var _n_loop = Number(document.getElementById("id_input_number").value);
-                        console.log(_n_loop);
+                        var _n_cnt = Number(document.getElementById("id_input_number").value);
+                        var _n_loop10 = _n_cnt/10;
+                        var _n_remainder = _n_cnt%10;
 
-                        for( var j=0; j<_n_loop; j++ ){
-                            for( var i=0; i<10; i++ ){
-                                sa_data[0] += i.toString();    
-                            }
-                        }//end for j
+                        for( var i=0; i<_n_loop10; i++ ){
+                            sa_data[0] += "0123456789";    
+                        }
+                        for( var i=0; i<_n_remainder; i++ ){
+                            sa_data[0] += i.toString();    
+                        }
                         console.log("kernel_execute : tx size(reduce) = "+sa_data[0].length.toString());
                     }
+                    */
                     return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
                 }
                 else{
@@ -552,6 +559,87 @@
             addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
         });           
     }//on_button_tc_000_003()    
+
+    //TC.000.004 : load , local big data execute and unload (Web-Scraping)
+    function on_button_tc_000_004(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.004 : load , local big data execute and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        var sa_data = new Array();
+        
+        elpusk.framework.coffee.get_instance().kernel_load(s_category,s_target)
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    sa_data[0] = "";//document.getElementById
+                    var _n_cnt = Number(document.getElementById("id_input_number").value);
+                    var _n_loop10 = _n_cnt/10;
+                    var _n_remainder = _n_cnt%10;
+
+                    for( var i=0; i<_n_loop10; i++ ){
+                        sa_data[0] += "0123456789";    
+                    }
+                    for( var i=0; i<_n_remainder; i++ ){
+                        sa_data[0] += i.toString();    
+                    }
+
+                    return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_execute : " + s_rx);
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_execute string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });           
+    }//on_button_tc_000_004()    
 
     </script>
 </BODY>
