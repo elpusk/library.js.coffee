@@ -1,0 +1,1 @@
+test_coffee_framework.html 에서 send a data to all session by promise 하면 cf 응답 없음.

@@ -30,7 +30,7 @@
     <meta charset="utf-8" />
 
     <TITLE>test for javascript library</TITLE>
-    <script src="scripts/include.js"></script>
+    <script src="./include.js"></script>
 </HEAD>
 <BODY>
     <!-- fixed message area -->
@@ -45,6 +45,7 @@
 
     <br />
     <br />
+    <input type="button" id="button_promise_connect_server_ws" onclick="on_button_promise_connect_server_ws();" value="connect websocket server by promise" />
     <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
     <br />
     <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
@@ -120,38 +121,6 @@
     <input type="button" id="button_promise_device_cancel" onclick="on_button_promise_device_cancel();" value="cancel operation of  device by promise" />
     <br />
 
-    <br />
-    <br />
-    kernel test. (sd_helloworld.dll)
-    <br />   For manager    <br />
-    <input type="button" id="button_promise_kernel_service_load" onclick='on_button_promise_kernel_service_load("default/sd_helloworld.dll");' value="load service dll" />
-    <input type="button" id="button_promise_kernel_service_unload" onclick='on_button_promise_kernel_service_unload("default/sd_helloworld.dll");' value="unload service dll" />
-    <input type="button" id="button_promise_kernel_service_execute" onclick='on_button_promise_kernel_service_execute("default/sd_helloworld.dll");' value="execute service dll" />
-    <input type="button" id="button_promise_kernel_service_cancel" onclick='on_button_promise_kernel_service_cancel("default/sd_helloworld.dll");' value="cancel service dll" />
-    <br />
-    <input type="button" id="button_promise_kernel_device_list" onclick='on_button_promise_kernel_device_list("hid#vid_134b&pid_0206&mi_01");' value="list device" />
-    <br />   For device   (sd_helloworld.dll)  <br />
-    <input type="button" id="button_promise_kernel_device_open" onclick="on_button_promise_kernel_device_open();" value="open device" />
-    <input type="button" id="button_promise_kernel_device_close" onclick="on_button_promise_kernel_device_close();" value="close device" />
-    <input type="button" id="button_promise_kernel_device_execute" onclick='on_button_promise_kernel_device_execute("default/sd_helloworld.dll");' value="execute device" />
-    <input type="button" id="button_promise_kernel_device_cancel" onclick='on_button_promise_kernel_device_cancel("default/sd_helloworld.dll");' value="cancel device" />
-
-    <br />
-    <br />
-    kernel test. (sd_post_office.dll)
-    <br />   For manager    <br />
-    <input type="button" id="button_promise_kernel_service_load" onclick='on_button_promise_kernel_service_load("3thpart/sd_post_office.dll");' value="load service dll" />
-    <input type="button" id="button_promise_kernel_service_unload" onclick='on_button_promise_kernel_service_unload("3thpart/sd_post_office.dll");' value="unload service dll" />
-    <input type="button" id="button_promise_kernel_service_execute" onclick='on_button_promise_kernel_service_execute("3thpart/sd_post_office.dll");' value="execute service dll" />
-    <input type="button" id="button_promise_kernel_service_cancel" onclick='on_button_promise_kernel_service_cancel("3thpart/sd_post_office.dll");' value="cancel service dll" />
-    <br />
-    <input type="button" id="button_promise_kernel_device_list" onclick='on_button_promise_kernel_device_list("hid#vid_134b&pid_0206&mi_01");' value="list device" />
-    <br />   For device   (sd_post_office.dll)  <br />
-    <input type="button" id="button_promise_kernel_device_open" onclick="on_button_promise_kernel_device_open();" value="open device" />
-    <input type="button" id="button_promise_kernel_device_close" onclick="on_button_promise_kernel_device_close();" value="close device" />
-    <input type="button" id="button_promise_kernel_device_execute" onclick='on_button_promise_kernel_device_execute("3thpart/sd_post_office.dll");' value="execute device" />
-    <input type="button" id="button_promise_kernel_device_cancel" onclick='on_button_promise_kernel_device_cancel("3thpart/sd_post_office.dll");' value="cancel device" />
-
     <p id="p_pre_main">
         <!-- pre main print area -->
     </p>
@@ -164,6 +133,7 @@
     <script type="text/javascript">
         var n_system_event = 0;
         var startTime, endTime;
+        var n_opened_device_index = 0;
 
         function cb_system_event( s_action_code,s_data_field ){
             do{
@@ -406,6 +376,18 @@
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function on_button_promise_connect_server_ws(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("ws").then(function (s_session_number) {
+                // server is ready here
+                addMessage("websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : websocket connection : "+ server.get_error_message(event_error));
+            });
         }
 
         function on_button_promise_connect_server_wss(){
@@ -1057,8 +1039,6 @@
             });
         }
 
-        var n_opened_device_index = 0;
-
         function on_button_promise_device_open() {
             var select_dev = document.getElementById("drop_get_device_list");
             var s_device_path = select_dev.options[select_dev.selectedIndex].text;
@@ -1217,215 +1197,7 @@
             });
         }
 
-        function on_button_promise_kernel_service_load(s_target){
-            var server = elpusk.framework.coffee.get_instance();
 
-            var s_category = "service";
-            server.kernel_load(s_category,s_target).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_service_load string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_service_load string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_service_unload(s_target){
-            var server = elpusk.framework.coffee.get_instance();
-
-            var s_category = "service";
-            server.kernel_unload(s_category,s_target).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_unload string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_unload string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
-            });
-        }
-
-        var _n_cnt_info = 0;
-
-        function on_button_promise_kernel_service_execute(s_target){
-            var server = elpusk.framework.coffee.get_instance();
-
-            var s_category = "service";
-            //var sa_data = ["inform2","inform1","inform0"];
-            var sa_data = [3];
-            sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-            sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-            sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-
-            server.kernel_execute(0,0,0,s_category,s_target,sa_data).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_execute string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_execute string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_service_cancel(s_target){
-            var server = elpusk.framework.coffee.get_instance();
-
-            var s_category = "service";
-
-            server.kernel_cancel(0,0,0,s_category,s_target).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_cancel string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_cancel string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_device_list(s_filter){
-            var server = elpusk.framework.coffee.get_instance();
-            var s_category = "device";
-
-            server.kernel_list(s_category,s_filter).then(function (s_rx) {
-                var select_dev = document.getElementById("drop_get_device_list");
-                var length = select_dev.options.length;
-                for (var i = length - 1; i >= 0; i--) {
-                    select_dev.options[i] = null;
-                }
-
-                if (Array.isArray(s_rx)) {
-                    addMessage("array data paths : " + s_rx);
-
-                    var array_device_list = new Array();
-
-                    var n_device = s_rx.length;
-                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
-                        var option = document.createElement('option');
-                        option.value = n_device_index;
-                        option.text = s_rx[n_device_index];
-                        select_dev.add(option, 0);
-                    }
-
-                }
-                else {
-                    if (s_rx === null) {
-                        addMessage("no connect device.");
-                    }
-                    else {
-                        addMessage("string path : " + s_rx);
-                    }
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_list : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_device_open(){
-            var select_dev = document.getElementById("drop_get_device_list");
-            var s_device_path = select_dev.options[select_dev.selectedIndex].text;
-
-            var server = elpusk.framework.coffee.get_instance();
-
-            var s_category = "device";
-
-            server.kernel_open(s_category,s_device_path).then(function (n_device_index) {
-                if( typeof n_device_index === 'undefined'){
-                    //error
-                    addMessage("error : open.");
-
-                }
-                else{
-                    if( n_device_index!==0){
-                        n_opened_device_index = n_device_index;
-                        addMessage("opened device index : " + n_device_index);
-                    }
-                    else{
-                        addMessage("opened device index : unknown - may be used in the other.");
-                    }
-                }
-            }).catch(function (event_error) {
-                n_opened_device_index = 0;
-                // error here
-                addMessage("fail : kernel_open : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_device_close(){
-
-            var server = elpusk.framework.coffee.get_instance();
-            var s_category = "device";
-
-            server.kernel_close(n_opened_device_index,s_category).then(function (s_rx) {
-                do{
-                    if (!Array.isArray(s_rx)) {
-                        addMessage("erro reponse : " + s_rx);
-                        continue;
-                    }
-                    if (s_rx === null) {
-                        addMessage("invalied response");
-                        continue;
-                    }
-                    else if( s_rx[0] != "success" ){
-                        addMessage("close failure");
-                        continue;
-                    }
-
-                    n_opened_device_index = 0;
-                    addMessage("close success");
-
-                }while(false);
-
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_close : "+ server.get_error_message(event_error));
-            });
-        }
-        function on_button_promise_kernel_device_execute(s_target){
-            var server = elpusk.framework.coffee.get_instance();
-            var s_category = "service";
-            //var sa_data = ["inform2","inform1","inform0"];
-            var sa_data = [3];
-            sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-            sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-            sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
-
-            server.kernel_execute(n_opened_device_index,0,0,s_category,s_target,sa_data).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_execute string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_execute string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
-            });
-            
-        }
-        function on_button_promise_kernel_device_cancel(s_target){
-            var server = elpusk.framework.coffee.get_instance();
-            var s_category = "service";
-
-            server.kernel_cancel(n_opened_device_index,0,0,s_category,s_target).then(function (s_rx) {
-                if (Array.isArray(s_rx)) {
-                    addMessage("kernel_cancel string array data : " + s_rx);
-                }
-                else {
-                    addMessage("kernel_cancel string data : " + s_rx);
-                }
-            }).catch(function (event_error) {
-                // error here
-                addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
-            });
-        }
 
     </script>
 </BODY>

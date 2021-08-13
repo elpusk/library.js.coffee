@@ -30,33 +30,13 @@
 <HEAD>
     <meta charset="utf-8" />
 
-    <TITLE>Test of lpu237 controller class</TITLE>
+    <TITLE>Test of hid bootloader class</TITLE>
+    <script src="./include_lpu237.js"></script>
 
 </HEAD>
 <BODY>
-    <script type="text/javascript">
-        if (typeof Promise === "undefined") {
-            document.write('<script src="scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
-        }
-        //load elpusk js library
-        document.write('<script src="scripts/elpusk/elpusk.util.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.util.keyboard.const.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.util.keyboard.map.js"><\/script>');
-        
-        document.write('<script src="scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.device.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.device.usb.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.device.usb.hid.lpu237.js"><\/script>');
-        document.write('<script src="scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js"><\/script>');
-
-        //load this project js files
-        document.write('<script src="scripts/this/gui.js"><\/script>');
-
-    </script>    
-
     <!-- fixed message area -->
-    this page supports that lpu237 controller class.
+    this page supports that hid bootloader class.
     <br />
     <br />
 
@@ -79,17 +59,12 @@
     <br />
 
     <br />
-    Select the your firmware file : 
-    <input type="file" id="fw_file" accept=".rom" />
-    <br />
-
-    <br />
     <input type="button" id="button_get_parameters" onclick="on_button_get_parameters();" value="get parameters" />
     <br />
     <progress id="progress_get_parameters" value="0" max="100"></progress>
 
     <br />
-    <input type="file" id="input_file" accept=".xml" />
+    <input type="file" id="input_file" accept=".rom" />
     <br />
 
     <br />
@@ -100,13 +75,6 @@
     <input type="button" id="button_enable_read_with_callback" onclick="on_button_enable_read_with_callback();" value="enable read with callback." />
     <br />
     <input type="button" id="button_disable_read_with_callback" onclick="on_button_disable_read_with_callback();" value="disable read with callback." />
-    <br />
-
-    <br />
-    <input type="button" id="button_save_to_sessionStorage" onclick="on_button_save_to_sessionStorage();" value="save to sessionStorage." />
-    <br />
-    <br />
-    <input type="button" id="button_set_from_sessionStorage" onclick="on_button_set_from_sessionStorage();" value="set from sessionStorage." />
     <br />
 
     <p id="p_pre_main">
@@ -254,7 +222,7 @@
                 function(s_session_number){
                     console.log("session : " + s_session_number);
                     //get device list. filtering hid, vid 0x134b, pid 0x0206, interface 1.
-                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                    return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0243");
                 }
             )
             .catch(
@@ -322,6 +290,23 @@
          * @function fun_init
          * @description initialize system
          */
+        var file_reader = new FileReader();
+
+        function file_reader_handle_event(event) {
+            //event.loaded - unit bytes the size of loaded data.
+
+            _add_message("p_main",`${event.type}: ${event.loaded} bytes transferred`);
+
+            if (event.type === "loadend") {
+                //preview.src = reader.result;
+                var ArrayBuffer_data = event.target.result;
+                
+                var uint8View = new Uint8Array(ArrayBuffer_data);
+                _add_message("p_main",uint8View.length.toString());
+                //_add_message("p_main",uint8View.toString());//out of memory in 80MBytes
+            }
+        }
+
         function fun_init() {
 
             _fun_init_coffee_framework();
@@ -330,48 +315,27 @@
                 _add_message("p_main","Not Supported File API");
             }
             
-            //////////////////////////////////////
-            // for setting file
+            //
             document.getElementById("input_file").onchange = function () {
                 var file = this.files[0];
                 var name = file.name;
                 var size = file.size;
                 //
-                ctl_lpu237.get_device().set_from_file(file).then(function (b_result) {
-                    //alway true.
-                    _add_message("p_main","ok : set_from_file");
-                    _add_multi_message("p_main",ctl_lpu237.get_device().get_string());
-                }).catch(function (event_error) {
-                    // error here
-                    _add_message("p_main","fail : set_from_file : "+ ctl_lpu237.get_device().get_error_message(event_error));
-                });
+                do{
+                    if(!file){
+                        continue;
+                    }
+                    file_reader.addEventListener('loadstart', file_reader_handle_event);
+                    file_reader.addEventListener('load', file_reader_handle_event);
+                    file_reader.addEventListener('loadend', file_reader_handle_event);
+                    file_reader.addEventListener('progress', file_reader_handle_event);
+                    file_reader.addEventListener('error', file_reader_handle_event);
+                    file_reader.addEventListener('abort', file_reader_handle_event);
 
+                    file_reader.readAsArrayBuffer(file);
+
+                }while(false);
             };
-
-            //////////////////////////////////////
-            // for updating fw.
-            document.getElementById("fw_file").onclick = function () {
-                this.value='';
-            };
-
-            document.getElementById("fw_file").onchange = function () {
-                var file = this.files[0];
-                var name = file.name;
-                var size = file.size;
-                //
-                ctl_lpu237.get_device().update_firmware(file).then(function (b_result) {
-                    //alway true.
-                    _add_message("p_main","ok : update_firmware");
-
-                    //document.getElementById("input_file").value = "";
-                }).catch(function (event_error) {
-                    // error here
-                    _add_message("p_main","fail : update_firmware : "+ ctl_lpu237.get_device().get_error_message(event_error));
-                    //document.getElementById("input_file").value = "";
-                });
-
-            };
-
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
@@ -420,6 +384,7 @@
             });            
         }
 
+        
         /**
          * @function _cb_progress_get_parameters
          * @parameter {number} n_device_index the index value of device on coffee framework.
@@ -600,14 +565,6 @@
             else{
                 _print_message("p_main","error : cancel.");
             }
-        }
-
-        function on_button_save_to_sessionStorage(){
-            ctl_lpu237.get_device().save_to_sessionStorage();
-        }
-
-        function on_button_set_from_sessionStorage(){
-            ctl_lpu237.get_device().set_from_sessionStorage();
         }
 
     </script>
