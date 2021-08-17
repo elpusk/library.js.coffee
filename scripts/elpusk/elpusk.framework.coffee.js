@@ -3048,7 +3048,7 @@
                      * 
                      * @description send a data to all session( except current session )  
                     */                
-                    advance_send_data_to_all : function(s_target_session_name, sa_data){
+                    advance_send_data_to_all : function(sa_data){
                         return new Promise(function (resolve, reject){
                     
                             do {
@@ -3078,15 +3078,29 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
-                                var json_packet = _generate_request_packet(
-                                    _type_packet_owner.MANAGER
-                                    , const_n_undefined_device_index
-                                    , action_code
-                                    , 0
-                                    , 0
-                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , ["send_data_to_all"].concat(sa_data)
-                                );
+                                var json_packet = null;
+                                if(Array.isArray(sa_data)){
+                                    json_packet = _generate_request_packet(
+                                        _type_packet_owner.MANAGER
+                                        , const_n_undefined_device_index
+                                        , action_code
+                                        , 0
+                                        , 0
+                                        , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                        , ["send_data_to_all"].concat(sa_data)
+                                    );
+                                }
+                                else{
+                                    json_packet = _generate_request_packet(
+                                        _type_packet_owner.MANAGER
+                                        , const_n_undefined_device_index
+                                        , action_code
+                                        , 0
+                                        , 0
+                                        , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                        , ["send_data_to_all",sa_data]
+                                    );
+                                }
                 
                                 var s_json_packet = JSON.stringify(json_packet);
                                 _websocket.send(s_json_packet);
@@ -4115,7 +4129,8 @@
      * @description get coffee library verion
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
-        return "1.12.0";
+        //return "1.12.0";
+        return "1.12.1";//at advance_send_data_to_all(), the first parameter os removed.
     }
 
     /**
