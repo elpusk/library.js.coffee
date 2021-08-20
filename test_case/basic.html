@@ -29,7 +29,7 @@
 <HEAD>
     <meta charset="utf-8" />
 
-    <TITLE>test for javascript library</TITLE>
+    <TITLE> = basic = test for javascript library</TITLE>
     <script src="./include.js"></script>
 </HEAD>
 <BODY>
@@ -45,7 +45,8 @@
 
     <br />
     <br />
-
+    <br />
+    test loop counter : <input type="number" id="id_loop_counter" value="10" min="1" max="104857600" />
     <br />
     <input type="button" id="button_tc_000_001" onclick='on_button_tc_000_001();' value="TC.000.001" />
     : connect and disconnect by wss protocol.
@@ -176,8 +177,31 @@
             parag_main.innerHTML += (Message + "<br />");
         }
 
+        function get_loop_count( n_loop_count,s_test_case_name ){
+            n_loop_count--;
+            if(n_loop_count % 5 ===0 ){
+                clearMessage();
+            }
+            if(n_loop_count === 0){
+                addMessage("pass : all : "+s_test_case_name);
+            }
+            return n_loop_count;
+        }
+
         //TC.000.001 : connect and disconnect by wss protocol.
+        _tc_000_001.count = 0;
+
         function on_button_tc_000_001() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_001.count = _n_cnt;
+            _tc_000_001();
+        }//on_button_tc_000_001()
+
+        function _tc_000_001() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss").then(function (s_session_number) {
                 // server is ready here
@@ -191,11 +215,15 @@
             .then(function (s_session_number) {
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_001.count = get_loop_count(_tc_000_001.count,"tc_000_001");
+                if(_tc_000_001.count >0){
+                    _tc_000_001();
+                }
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_001()
+        }//_tc_000_001()
 
         //TC.000.002 : connect, string echo and disconnect by wss protocol.
         function on_button_tc_000_002() {
@@ -386,7 +414,19 @@
         }//on_button_tc_000_005()
 
         //TC.000.006 : connect, broadcast data to all session and disconnect by wss protocol.
+        _tc_000_006.count = 0;
+
         function on_button_tc_000_006() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_006.count = _n_cnt;
+            _tc_000_006();
+        }//on_button_tc_000_006()
+
+        function _tc_000_006() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {//connect ok. 
@@ -444,12 +484,17 @@
             .then(function (s_session_number) {//disconnect ok.
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+
+                _tc_000_006.count = get_loop_count(_tc_000_006.count,"tc_000_006");
+                if(_tc_000_006.count >0){
+                    _tc_000_006();
+                }
             })
             .catch(function (event_error) {//disconnect error.
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_006()
+        }//_tc_000_006()
 
         //TC.000.007 : connect, get device list and disconnect by wss protocol.
         function on_button_tc_000_007() {

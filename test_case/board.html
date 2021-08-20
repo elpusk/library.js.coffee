@@ -1,0 +1,193 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2021 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE> = board = test for cf javascript library</TITLE>
+    <script src="./include.js"></script>
+</HEAD>
+<BODY>
+    <!-- fixed message area -->
+    this page system event board.
+    <br />
+    <!-- control area -->
+    <p id="p_top_text">
+        <!-- top text print area -->
+    </p>
+
+    <input type="button" id="button_clear_message" onclick="clearMessage_pre();" value="clear message" />
+
+    <br />
+    <br />
+    <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+        var startTime, endTime;
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : removed : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "A"){
+                    //send data to session of advance operation.
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
+                    continue;
+                }
+                //
+
+            }while(false);
+        }
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                addMessage("ok promise");
+            }
+
+            printTopMessage( "coffee library verion : " + elpusk.framework.coffee.get_this_library_version());
+            var server1 = elpusk.framework.coffee.get_instance();
+            var server2 = elpusk.framework.coffee.get_instance();
+
+            if( server1 === server2 ){
+                addMessage( "server1 and 2 identical." );
+            }
+            else{
+                addMessage( "server1 and 2 different." );
+            }
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+        }
+
+        window.addEventListener("load", init, false);
+
+        function printTopMessage(Message){
+            var parag_main = document.getElementById("p_top_text");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function clearMessage() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage(Message){
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function printMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function clearMessage_pre() {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        function on_button_promise_connect_server_wss(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss").then(function (s_session_number) {
+                // server is ready here
+                addMessage("security websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : security websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is ready here
+                addMessage("disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+    </script>
+
+</BODY>
+</HTML>
