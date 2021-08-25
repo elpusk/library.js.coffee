@@ -184,6 +184,13 @@
             }
             if(n_loop_count === 0){
                 addMessage("pass : all : "+s_test_case_name);
+
+                var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+                printMessage_pre("pass the number of " + _n_cnt.toString());
+
+            }
+            else{
+                printMessage_pre("remainder : "+n_loop_count.toString());
             }
             return n_loop_count;
         }
@@ -226,7 +233,19 @@
         }//_tc_000_001()
 
         //TC.000.002 : connect, string echo and disconnect by wss protocol.
+        _tc_000_002.count = 0;
+
         function on_button_tc_000_002() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_002.count = _n_cnt;
+            _tc_000_002();
+        }//on_button_tc_000_002()
+
+        function _tc_000_002() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {
@@ -253,6 +272,10 @@
             .then(function (s_session_number) {
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_002.count = get_loop_count(_tc_000_002.count,"tc_000_002");
+                if(_tc_000_002.count >0){
+                    _tc_000_002();
+                }
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
@@ -260,7 +283,19 @@
         }//on_button_tc_000_002()
 
         //TC.000.003 : connect, hex echo and disconnect by wss protocol.
+        _tc_000_003.count = 0;
+
         function on_button_tc_000_003() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_003.count = _n_cnt;
+            _tc_000_003();
+        }//on_button_tc_000_003()
+
+        function _tc_000_003() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {
@@ -287,16 +322,32 @@
             .then(function (s_session_number) {
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_003.count = get_loop_count(_tc_000_003.count,"tc_000_003");
+                if(_tc_000_003.count >0){
+                    _tc_000_003();
+                }
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_003()
+        }//_tc_000_003()
 
         var g_n_session_sn = 0;
         var g_s_session_name = "";
         //TC.000.004 : connect, set session name, get_session name and disconnect by wss protocol.
+        _tc_000_004.count = 0;
+
         function on_button_tc_000_004() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_004.count = _n_cnt;
+            _tc_000_004();
+        }//on_button_tc_000_004()
+
+        function _tc_000_004() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {//connect ok. 
@@ -340,15 +391,31 @@
             .then(function (s_session_number) {//disconnect ok.
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_004.count = get_loop_count(_tc_000_004.count,"tc_000_004");
+                if(_tc_000_004.count >0){
+                    _tc_000_004();
+                }
             })
             .catch(function (event_error) {//disconnect error.
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_004()
+        }//_tc_000_004()
 
         //TC.000.005 : connect, send data to a session and disconnect by wss protocol.
+        _tc_000_005.count = 0;
+
         function on_button_tc_000_005() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_005.count = _n_cnt;
+            _tc_000_005();
+        }//on_button_tc_000_005()
+
+        function _tc_000_005() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {//connect ok. 
@@ -406,12 +473,16 @@
             .then(function (s_session_number) {//disconnect ok.
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_005.count = get_loop_count(_tc_000_005.count,"tc_000_005");
+                if(_tc_000_005.count >0){
+                    _tc_000_005();
+                }
             })
             .catch(function (event_error) {//disconnect error.
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_005()
+        }//_tc_000_005()
 
         //TC.000.006 : connect, broadcast data to all session and disconnect by wss protocol.
         _tc_000_006.count = 0;
@@ -497,7 +568,19 @@
         }//_tc_000_006()
 
         //TC.000.007 : connect, get device list and disconnect by wss protocol.
+        _tc_000_007.count = 0;
+
         function on_button_tc_000_007() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_007.count = _n_cnt;
+            _tc_000_007();
+        }//on_button_tc_000_001()
+
+        function _tc_000_007() {
             var server = elpusk.framework.coffee.get_instance();
             server.connect("wss")
             .then(function (s_session_number) {
@@ -531,11 +614,15 @@
             .then(function (s_session_number) {
                 // server is ready here
                 addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_007.count = get_loop_count(_tc_000_007.count,"tc_000_007");
+                if(_tc_000_007.count >0){
+                    _tc_000_007();
+                }
             }).catch(function (event_error) {
                 // error here
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });
-        }//on_button_tc_000_007()
+        }//_tc_000_007()
 
     </script>
 </BODY>
