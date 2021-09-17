@@ -70,6 +70,10 @@
     : connect, get device list and disconnect by wss protocol.
     <br />
 
+    <p id="p_sys_event">
+        <!-- sys_event print area -->
+    </p>
+
     <p id="p_pre_main">
         <!-- pre main print area -->
     </p>
@@ -83,27 +87,37 @@
         var n_system_event = 0;
         var startTime, endTime;
 
+        cb_system_event.count = 0;
         function cb_system_event( s_action_code,s_data_field ){
             do{
                 if( typeof s_action_code === 'undefined'){
                     continue;
                 }
 
+                if( cb_system_event.count === 10 ){
+                    cb_system_event.count = 0;
+                    clearMessage_sys();
+                }
+
                 if( s_action_code === "c"){
                     //removed event
                     ++n_system_event;
-                    addMessage_pre("system event [" + n_system_event.toString() + "] : removed : " + s_data_field );
+                    cb_system_event.count++;
+                    addMessage_sys("system event [" + n_system_event.toString() + "] : removed : " + s_data_field );
                     continue;
                 }
                 if( s_action_code === "P"){
                     //plugged in event
                     ++n_system_event;
-                    addMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    cb_system_event.count++;
+                    addMessage_sys("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
                     continue;
                 }
                 if( s_action_code === "A"){
                     //send data to session of advance operation.
-                    addMessage_pre("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
+                    ++n_system_event;
+                    cb_system_event.count++;
+                    addMessage_sys("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
                     continue;
                 }
                 //
@@ -142,6 +156,29 @@
             parag_main.innerHTML = Message + "<br />";
         }
 
+        //p_sys_event
+        function clearMessage_sys() {
+            var parag_main = document.getElementById("p_sys_event");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "10px";
+            parag_main.innerHTML ="";
+        }
+
+        function printMessage_sys(Message){
+            var parag_main = document.getElementById("p_sys_event");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "10px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage_sys(Message) {
+            var parag_main = document.getElementById("p_sys_event");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "10px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+
         function clearMessage() {
             var parag_main = document.getElementById("p_main");
             parag_main.style.wordWrap = "break-word";
@@ -175,6 +212,13 @@
             parag_main.style.wordWrap = "break-word";
             parag_main.style.fontSize = "14px";
             parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function clearMessage_pre() {
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML ="";
         }
 
         function get_loop_count( n_loop_count,s_test_case_name ){
