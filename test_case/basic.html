@@ -121,6 +121,10 @@
                     continue;
                 }
                 //
+                //unknown
+                ++n_system_event;
+                cb_system_event.count++;
+                addMessage_sys("system event [" + n_system_event.toString() + "] : " + s_action_code.toString() +" : " + s_data_field.toString() );
 
             }while(false);
         }
