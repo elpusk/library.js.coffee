@@ -69,9 +69,11 @@
     <input type="button" id="button_tc_000_007" onclick='on_button_tc_000_007();' value="TC.000.007" />
     : connect, get device list and disconnect by wss protocol.
     <br />
-
     <input type="button" id="button_tc_000_008" onclick='on_button_tc_000_008();' value="TC.000.008" />
-    : [file operation] connect, delete, create, list, open, append, truncate, close, delete disconnect
+    : [file operation] connect, delete, create, list, open, append, truncate, close, delete, disconnect
+    <br />
+    <input type="button" id="button_tc_000_009" onclick='on_button_tc_000_009();' value="TC.000.009" />
+    : [kernel operation] connect, load, unload, execute, cancel, list, open, close, disconnect
     <br />
 
     <p id="p_sys_event">
@@ -891,6 +893,116 @@
                 addMessage("fail : disconnect : "+ server.get_error_message(event_error));
             });            
         }
+
+        //TC.000.009 : [kernel operation] connect, load, unload, execute, cancel, list, open, close, disconnect
+        function on_button_tc_000_009() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_009.count = _n_cnt;
+            _tc_000_009();
+        }//on_button_tc_000_009()
+
+        var g_s_kernel_category = "service";
+        var g_s_kernel_target = "default/sd_helloworld.dll";
+
+        var g_n_cnt_info = 0;
+
+        function _tc_000_009() {
+            var server = elpusk.framework.coffee.get_instance();
+            var sa_data = [3];
+            sa_data[2] = "inform"+g_n_cnt_info.toString();   g_n_cnt_info++;
+            sa_data[1] = "inform"+g_n_cnt_info.toString();   g_n_cnt_info++;
+            sa_data[0] = "inform"+g_n_cnt_info.toString();   g_n_cnt_info++;
+
+            server.connect("wss")
+            .then(function (s_session_number) {
+                // server is ready here
+                addMessage("pass :  connect wss : session number = " + s_session_number);
+                //return elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01");
+                return elpusk.framework.coffee.get_instance().kernel_load(g_s_kernel_category,g_s_kernel_target);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : connect wss : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : kernel_load string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : kernel_load string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,g_s_kernel_category,g_s_kernel_target,sa_data);
+            })
+            .catch(function (event_error) {
+                addMessage("fail : kernel_load : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    if( s_rx[0] === "success" ){
+                        addMessage("pass : kernel_execute : ");
+                        var array_device_list = new Array();
+
+                        var n_device = s_rx.length;
+                        for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                            addMessage(s_rx[n_device_index]);
+                        }
+                        return elpusk.framework.coffee.get_instance().kernel_unload(g_s_kernel_category,g_s_kernel_target);
+                    }
+                    else{
+                        addMessage("fail : kernel_execute string array data : " + s_rx);
+                    }
+                }
+                else {
+                    addMessage("fail : kernel_execute string data : " + s_rx);
+                }
+            })
+            .catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : kernel_unload string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : kernel_unload string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().disconnect();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_session_number) {
+                // server is ready here
+                addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_009.count = get_loop_count(_tc_000_009.count,"tc_000_009");
+                if(_tc_000_009.count >0){
+                    _tc_000_009();
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnect : "+ server.get_error_message(event_error));
+            });
+        }//_tc_000_009
 
 </script>
 </BODY>
