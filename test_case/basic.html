@@ -58,16 +58,20 @@
     : connect, hex echo and disconnect by wss protocol.
     <br />
     <input type="button" id="button_tc_000_004" onclick='on_button_tc_000_004();' value="TC.000.004" />
-    : connect, set session name, get_session name and disconnect by wss protocol.
+    : [advance operation ] connect, set session name, get_session name and disconnect by wss protocol.
     <br />
     <input type="button" id="button_tc_000_005" onclick='on_button_tc_000_005();' value="TC.000.005" />
-    : connect, send data to a session and disconnect by wss protocol.
+    : [advance operation ] connect, send data to a session and disconnect by wss protocol.
     <br />
     <input type="button" id="button_tc_000_006" onclick='on_button_tc_000_006();' value="TC.000.006" />
-    : connect, broadcast data to all session and disconnect by wss protocol.
+    : [advance operation ] connect, broadcast data to all session and disconnect by wss protocol.
     <br />
     <input type="button" id="button_tc_000_007" onclick='on_button_tc_000_007();' value="TC.000.007" />
     : connect, get device list and disconnect by wss protocol.
+    <br />
+
+    <input type="button" id="button_tc_000_008" onclick='on_button_tc_000_008();' value="TC.000.008" />
+    : [file operation] connect, delete, create, list, open, append, truncate, close, delete disconnect
     <br />
 
     <p id="p_sys_event">
@@ -242,6 +246,8 @@
             }
             return n_loop_count;
         }
+
+        var g_s_session_number = "";
 
         //TC.000.001 : connect and disconnect by wss protocol.
         _tc_000_001.count = 0;
@@ -626,7 +632,7 @@
 
             _tc_000_007.count = _n_cnt;
             _tc_000_007();
-        }//on_button_tc_000_001()
+        }//on_button_tc_000_007()
 
         function _tc_000_007() {
             var server = elpusk.framework.coffee.get_instance();
@@ -672,6 +678,220 @@
             });
         }//_tc_000_007()
 
-    </script>
+        //TC.000.008 : [file operation] connect, delete, create, list, open, append, truncate, close, delete disconnect
+        function on_button_tc_000_008() {
+            var _n_cnt = Number(document.getElementById("id_loop_counter").value);
+            if(_n_cnt <=0 ){
+                _n_cnt = 1;
+            }
+
+            _tc_000_008.count = _n_cnt;
+            _tc_000_008();
+        }//on_button_tc_000_008()
+
+        var g_s_file_name_pre  = "test_";
+        var g_s_file_name = "";
+        var g_s_hex_data = "3031323334353637383930";
+
+        function _tc_000_008() {
+            var server = elpusk.framework.coffee.get_instance();
+            server.connect("wss")
+            .then(function (s_session_number) {
+                // server is ready here
+                var s_old_name = g_s_file_name;
+                g_s_session_number = s_session_number;
+                g_s_file_name = g_s_file_name_pre + g_s_session_number + ".txt";
+                addMessage("pass :  connect wss : session number = " + s_session_number);
+                return elpusk.framework.coffee.get_instance().file_delete(s_old_name);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : connect wss : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_delete string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_delete string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_create(g_s_file_name);
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_delete : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_create string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_create string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_open(g_s_file_name);
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_create : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_open string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_open string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_append(g_s_hex_data);
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_open : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_append string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_append string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_get_size();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_append : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_get_size string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_get_size string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_truncate();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_get_size : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_truncate string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_truncate string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_get_size();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_truncate : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_get_size string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_get_size string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_close();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_get_size : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_close string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_close string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().file_get_list();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_close : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("pass : file_get_list string array data : ");
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        addMessage(s_rx[n_device_index]);
+                    }
+                }
+                else {
+                    addMessage("pass : file_get_list string data : " + s_rx);
+                }
+                return elpusk.framework.coffee.get_instance().disconnect();
+            })
+            .catch(function (event_error) {
+                addMessage("fail : file_get_list : "+ server.get_error_message(event_error));
+                throw(event_error);
+            })
+            .then(function (s_session_number) {
+                // server is ready here
+                addMessage("pass : disconnect : session number = " + s_session_number);
+                _tc_000_008.count = get_loop_count(_tc_000_008.count,"tc_000_008");
+                if(_tc_000_008.count >0){
+                    _tc_000_008();
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnect : "+ server.get_error_message(event_error));
+            });            
+        }
+
+</script>
 </BODY>
 </HTML>
