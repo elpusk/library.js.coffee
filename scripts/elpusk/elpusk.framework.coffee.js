@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.9.0
+ * @version 1.12.2
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -4130,17 +4130,8 @@
      */
     _elpusk.framework.coffee.get_this_library_version = function () {
         //return "1.12.0";
-        return "1.12.1";//at advance_send_data_to_all(), the first parameter os removed.
-    }
-
-    /**
-     * @public 
-     * @function elpusk.framework.coffee.get_session_number
-     * @return {string} the current session number.
-     * @description get session number of connection.
-     */
-    _elpusk.framework.coffee.get_session_number = function () {
-        return _s_session;
+        //return "1.12.1";//at advance_send_data_to_all(), the first parameter os removed.
+        return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
     }
 
     /**
