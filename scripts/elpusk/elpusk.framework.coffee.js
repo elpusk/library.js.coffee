@@ -1919,7 +1919,7 @@
                      * <br /> if n_device_index is zero, this is processed by manager.
                      * <br /> else dose by device.
                      * @param {string} s_category may be "device"
-                     * @param {string} s_target service dll path.
+                     * @param {string} s_path the path of device.
                      * <br />  .
                      * 
                      * @returns {Promise} if success, resolve with device index number.
