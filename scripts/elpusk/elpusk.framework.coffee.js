@@ -1558,7 +1558,7 @@
                      * @param {string} s_target service dll path.
                      * <br />  .
                      * 
-                     * @returns {Promise} if success, resolve with echo data from server.
+                     * @returns {Promise} if success, resolve with string array( first string is "success" ).
                      * <br /> else reject with Error object.
                      * 
                      * @description binding a service dll.
@@ -1617,7 +1617,7 @@
                      * @param {string} s_target service dll path.
                      * <br />  .
                      * 
-                     * @returns {Promise} if success, resolve with echo data from server.
+                     * @returns @returns {Promise} if success, resolve with string array( first string is "success" ).
                      * <br /> else reject with Error object.
                      * 
                      * @description unbinding a service dll.
@@ -1686,7 +1686,7 @@
                      * @param {string} sa_data - string array of "sd_execute" function parameters
                      * <br />  .
                      * 
-                     * @returns {Promise} if success, resolve with echo data from server.
+                     * @returns {Promise} if success, resolve with string array(the first string is "success", from the second string -> response ).
                      * <br /> else reject with Error object.
                      * 
                      * @description run "sd_execute" function of service dll.
@@ -1771,7 +1771,7 @@
                      * @param {string} s_target service dll path.
                      * <br />  .
                      * 
-                     * @returns {Promise} if success, resolve with echo data from server.
+                     * @returns {Promise} @returns {Promise} if success, resolve with string array(the first string is "success" ).
                      * <br /> else reject with Error object.
                      * 
                      * @description run "sd_cancel" function of service dll.
@@ -1988,7 +1988,7 @@
                      * @param {string} s_category may be "device"
                      * <br />  .
                      * 
-                     * @returns {Promise} if success, resolve with echo data from server.
+                     * @returns {Promise} if success, resolve with string array( first string is "success" ).
                      * <br /> else reject with Error object.
                      * 
                      * @description run device close action to server by promise.
