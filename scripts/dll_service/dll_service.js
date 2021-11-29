@@ -30,7 +30,6 @@
  * <br /> 
  * <br />  2021.11.xx - release 1.0.
  * 
- * @namespace dll_service
  */
 
  'use strict';
@@ -52,477 +51,413 @@
         return;
     }
 
-    //create namespace
-    var _dll_service = window.dll_service;
-
-    if (!_dll_service) {
-        _dll_service = {};
+    /**
+     * dll_service - the base class of all service dll.
+     */
+    if(!_dll_service){
+        'use strict';
 
         /**
-         * @class dll_service
-         * @classdesc this class support the interface to service dll of coffee framework" basically.
-         * <br /> this class must be used by singleton pattern.
-         * <br /> Use get_instance() method.
-        */
-        _dll_service = (function () {
-
-            ///////////////////////////////
-            //private variables of class
-
-            /** 
-             * instance of class
-             * @private 
-            */ 
-            var _instance;
-
-            ///////////////////////////////
-            //private function of class
-            /*
-            function _x() {
+         * @constructs dll_service
+         * @param {number} n_session mandotry,  session number of this service dll.
+         * @param {string} s_sd_dll_path mandotry, service dll path( default/sd_*.dll or 3thpart/sd_*.dll)
+         */
+        _dll_service = function (n_session,s_sd_dll_path) {
+            if( typeof s_sd_dll_path !== 'string' ){
+                this._s_sd_dll_path = "";
+                console.log("error : s_sd_dll_path must be string type(default/sd_*.dll or 3thpart/sd_*.dll)");
             }
-            */
+            else{
+                this._s_sd_dll_path = s_sd_dll_path;
+            }
+
+            if( typeof n_session !== 'number'){
+                this._n_session = 0xFFFFFFFF;//undefined session number
+                console.log("error : n_session must be number type(0~0xFFFFFFFE)");
+            }
+            else{
+                this._n_session = n_session;
+            }
 
             /**
-             * @private
-             * @description construtor of dll_service class
+             * @type {number}
              */
-            function _constructor(){
-                ///////////////////////////////
-                //private variables of class instance
+            this._n_device_index = 0;// 0 is undefined index number
 
-                /** 
-                 * @private 
-                 * @constant {number} 
-                 *  @description session number.
-                */                
-                var _n_session = 0xFFFFFFFF;
+            /**
+             * @type {string}
+             */
+            this._s_device_path = "";// the path of of this._n_device_index
+        };
 
-                /** 
-                 * @private 
-                 * @constant {number} 
-                 *  @description device index number.
-                */                
-                var _n_device = 0;
+        /**
+         * @public
+         * @function get_path
+         * @return {string} service dll path
+         */
+         _dll_service.prototype.get_path = function()
+         {
+             return this._s_sd_dll_path;
+         }
+ 
+        /**
+         * @public
+         * @function get_device_index
+         * @return {number} the index of device. 0 is unknown index value.
+         */
+         _dll_service.prototype.get_device_index = function()
+         {
+             return this._n_device_index;
+         }
 
-                var _s_device_path = "";
-                var _s_sd_dll_name = "";
-        
-                ///////////////////////////////
-                //private function of class instance
-                /* ex)
-                function _x() {
-                }
-                */
+        /**
+         * @public
+         * @function get_session_number
+         * @return {number} this instance's master session number. 0xFFFFFFFF is unknown value.
+         */
+         _dll_service.prototype.get_session_number = function()
+         {
+             return this._n_session;
+         }
 
-                return{
-                    ///////////////////////////////
-                    //public function of class instance
 
-                    /* ex)
-                    X : function(){
-                    },
-                    Y : function(){
+        /** 
+         * @public 
+         * @async
+         * @function sd_load
+         * 
+         * @returns {Promise} if success, resolve with string array( first string is "success" ).
+         * <br /> else reject with Error object.
+         * 
+         * @description load service dll and initialize
+        */                
+         _dll_service.prototype.sd_load = function(){
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "service";
+
+                elpusk.framework.coffee.get_instance().kernel_load(s_kernel_category, this._s_sd_dll_path)
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length<1){
+                            continue;
+                        }
+                        if (s_rx[0] !== "success") {
+                            continue;
+                        }
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve("success");
                     }
-                    */ 
-
-                    /** 
-                     * @public 
-                     * @sync
-                     * @function get_session_number
-                     * @param none
-                     * 
-                     * @returns {number} session numnber
-                     * 
-                    */                
-                    get_session_number : function(){
-                        return _n_session;
-                    },
-
-                    /** 
-                     * @public 
-                     * @sync
-                     * @function get_device_path
-                     * @param none
-                     * 
-                     * @returns {String} the path of device.
-                     * 
-                    */                
-                    get_device_path : function(){
-                        return _s_device_path;
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function set_device_path
-                     * @param {string} the path of device.
-                     * 
-                     * @returns none
-                     * 
-                     * @description save the device path.
-                    */                
-                    set_device_path : function(s_device_path){
-                        do{
-                            if(typeof s_device_path !== "string"){
-                                continue;
-                            }
-                            //
-                            _s_device_path = s_device_path;
-                        }while(false);
-                    },
-
-                    /** 
-                     * @public 
-                     * @sync
-                     * @function get_opened_device_index
-                     * @param none
-                     * 
-                     * @returns {number}  the opened device index.
-                     * 
-                     * @description get the opened device index.
-                    */                
-                    get_opened_device_index : function(){
-                        return _n_device;
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function sd_load
-                     * @param {string} s_sd_dll_name - "default/sd_x.dll" or "3thpart/sd_x.dll";
-                     * @param {number} n_session - the session number( 0~ 0xFFFFFFFE)
-                     * 
-                     * @returns {Promise} if success, resolve with string array( first string is "success" ).
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description load sd_x.dll and initialize
-                    */                
-                     sd_load : function(n_session,s_sd_dll_name){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = "service";
-
-                            _n_session = n_session;
-                            _s_sd_dll_name = s_sd_dll_name;
-
-                            elpusk.framework.coffee.get_instance().kernel_load(s_kernel_category, _s_sd_dll_name)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length<1){
-                                        continue;
-                                    }
-                                    if (s_rx[0] !== "success") {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve("success");
-                                }
-                                else{
-                                    reject("kernel_load");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function sd_get_device_list
-                     * @param {string} s_filter This filter is used to represent the desired USB device.
-                     * 
-                     * @returns {Promise} if success, resolve with device path list.
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description get device path-list
-                    */                
-                    sd_get_device_list : function(s_filter){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = "device";
-
-                            elpusk.framework.coffee.get_instance().kernel_list(s_kernel_category, s_filter)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length===0){
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve(s_rx);
-                                }
-                                else{
-                                    reject("kernel_list");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function sd_open_device
-                     * @param {string} s_path the path of device.
-                     * 
-                     * @returns {Promise} if success, resolve with device index
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description open device by kernel mode.
-                    */                
-                    sd_open_device : function(s_path){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = "device";
-
-                            elpusk.framework.coffee.get_instance().kernel_open(s_kernel_category, s_path)
-                            .then(function (n_device_index) {
-                                var b_result = false;
-                                do{
-                                    _n_device = n_device_index;
-                                    if (n_device_index === 0) {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve(n_device_index);
-                                }
-                                else{
-                                    reject("kernel_open");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function sd_open_device
-                     * 
-                     * @returns {Promise} if success, resolve with string array( first string is "success" ).
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description close device by kernel mode.
-                    */                
-                    sd_close_device : function(){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = "device";
-
-                            elpusk.framework.coffee.get_instance().kernel_close(_n_device, s_kernel_category)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length<1){
-                                        continue;
-                                    }
-                                    if (s_rx[0] !== "success") {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve("success");
-                                }
-                                else{
-                                    reject("kernel_close");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-                    /**
-                     * 
-                     * @param {string} s_category - "service" or "device" 
-                     * @param {*} n_in_id 
-                     * @param {*} n_out_id 
-                     * @param {*} array_s_input 
-                     * @returns {Promise} if success, resolve with string array( first string is "success" ).
-                     * <br /> else reject with Error object.
-                     */
-                    sd_execute : function(s_category,n_in_id, n_out_id,array_s_input){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = s_category;
-
-                            elpusk.framework.coffee.get_instance().kernel_execute(_n_device, n_in_id, n_out_id,s_kernel_category,_s_sd_dll_name,array_s_input)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length<1){
-                                        continue;
-                                    }
-                                    if (s_rx[0] !== "success") {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve(s_rx);
-                                }
-                                else{
-                                    reject("kernel_execute");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-
-                    /**
-                     * 
-                     * @param {string} s_category - "service" or "device" 
-                     * @param {*} n_in_id 
-                     * @param {*} n_out_id 
-                     * @returns 
-                     */
-                    sd_cancel : function(s_category,n_in_id, n_out_id){
-                        return new Promise(function(resolve,reject){
-                            var s_error = "";
-                            var s_kernel_category = s_category;
-
-                            elpusk.framework.coffee.get_instance().kernel_cancel(_n_device, n_in_id, n_out_id,s_kernel_category,_s_sd_dll_name)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length<1){
-                                        continue;
-                                    }
-                                    if (s_rx[0] !== "success") {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve("success");
-                                }
-                                else{
-                                    reject("kernel_cancel");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-                    /** 
-                     * @public 
-                     * @async
-                     * @function sd_unload
-                     * @param {number} n_session - the session number( 0~ 0xFFFFFFFE)
-                     * 
-                     * @returns {Promise} if success, resolve with echo data from server.
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description unload sd_x.dll and deinitialize
-                    */                
-                    sd_unload :function(n_session){
-                        return new Promise(function(resolve,reject){
-                            var s_kernel_category = "service";
-                            var s_error = "";
-
-                            elpusk.framework.coffee.get_instance().kernel_unload(s_kernel_category, _s_sd_dll_name)
-                            .then(function (s_rx) {
-                                var b_result = false;
-                                do{
-                                    if (!Array.isArray(s_rx)) {
-                                        continue;
-                                    }
-                                    if(s_rx.length<1){
-                                        continue;
-                                    }
-                                    if (s_rx[0] !== "success") {
-                                        continue;
-                                    }
-                                    b_result = true;
-                                }while(false);
-    
-                                if(b_result){
-                                    resolve("success");
-                                }
-                                else{
-                                    reject("kernel_unload");
-                                }
-                            })
-                            .catch(function (event_error) {
-                                reject(s_error);
-                            });
-                        });
-                    },
-
-
-                    ///////////////////////////////
-                    //public variable of class instance
-
-                };
-            }
-
-
-            /*** @return {_instance} the instance of dll_service class. */
-            return{
-                /** 
-                 * @public 
-                 * @constructs get_instance
-                 * 
-                 * @returns {object} return dll_service class instance.
-                 * 
-                 * @description coffee class use singleton pattern. you can get the instance of dll_service class.
-                */                   
-                get_instance : function(){
-                    if(!_instance){
-                        _instance = _constructor();
+                    else{
+                        reject("kernel_load");
                     }
-                    return _instance;
-                }
-            };
-        })();
-        
-    }//!_dll_service
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
 
+        /** 
+         * @public 
+         * @async
+         * @function sd_get_device_list
+         * @param {string} s_filter This filter is used to represent the desired USB device.
+         * 
+         * @returns {Promise} if success, resolve with device path list.
+         * <br /> else reject with Error object.
+         * 
+         * @description get device path-list
+        */                
+         _dll_service.prototype.sd_get_device_list = function(s_filter){
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "device";
+
+                elpusk.framework.coffee.get_instance().kernel_list(s_kernel_category, s_filter)
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length===0){
+                            continue;
+                        }
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve(s_rx);
+                    }
+                    else{
+                        reject("kernel_list");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
+
+        /** 
+         * @public 
+         * @async
+         * @function sd_open_device
+         * @param {string} s_path the path of device.
+         * 
+         * @returns {Promise} if success, resolve with device index
+         * <br /> else reject with Error object.
+         * 
+         * @description open device by kernel mode.
+        */                
+         _dll_service.prototype.sd_open_device = function(s_path){
+            var this_sd_dll = this;
+
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "device";
+
+                elpusk.framework.coffee.get_instance().kernel_open(
+                    s_kernel_category, 
+                    s_path
+                    )
+                .then(function (n_device_index) {
+                    var b_result = false;
+                    do{
+                        if (n_device_index === 0) {
+                            continue;
+                        }
+                        this_sd_dll._n_device_index = n_device_index;
+                        this_sd_dll._s_device_path = s_path;
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve(n_device_index);
+                    }
+                    else{
+                        reject("kernel_open");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
+
+        /** 
+         * @public 
+         * @async
+         * @function sd_close_device
+         * 
+         * @returns {Promise} if success, resolve with string array( first string is "success" ).
+         * <br /> else reject with Error object.
+         * 
+         * @description close device by kernel mode.
+        */                
+        _dll_service.prototype.sd_close_device = function(){
+            var this_sd_dll = this;
+
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "device";
+
+                elpusk.framework.coffee.get_instance().kernel_close(
+                    this_sd_dll._n_device_index, 
+                    s_kernel_category
+                    )
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length<1){
+                            continue;
+                        }
+                        if (s_rx[0] !== "success") {
+                            continue;
+                        }
+                        this_sd_dll._n_device_index = 0;
+                        this_sd_dll._s_device_path = "";
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve("success");
+                    }
+                    else{
+                        reject("kernel_close");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
+
+        /**
+         * @public 
+         * @async
+         * @function sd_execute
+         * @param {*} n_in_id
+         * @param {*} n_out_id 
+         * @param {*} array_s_input 
+         * @returns {Promise} if success, resolve with string array( first string is "success" ).
+         * <br /> else reject with Error object.
+         */
+         _dll_service.prototype.sd_execute = function(n_in_id, n_out_id,array_s_input){
+            var this_sd_dll = this;
+            
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "service";
+
+                elpusk.framework.coffee.get_instance().kernel_execute(
+                    this_sd_dll._n_device_index,
+                     n_in_id, n_out_id,
+                     s_kernel_category,
+                     this_sd_dll._s_sd_dll_path,
+                     array_s_input
+                     )
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length<1){
+                            continue;
+                        }
+                        if (s_rx[0] !== "success") {
+                            continue;
+                        }
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve(s_rx);
+                    }
+                    else{
+                        reject("kernel_execute");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
+
+        /**
+         * @public 
+         * @async
+         * @function sd_cancel
+         * @param {*} n_in_id
+         * @param {*} n_out_id 
+         * @returns {Promise} if success, resolve with string array( first string is "success" ).
+         * <br /> else reject with Error object.
+         */
+        _dll_service.prototype.sd_cancel = function(n_in_id, n_out_id){
+            var this_sd_dll = this;
+
+            return new Promise(function(resolve,reject){
+                var s_error = "";
+                var s_kernel_category = "service";
+
+                elpusk.framework.coffee.get_instance().kernel_cancel(
+                    this_sd_dll._n_device_index, 
+                    n_in_id, n_out_id,
+                    s_kernel_category,
+                    this_sd_dll._s_sd_dll_path
+                    )
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length<1){
+                            continue;
+                        }
+                        if (s_rx[0] !== "success") {
+                            continue;
+                        }
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve("success");
+                    }
+                    else{
+                        reject("kernel_cancel");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }
+
+        /** 
+         * @public 
+         * @async
+         * @function sd_unload
+         * 
+         * @returns {Promise} if success, resolve with echo data from server.
+         * <br /> else reject with Error object.
+         * 
+         * @description unload sd_emv.dll and deinitialize
+        */                
+         _dll_service.prototype.sd_unload = function(){
+            
+            var this_sd_dll = this;
+
+            return new Promise(function(resolve,reject){
+                var s_kernel_category = "service";
+                var s_error = "";
+
+                elpusk.framework.coffee.get_instance().kernel_unload(
+                    s_kernel_category, 
+                    this_sd_dll._s_sd_dll_path
+                    )
+                .then(function (s_rx) {
+                    var b_result = false;
+                    do{
+                        if (!Array.isArray(s_rx)) {
+                            continue;
+                        }
+                        if(s_rx.length<1){
+                            continue;
+                        }
+                        if (s_rx[0] !== "success") {
+                            continue;
+                        }
+                        this_sd_dll._s_sd_dll_path = "";
+                        b_result = true;
+                    }while(false);
+
+                    if(b_result){
+                        resolve("success");
+                    }
+                    else{
+                        reject("kernel_unload");
+                    }
+                })
+                .catch(function (event_error) {
+                    reject(s_error);
+                });
+            });
+        }        
+
+    }// the end of function
     
-
-    //some function is exported.
-
-
     window.dll_service = _dll_service;
 }(window));

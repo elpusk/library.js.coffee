@@ -1,0 +1,746 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2021 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>TODO:여기에 테스트 제목 for javascript library</TITLE>
+    <script src="./include_emv.js"></script> <!-- TODO:다른 js 파일 include 하는 js 파일 --> 
+</HEAD>
+<BODY>
+    <!-- fixed message area -->
+    TODO:페이지 최상단에 표시 할 글
+    <br />
+    <!-- control area -->
+    <!-- 기본 버튼 형태 -->
+    <input type="button" id="id_bt_clear_message" onclick='clear_message("p_id_top");' value="clear message" />
+
+    <!-- 메시지 표시를 위한 paragraph 를 여기에 정의 하시요.-->
+    <p id="p_id_top">
+        <!-- top text print area -->
+    </p>
+    <p id="p_id_middle">
+        <!-- middle text print area -->
+    </p>
+    <p id="p_id_bottom">
+        <!-- bottom text print area -->
+    </p>
+
+    <script type="text/javascript">
+        function clear_message(s_paragraph_id,n_font_size_px) {
+            var parag_main = document.getElementById("s_paragraph_id");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = n_font_size_px.toString()+"px";
+            parag_main.innerHTML ="";
+        }
+        </script>
+    
+
+    <br />
+    <br />
+    <input type="button" id="button_promise_connect_server_wss" onclick="on_button_promise_connect_server_wss();" value="connect security websocket server by promise" />
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+    sd emv test.
+    <br /> TEST SUIT 0 : test For manager    <br />
+    <input type="button" id="button_promise_kernel_service_load" onclick='on_button_promise_kernel_service_load("default/sd_helloworld.dll");' value="load service dll" />
+    <input type="button" id="button_promise_kernel_service_unload" onclick='on_button_promise_kernel_service_unload("default/sd_helloworld.dll");' value="unload service dll" />
+    <br />
+    <input type="button" id="button_promise_kernel_service_execute" onclick='on_button_promise_kernel_service_execute("default/sd_helloworld.dll");' value="execute service dll" />
+    <input type="button" id="button_promise_kernel_service_cancel" onclick='on_button_promise_kernel_service_cancel("default/sd_helloworld.dll");' value="cancel service dll" />
+    <br />
+    <input type="button" id="button_promise_kernel_device_list" onclick='on_button_promise_kernel_device_list("hid#vid_134b&pid_0206&mi_01");' value="list device" />
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+
+    <br />
+    input number(max 1M characters) <input type="number" id="id_input_number" value="1048576" min="1" max="104857600" />
+    <br />
+    
+    <br />
+    TC.000.001 : load and unload
+    <input type="button" id="button_tc_000_001" onclick='on_button_tc_000_001("default/sd_helloworld.dll");' value="TC.000.001" />
+    <br />
+    TC.000.002 : load , execute and unload
+    <input type="button" id="button_tc_000_002" onclick='on_button_tc_000_002("default/sd_helloworld.dll");' value="TC.000.002" />
+    <br />
+    TC.000.003 : load , remote big data execute and unload
+    <input type="button" id="button_tc_000_003" onclick='on_button_tc_000_003("default/sd_helloworld.dll");' value="TC.000.003" />
+    <br />
+    TC.000.004 : load , local single big data execute and unload
+    <input type="button" id="button_tc_000_004" onclick='on_button_tc_000_004("default/sd_helloworld.dll");' value="TC.000.004" />
+    <br />
+    TC.000.005 : load , local multi big data execute and unload
+    <input type="button" id="button_tc_000_005" onclick='on_button_tc_000_005("default/sd_helloworld.dll");' value="TC.000.005" />
+    <br />
+
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        var n_system_event = 0;
+        var startTime, endTime;
+
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : removed : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "A"){
+                    //send data to session of advance operation.
+                    addMessage_pre("system event [" + n_system_event.toString() + "] : advance operation : " + s_data_field );
+                    continue;
+                }
+                //
+
+            }while(false);
+        }
+
+        function init() {
+            if( typeof Promise === 'undefined'){
+                addMessage("none promise");
+            }
+            else{
+                addMessage("ok promise");
+            }
+
+            printTopMessage( "coffee library verion : " + elpusk.framework.coffee.get_this_library_version());
+            var server1 = elpusk.framework.coffee.get_instance();
+            var server2 = elpusk.framework.coffee.get_instance();
+
+            if( server1 === server2 ){
+                addMessage( "server1 and 2 identical." );
+            }
+            else{
+                addMessage( "server1 and 2 different." );
+            }
+
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+        }
+
+        window.addEventListener("load", init, false);
+
+        function printTopMessage(Message){
+            var parag_main = document.getElementById("p_top_text");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+
+        function printMessage(Message){
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage(Message) {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function printMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML = Message + "<br />";
+        }
+
+        function addMessage_pre(Message){
+            var parag_main = document.getElementById("p_pre_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "14px";
+            parag_main.innerHTML += (Message + "<br />");
+        }
+
+        function on_button_promise_connect_server_wss(){
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.connect("wss").then(function (s_session_number) {
+                // server is ready here
+                addMessage("security websocket connected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : security websocket connection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is ready here
+                addMessage("disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+
+        var n_opened_device_index = 0;
+
+        function on_button_promise_kernel_service_load(s_target){
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "service";
+            server.kernel_load(s_category,s_target).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_service_load string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_service_load string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_kernel_service_unload(s_target){
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "service";
+            server.kernel_unload(s_category,s_target).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_unload string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_unload string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+            });
+        }
+
+        var _n_cnt_info = 0;
+
+        function on_button_promise_kernel_service_execute(s_target){
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "service";
+            //var sa_data = ["inform2","inform1","inform0"];
+            var sa_data = [3];
+            sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+            sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+
+            server.kernel_execute(0,0,0,s_category,s_target,sa_data).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_execute string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_execute string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_kernel_service_cancel(s_target){
+            var server = elpusk.framework.coffee.get_instance();
+
+            var s_category = "service";
+
+            server.kernel_cancel(0,0,0,s_category,s_target).then(function (s_rx) {
+                if (Array.isArray(s_rx)) {
+                    addMessage("kernel_cancel string array data : " + s_rx);
+                }
+                else {
+                    addMessage("kernel_cancel string data : " + s_rx);
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_cancel : "+ server.get_error_message(event_error));
+            });
+        }
+        function on_button_promise_kernel_device_list(s_filter){
+            var server = elpusk.framework.coffee.get_instance();
+            var s_category = "device";
+
+            server.kernel_list(s_category,s_filter).then(function (s_rx) {
+                var select_dev = document.getElementById("drop_get_device_list");
+                var length = select_dev.options.length;
+                for (var i = length - 1; i >= 0; i--) {
+                    select_dev.options[i] = null;
+                }
+
+                if (Array.isArray(s_rx)) {
+                    addMessage("array data paths : " + s_rx);
+
+                    var array_device_list = new Array();
+
+                    var n_device = s_rx.length;
+                    for (var n_device_index = 0; n_device_index < n_device; n_device_index++) {
+                        var option = document.createElement('option');
+                        option.value = n_device_index;
+                        option.text = s_rx[n_device_index];
+                        select_dev.add(option, 0);
+                    }
+
+                }
+                else {
+                    if (s_rx === null) {
+                        addMessage("no connect device.");
+                    }
+                    else {
+                        addMessage("string path : " + s_rx);
+                    }
+                }
+            }).catch(function (event_error) {
+                // error here
+                addMessage("fail : kernel_list : "+ server.get_error_message(event_error));
+            });
+        }
+
+    </script>
+
+    <script type="text/javascript">
+    //TC.000.001 : load and unload
+    function on_button_tc_000_001(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.001 : load and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        server.kernel_load(s_category,s_target).then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        }).catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });        
+
+    }//on_button_tc_000_001()
+
+    //TC.000.002 : load , execute and unload
+    function on_button_tc_000_002(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.002 : load , execute and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        var sa_data = [3];
+        sa_data[2] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+        sa_data[1] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+        sa_data[0] = "inform"+_n_cnt_info.toString();   _n_cnt_info++;
+
+        server.kernel_load(s_category,s_target).then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        }).catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_execute : " + s_rx);
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_execute string data : " + s_rx);
+            }
+        }).catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });           
+    }//on_button_tc_000_002()
+
+    //TC.000.003 : load , remote big data execute and unload (Web-Scraping)
+    function on_button_tc_000_003(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.003 : load , remote big data execute and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        var sa_data = new Array();
+        
+        fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits')
+        .then(function (response) {
+            console.log("fetched.......");
+            if( response.ok ){
+                //HTTO status code 200-299
+                return response.json();
+            }
+            else{
+                alert("HTTP-Error: " + response.status);
+            }
+            
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : fetch : "+ event_error.toString());
+            throw(event_error);
+        })
+        .then(function (json) {
+            console.log("JSON.......");
+            var _s_d = JSON.stringify(json);
+            sa_data.push(_s_d);
+            return elpusk.framework.coffee.get_instance().kernel_load(s_category,s_target);
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : fetch : "+ event_error.toString());
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    console.log("kernel_execute : tx size = "+sa_data[0].length.toString());
+                    /*
+                    if(sa_data[0].length > 100 ){
+                        sa_data[0] = "";//document.getElementById
+                        var _n_cnt = Number(document.getElementById("id_input_number").value);
+                        var _n_loop10 = _n_cnt/10;
+                        var _n_remainder = _n_cnt%10;
+
+                        for( var i=0; i<_n_loop10; i++ ){
+                            sa_data[0] += "0123456789";    
+                        }
+                        for( var i=0; i<_n_remainder; i++ ){
+                            sa_data[0] += i.toString();    
+                        }
+                        console.log("kernel_execute : tx size(reduce) = "+sa_data[0].length.toString());
+                    }
+                    */
+                    return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_execute : " + s_rx);
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_execute string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });           
+    }//on_button_tc_000_003()    
+
+    //TC.000.004 : load , local single big data execute and unload
+    function on_button_tc_000_004(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.004 : load , local single big data execute and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        var sa_data = new Array();
+        
+        elpusk.framework.coffee.get_instance().kernel_load(s_category,s_target)
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    sa_data[0] = "";//document.getElementById
+                    var _n_cnt = Number(document.getElementById("id_input_number").value);
+                    var _n_loop10 = _n_cnt/10;
+                    var _n_remainder = _n_cnt%10;
+
+                    for( var i=0; i<_n_loop10; i++ ){
+                        sa_data[0] += "0123456789";    
+                    }
+                    for( var i=0; i<_n_remainder; i++ ){
+                        sa_data[0] += i.toString();    
+                    }
+
+                    return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_execute : " + s_rx);
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_execute string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });           
+    }//on_button_tc_000_004()    
+
+    //TC.000.005 : load , local single big data execute and unload
+    function on_button_tc_000_005(s_sd_dll) {
+        addMessage("========================");
+        addMessage("TC.000.005 : load , local multi big data execute and unload");
+
+        var server = elpusk.framework.coffee.get_instance();
+
+        var s_category = "service";
+        var s_target = s_sd_dll;
+        var sa_data = new Array();
+        
+        elpusk.framework.coffee.get_instance().kernel_load(s_category,s_target)
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_service_load");
+                    sa_data[0] = "";//document.getElementById
+                    var _n_cnt = Number(document.getElementById("id_input_number").value);
+                    var _n_loop10 = _n_cnt/10;
+                    var _n_remainder = _n_cnt%10;
+                    var _s_temp = "";
+
+                    for( var i=0; i<_n_loop10; i++ ){
+                        sa_data.push("0123456789");    
+                    }
+                    for( var i=0; i<_n_remainder; i++ ){
+                        _s_temp += i.toString();    
+                    }
+
+                    if(_s_temp.length>0){
+                        sa_data.push(_s_temp);   
+                    }
+
+                    return elpusk.framework.coffee.get_instance().kernel_execute(0,0,0,s_category,s_target,sa_data);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_service_load string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_service_load : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_execute : " + s_rx);
+                    return elpusk.framework.coffee.get_instance().kernel_unload(s_category,s_target);
+                }
+                else{
+                    addMessage("fail : kernel_service_load string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_execute string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_execute : "+ server.get_error_message(event_error));
+            throw(event_error);
+        })
+        .then(function (s_rx) {
+            if (Array.isArray(s_rx)) {
+                if( s_rx[0] === "success" ){
+                    addMessage("pass : kernel_unload");
+                }
+                else{
+                    addMessage("fail : kernel_unload string array data : " + s_rx);
+                }
+            }
+            else {
+                addMessage("fail : kernel_unload string data : " + s_rx);
+            }
+        })
+        .catch(function (event_error) {
+            // error here
+            addMessage("fail : kernel_unload : "+ server.get_error_message(event_error));
+        });           
+    }//on_button_tc_000_005()        
+    </script>
+</BODY>
+</HTML>
