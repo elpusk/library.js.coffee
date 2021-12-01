@@ -54,6 +54,7 @@
     /**
      * dll_service - the base class of all service dll.
      */
+    var _dll_service = window.dll_service;
     if(!_dll_service){
         'use strict';
 
@@ -132,11 +133,12 @@
          * @description load service dll and initialize
         */                
          _dll_service.prototype.sd_load = function(){
+            var this_sd_dll = this;
             return new Promise(function(resolve,reject){
                 var s_error = "";
                 var s_kernel_category = "service";
 
-                elpusk.framework.coffee.get_instance().kernel_load(s_kernel_category, this._s_sd_dll_path)
+                elpusk.framework.coffee.get_instance().kernel_load(s_kernel_category, this_sd_dll._s_sd_dll_path)
                 .then(function (s_rx) {
                     var b_result = false;
                     do{

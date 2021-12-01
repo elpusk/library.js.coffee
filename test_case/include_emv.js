@@ -36,3 +36,4 @@ document.write('<script src="../scripts/elpusk/elpusk.device.usb.hid.js"><\/scri
 
 document.write('<script src="../scripts/dll_service/dll_service.js"><\/script>');
 document.write('<script src="../scripts/dll_service/default/sd_emv.js"><\/script>');
+document.write('<script src="../scripts/etc/etc.tools.js"><\/script>');
