@@ -58,25 +58,97 @@
         //여기서 컨트롤을 추가한다.
         //컨트롤 이름은 ID 에서 "id_"를 제외한 문자열이다.
         var s_parent_name = "", s_ctl_name = "", s_event_handler = "", s_message = "";
+        var b_break = false;
 
+        //////////////////////////
+        //top button
         s_parent_name = "p_top_ctl0";
         s_ctl_name = "bt_top_clear";
         s_event_handler = `etc_tools_clear_paragraph("p_top","12px")`;
         s_message = "clear top";
-        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message);
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
-        s_parent_name = "p_top_ctl0";
         s_ctl_name = "bt_emv_get_status";
         s_event_handler = `sd_emv_run_fun("get_status")`;
         s_message = "get_status";
-        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message);
+        b_break = true;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
+        s_ctl_name = "bt_emv_power_on";
+        s_event_handler = `sd_emv_run_fun("power_on")`;
+        s_message = "power_on";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
+        s_ctl_name = "bt_emv_power_off";
+        s_event_handler = `sd_emv_run_fun("power_off")`;
+        s_message = "power_off";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+        //
+        s_ctl_name = "bt_emv_initialize_transaction";
+        s_event_handler = `sd_emv_run_fun("initialize_transaction")`;
+        s_message = "initialize_transaction";
+        b_break = true;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_build_candidate_list";
+        s_event_handler = `sd_emv_run_fun("build_candidate_list")`;
+        s_message = "build_candidate_list";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_select_application";
+        s_event_handler = `sd_emv_run_fun("select_application")`;
+        s_message = "select_application";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_read_data";
+        s_event_handler = `sd_emv_run_fun("read_data")`;
+        s_message = "read_data";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_offline_data_authentication";
+        s_event_handler = `sd_emv_run_fun("offline_data_authentication")`;
+        s_message = "offline_data_authentication";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_processing_restrictions";
+        s_event_handler = `sd_emv_run_fun("processing_restrictions")`;
+        s_message = "processing_restrictions";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_cardholder_verification";
+        s_event_handler = `sd_emv_run_fun("cardholder_verification")`;
+        s_message = "cardholder_verification";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_terminal_risk_managment";
+        s_event_handler = `sd_emv_run_fun("terminal_risk_managment")`;
+        s_message = "terminal_risk_managment";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        s_ctl_name = "bt_emv_terminal_action_analysis";
+        s_event_handler = `sd_emv_run_fun("terminal_action_analysis")`;
+        s_message = "terminal_action_analysis";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
+        //////////////////////////
+        //bottom button
         s_parent_name = "p_top_ctl1";
         s_ctl_name = "bt_top_add_msg";
         s_event_handler = `etc_tools_add_msg_to_paragraph("p_top","12px","good job<br />")`;
         s_message = "add msg to top";
-        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message);
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
     </script>
     <br />
 

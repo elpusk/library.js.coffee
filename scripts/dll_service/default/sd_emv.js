@@ -33,7 +33,7 @@
  * @namespace dll_service.default.sd_emv
  */
 
- 'use strict';
+'use strict';
 
 (function (window, undefined) {
 
@@ -77,9 +77,9 @@
          * <br /> //n_in_id : in report id
          * <br /> //n_out_id : out report id
         */
-        _dll_service.default.sd_emv = function (n_session,n_slot,n_in_id, n_out_id) {
+        _dll_service.default.sd_emv = function (n_session, n_slot, n_in_id, n_out_id) {
             var s_sd_dll_path = "default/sd_emv.dll";
-            dll_service.call(this,n_session,s_sd_dll_path);
+            dll_service.call(this, n_session, s_sd_dll_path);
             /**
              * @private
              * as like "this._x = '';"
@@ -89,23 +89,23 @@
              * @private
              * slot number of smart card reader.
              */
-            if( typeof n_slot === 'number'){
+            if (typeof n_slot === 'number') {
                 this._n_slot = n_slot;
             }
-            else{
+            else {
                 this._n_slot = 0;//set default value.
             }
 
-            if( typeof n_in_id === 'number'){
+            if (typeof n_in_id === 'number') {
                 this._n_in_id = n_in_id;
             }
-            else{
+            else {
                 this._n_in_id = 0;//set default value.
             }
-            if( typeof n_out_id === 'number'){
+            if (typeof n_out_id === 'number') {
                 this._n_out_id = n_out_id;
             }
-            else{
+            else {
                 this._n_out_id = 0;//set default value.
             }
         };
@@ -127,7 +127,7 @@
          * @return {Promise} processing result.
          * @description get card status.
          */
-         _dll_service.default.sd_emv.prototype.get_status = function(){
+        _dll_service.default.sd_emv.prototype.get_status = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -136,8 +136,8 @@
                 'status'
             ];
 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }   
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public
@@ -145,7 +145,7 @@
          * @return {Promise} processing result.
          * @description power on icc
          */
-         _dll_service.default.sd_emv.prototype.power_on = function(){
+        _dll_service.default.sd_emv.prototype.power_on = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -154,8 +154,8 @@
                 'on'
             ];
 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }   
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public
@@ -163,7 +163,7 @@
          * @return {Promise} processing result.
          * @description power off icc
          */
-         _dll_service.default.sd_emv.prototype.power_off = function(){
+        _dll_service.default.sd_emv.prototype.power_off = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -172,8 +172,8 @@
                 'off'
             ];
 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }   
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public
@@ -185,12 +185,12 @@
          * @return {Promise} processing result.
          * @description initialize virtual emv terminal.
          */
-         _dll_service.default.sd_emv.prototype.terminal_on = function(
-             s_hex_9f35_tag_value,
-             s_hex_9f1a_tag_value,
-             s_hex_9a_tag_value,
-             s_hex_9f33_tag_value
-         ){
+        _dll_service.default.sd_emv.prototype.terminal_on = function (
+            s_hex_9f35_tag_value,
+            s_hex_9f1a_tag_value,
+            s_hex_9a_tag_value,
+            s_hex_9f33_tag_value
+        ) {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -198,30 +198,30 @@
                 this._n_slot.toString()
             ];
 
-            ar_parameter.push(s_hex_9f35_tag_value);
-            ar_parameter.push(s_hex_9f1a_tag_value);
-            ar_parameter.push(s_hex_9a_tag_value);
-            ar_parameter.push(s_hex_9f33_tag_value);
+            ar_parameter.push('TAGT_TERMINAL_TYPE:b:' + s_hex_9f35_tag_value);
+            ar_parameter.push('TAGT_TERMINAL_COUNTRY_CODE:b:' + s_hex_9f1a_tag_value);
+            ar_parameter.push('TAGT_TRANSACTION_DATE:b:' + s_hex_9a_tag_value);
+            ar_parameter.push('TAGT_TERMINAL_CAPABILITIES:b:' + s_hex_9f33_tag_value);
 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }   
-        
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
+
         /**
          * @public
          * @function dll_service.default.sd_emv.terminal_off
          * @return {Promise} processing result.
          * @description deinitialize virtual emv terminal.
          */
-         _dll_service.default.sd_emv.prototype.terminal_off = function(){
+        _dll_service.default.sd_emv.prototype.terminal_off = function () {
 
-           var this_sd_dll = this;
-           var ar_parameter = [
-               'off',
-               this._n_slot.toString()
-           ];
+            var this_sd_dll = this;
+            var ar_parameter = [
+                'off',
+                this._n_slot.toString()
+            ];
 
-           return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-       }           
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public
@@ -229,16 +229,16 @@
          * @return {Promise} processing result.
          * @description reinitialize virtual emv terminal.
          */
-         _dll_service.default.sd_emv.prototype.terminal_reset = function(){
+        _dll_service.default.sd_emv.prototype.terminal_reset = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
                 'reset',
                 this._n_slot.toString()
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public
@@ -246,18 +246,18 @@
          * @param {string} s_hex_9c_tag_value hex string TAGT_TRANSACTION_TYPE
          * @param {string} s_hex_5f2a_tag_value hex string TAGT_TANSACTION_CURRENCY_CODE
          * @param {string} s_hex_5f36_tag_value hex string TAGT_TRANSACTION_CURRENCY_EXPONENT
-         * @param {string} s_hex_9f02_tag_value decimal string TAGT_AMOUNT_AUTHORISED_NUMERIC
-         * @param {string} s_hex_9f03_tag_value decimal string TAGT_AMOUNT_OTHER_NUMERIC
+         * @param {string} s_dec_9f02_tag_value decimal string TAGT_AMOUNT_AUTHORISED_NUMERIC
+         * @param {string} s_dec_9f03_tag_value decimal string TAGT_AMOUNT_OTHER_NUMERIC
          * @return {Promise} processing result.
          * @description initialize emv transaction
          */
-         _dll_service.default.sd_emv.prototype.initialize_transaction = function(
+        _dll_service.default.sd_emv.prototype.initialize_transaction = function (
             s_hex_9c_tag_value,
             s_hex_5f2a_tag_value,
             s_hex_5f36_tag_value,
-            s_hex_9f02_tag_value,
-            s_hex_9f03_tag_value
-         ){
+            s_dec_9f02_tag_value,
+            s_dec_9f03_tag_value
+        ) {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -266,15 +266,15 @@
                 'it'
             ];
 
-            ar_parameter.push('TAGT_TRANSACTION_TYPE:b:'+s_hex_9c_tag_value);
-            ar_parameter.push('TAGT_TANSACTION_CURRENCY_CODE:b:'+s_hex_5f2a_tag_value);
-            ar_parameter.push('TAGT_TRANSACTION_CURRENCY_EXPONENT:b:'+s_hex_5f36_tag_value);
-            ar_parameter.push('TAGT_AMOUNT_AUTHORISED_NUMERIC:n:'+s_hex_9f02_tag_value);
-            ar_parameter.push('TAGT_AMOUNT_OTHER_NUMERIC:n:'+s_hex_9f03_tag_value);
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
-        
+            ar_parameter.push('TAGT_TRANSACTION_TYPE:b:' + s_hex_9c_tag_value);
+            ar_parameter.push('TAGT_TANSACTION_CURRENCY_CODE:b:' + s_hex_5f2a_tag_value);
+            ar_parameter.push('TAGT_TRANSACTION_CURRENCY_EXPONENT:b:' + s_hex_5f36_tag_value);
+            ar_parameter.push('TAGT_AMOUNT_AUTHORISED_NUMERIC:n:' + s_dec_9f02_tag_value);
+            ar_parameter.push('TAGT_AMOUNT_OTHER_NUMERIC:n:' + s_dec_9f03_tag_value);
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
+
 
         /**
          * TODO more define additional parameters
@@ -284,11 +284,11 @@
          * @return {Promise} processing result.
          * @description build candidate list.
          */
-         _dll_service.default.sd_emv.prototype.build_candidate_list = function(
+        _dll_service.default.sd_emv.prototype.build_candidate_list = function (
             s_use_pse
-         ){
+        ) {
             var s_pse = '1';//default 
-            if( s_use_pse === '0'){
+            if (s_use_pse === '0') {
                 s_pse = '0';
             }
 
@@ -297,11 +297,11 @@
                 'transaction',
                 this._n_slot.toString(),
                 'bcl',
-                'PSE:n:'+s_pse
+                'PSE:n:' + s_pse
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -311,10 +311,10 @@
          * @return {Promise} processing result.
          * @description select application
          */
-         _dll_service.default.sd_emv.prototype.select_application = function(
-             s_aid,
-             s_use_confirm
-         ){
+        _dll_service.default.sd_emv.prototype.select_application = function (
+            s_aid,
+            s_use_confirm
+        ) {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -323,22 +323,22 @@
                 'sa'
             ];
 
-            if( typeof s_aid === 'string'){
-                ar_parameter.push('AID:b:'+s_aid);
+            if (typeof s_aid === 'string') {
+                ar_parameter.push('AID:b:' + s_aid);
             }
-            else if( s_aid === ''){
-                ar_parameter.push('AID:b:'+s_aid);
+            else if (s_aid === '') {
+                ar_parameter.push('AID:b:' + s_aid);
             }
 
-            if(s_use_confirm === '1'){
+            if (s_use_confirm === '1') {
                 ar_parameter.push('CONFIRM:n:1');
             }
-            else{
+            else {
                 ar_parameter.push('CONFIRM:n:0');
             }
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -346,7 +346,7 @@
          * @return {Promise} processing result.
          * @description read data
          */
-         _dll_service.default.sd_emv.prototype.read_data = function(){
+        _dll_service.default.sd_emv.prototype.read_data = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -354,9 +354,9 @@
                 this._n_slot.toString(),
                 'ra'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -364,7 +364,7 @@
          * @return {Promise} processing result.
          * @description offline data authentication.
          */
-         _dll_service.default.sd_emv.prototype.offline_data_authentication = function(){
+        _dll_service.default.sd_emv.prototype.offline_data_authentication = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -372,9 +372,9 @@
                 this._n_slot.toString(),
                 'oda'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -382,7 +382,7 @@
          * @return {Promise} processing result.
          * @description processing restrictions. 
          */
-         _dll_service.default.sd_emv.prototype.processing_restrictions = function(){
+        _dll_service.default.sd_emv.prototype.processing_restrictions = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -390,9 +390,9 @@
                 this._n_slot.toString(),
                 'pr'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -400,7 +400,7 @@
          * @return {Promise} processing result.
          * @description cardholder verification. 
          */
-         _dll_service.default.sd_emv.prototype.cardholder_verification = function(){
+        _dll_service.default.sd_emv.prototype.cardholder_verification = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -408,9 +408,9 @@
                 this._n_slot.toString(),
                 'cv'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -418,7 +418,7 @@
          * @return {Promise} processing result.
          * @description terminal risk managment.
          */
-         _dll_service.default.sd_emv.prototype.terminal_risk_managment = function(){
+        _dll_service.default.sd_emv.prototype.terminal_risk_managment = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -426,9 +426,9 @@
                 this._n_slot.toString(),
                 'trm'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -436,7 +436,7 @@
          * @return {Promise} processing result.
          * @description terminal action analysis. 
          */
-         _dll_service.default.sd_emv.prototype.terminal_action_analysis = function(){
+        _dll_service.default.sd_emv.prototype.terminal_action_analysis = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -444,9 +444,9 @@
                 this._n_slot.toString(),
                 'taa'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -454,7 +454,7 @@
          * @return {Promise} processing result.
          * @description card_action_analysis.
          */
-         _dll_service.default.sd_emv.prototype.card_action_analysis = function(){
+        _dll_service.default.sd_emv.prototype.card_action_analysis = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -462,9 +462,9 @@
                 this._n_slot.toString(),
                 'caa'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -472,7 +472,7 @@
          * @return {Promise} processing result.
          * @description go online.
          */
-         _dll_service.default.sd_emv.prototype.go_online = function(){
+        _dll_service.default.sd_emv.prototype.go_online = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -480,9 +480,9 @@
                 this._n_slot.toString(),
                 'go'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -490,7 +490,7 @@
          * @return {Promise} processing result.
          * @description complete transaction.
          */
-         _dll_service.default.sd_emv.prototype.complete_transaction = function(){
+        _dll_service.default.sd_emv.prototype.complete_transaction = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -498,9 +498,9 @@
                 this._n_slot.toString(),
                 'ct'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
         /**
          * @public 
@@ -508,7 +508,7 @@
          * @return {Promise} processing result.
          * @description end transaction.
          */
-         _dll_service.default.sd_emv.prototype.end_transaction = function(){
+        _dll_service.default.sd_emv.prototype.end_transaction = function () {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -516,9 +516,9 @@
                 this._n_slot.toString(),
                 'et'
             ];
- 
-            return this.sd_execute(this._n_in_id,this._n_out_id,ar_parameter);
-        }           
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
 
     }//!_dll_service.default.sd_emv

@@ -64,7 +64,7 @@ function sd_emv_ini_server() {
     )
         .catch(
             function (event_error) {
-                console.log("connect : " + event_error);
+                console.log("[E] connect : " + event_error);
                 throw (event_error);
             }
         )
@@ -102,7 +102,8 @@ function sd_emv_ini_server() {
         .catch(
             function (event_error) {
                 etc_tools_add_msg_to_paragraph("p_top", 14, "error response : " + event_error);
-                console.log("get device list : " + event_error);
+                console.log("[E] get device list : " + event_error);
+                throw (event_error);
             }
         )
         //load 
@@ -121,7 +122,8 @@ function sd_emv_ini_server() {
         .catch(
             function (event_error) {
                 etc_tools_add_msg_to_paragraph("p_top", 14, "error response : " + event_error);
-                console.log("sd_load : " + event_error);
+                console.log("[E] sd_load : " + event_error);
+                throw (event_error);
             }
         )
         //open
@@ -129,26 +131,92 @@ function sd_emv_ini_server() {
             function (n_device) {
                 if (typeof n_device === 'number') {
                     if (n_device !== 0) {
-                        etc_tools_add_msg_to_paragraph("p_top", 12, "ready for starting EMV process.<br />");
+                        var today = new Date();
+                        var s_year = today.getFullYear().toString().slice(-2);
+                        var s_month = ('0' + (today.getMonth() + 1)).slice(-2);
+                        var s_day = ('0' + today.getDate()).slice(-2);
+
+                        etc_tools_add_msg_to_paragraph("p_top", 12, `opened device ${n_device}.<br />`);
+                        var s_hex_9f35_tag_value = "11";//1 byte hex string( CONTROL_BY_FINANCIAL | TERMINAL_TYPE_ATTENDED_ONLINE)
+                        var s_hex_9f1a_tag_value = "0410";//2 bytes hex string  ISO 3166, KOR
+                        var s_hex_9a_tag_value = s_year + s_month + s_day;//3 byets YYMMDD
+                        var s_hex_9f33_tag_value = "06E8E8";//3 bytes hex string 
+
+                        return g_emv_terminal.terminal_on(
+                            s_hex_9f35_tag_value,
+                            s_hex_9f1a_tag_value,
+                            s_hex_9a_tag_value,
+                            s_hex_9f33_tag_value
+                        );
                     }
                     else {
-                        etc_tools_add_msg_to_paragraph("p_top", 14, "error : device index must be gratetr then zero : " + n_device.toString());
+                        etc_tools_add_msg_to_paragraph("p_top", 14, `error : device index must be gratetr then zero : ${n_device}.<br />`);
                     }
                 }
                 else {
-                    etc_tools_add_msg_to_paragraph("p_top", 14, "error : sd_open_device : " + n_device.toString());
+                    etc_tools_add_msg_to_paragraph("p_top", 14, `error : sd_open_device : ${n_device}.<br />`);
                 }
             }
         )
         .catch(
             function (event_error) {
-                etc_tools_add_msg_to_paragraph("p_top", 14, "error sd_open_device : " + event_error);
-                console.log("sd_open_device : " + event_error);
+                etc_tools_add_msg_to_paragraph("p_top", 14, `error sd_open_device : ${event_error}.<br />`);
+                console.log("[E] sd_open_device : " + event_error);
+                throw (event_error);
+            }
+        )
+        //create virtual terminal
+        .then(
+            function (s_rx) {
+                console.log(s_rx);
+                if (Array.isArray(s_rx)) {
+                    if (s_rx.length > 0) {
+                        if (s_rx[0] === "success") {
+                            etc_tools_add_msg_to_paragraph("p_top", 12, "created virtual terminal.<br />");
+                        }
+                        else {
+                            etc_tools_add_msg_to_paragraph("p_top", 14, "error : terminal_on : " + s_rx);
+                        }
+                    }
+                    else {
+                        etc_tools_add_msg_to_paragraph("p_top", 14, "error : terminal_on : " + s_rx);
+                    }
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_top", 14, "error : terminal_on : " + s_rx);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_top", 14, `error response : ${event_error}.<br />`);
+                console.log("[E] terminal_on : " + event_error);
             }
         )
         ;
 }
 
+function _check_rx_for_emv_run_fun(s_rx, n_mandotry) {
+    console.log(s_rx);
+    var b_result = false;
+    do {
+        if (n_mandotry <= 0) {
+            continue;
+        }
+        if (!Array.isArray(s_rx)) {
+            continue;
+        }
+        if (s_rx.length < n_mandotry) {
+            continue;
+        }
+        if (s_rx[0] !== "success") {
+            continue;
+        }
+        b_result = true;
+
+    } while (false);
+    return b_result;
+}
 /**
  * 
  * @param {*} s_fun_name 
@@ -167,25 +235,113 @@ function sd_emv_run_fun(s_fun_name) {
         switch (s_fun_name) {
             case "get_status":
                 result = g_emv_terminal.get_status()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 2)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `card : status : ${s_rx[1]}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : get_status : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "power_on":
+                result = g_emv_terminal.power_on()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 2)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `atr : ${s_rx[1]}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : power_on : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "power_off":
+                result = g_emv_terminal.power_off()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `icc power off.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : power_off : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "initialize_transaction":
+                var s_hex_9c_tag_value = "00";//1 byte  ISO 8583:1987
+                var s_hex_5f2a_tag_value = "0410";//2 bytes ISO 4217
+                var s_hex_5f36_tag_value = "00";//1 byte
+                var s_dec_9f02_tag_value = "0";
+                var s_dec_9f03_tag_value = "0";
+                result = g_emv_terminal.initialize_transaction(
+                    s_hex_9c_tag_value,
+                    s_hex_5f2a_tag_value,
+                    s_hex_5f36_tag_value,
+                    s_dec_9f02_tag_value,
+                    s_dec_9f03_tag_value
+                )
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `initialize_transaction.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : initialize_transaction : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "build_candidate_list":
+                var s_use_pse = "1";
+                result = g_emv_terminal.build_candidate_list(s_use_pse)
                 .then(
                     function (s_rx) {
-                        console.log(s_rx);
+                        if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `build_candidate_list.<br />`);
+                        }
+                        else {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error : build_candidate_list : ${s_rx}.<br />`);
+                        }
                     }
                 )
                 .catch(
                     function (event_error) {
-                        etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ` + event_error);
-                        console.log(s_fun_name + " : "+ event_error);
+                        etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                        console.log(s_fun_name + " : " + event_error);
                     }
                 );
                 break;
-            case "power_on":
-                result = g_emv_terminal.get_status();
-                break;
-            case "power_off":
-                result = g_emv_terminal.get_status();
-                break;
             default:
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : none implementation.<br />`);
                 continue;
         }//end switch
 

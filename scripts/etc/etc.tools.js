@@ -1,6 +1,6 @@
 
 
-function etc_tools_add_button(s_parent_name, s_name, s_onclick, s_data) {
+function etc_tools_add_button(s_parent_name, s_name, s_onclick, s_data,b_insert_cr_before_new) {
 
     do {
         var parent = document.getElementById(`id_${s_parent_name}`);
@@ -19,7 +19,13 @@ function etc_tools_add_button(s_parent_name, s_name, s_onclick, s_data) {
             bt.innerHTML = "";
         }
 
+        if( typeof b_insert_cr_before_new === 'boolean'){
+            if(b_insert_cr_before_new){
+                parent.innerHTML += "<br />";
+            }
+        }
         parent.appendChild(bt);
+        
     } while (false);
 }
 
