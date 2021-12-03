@@ -323,23 +323,63 @@ function sd_emv_run_fun(s_fun_name) {
             case "build_candidate_list":
                 var s_use_pse = "1";
                 result = g_emv_terminal.build_candidate_list(s_use_pse)
-                .then(
-                    function (s_rx) {
-                        if (_check_rx_for_emv_run_fun(s_rx, 1)) {
-                            etc_tools_add_msg_to_paragraph("p_middle", 14, `build_candidate_list.<br />`);
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `build_candidate_list.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : build_candidate_list : ${s_rx}.<br />`);
+                            }
                         }
-                        else {
-                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error : build_candidate_list : ${s_rx}.<br />`);
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
                         }
-                    }
-                )
-                .catch(
-                    function (event_error) {
-                        etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
-                        console.log(s_fun_name + " : " + event_error);
-                    }
-                );
+                    );
                 break;
+            case "select_application":
+                var s_use_confirm = "0";
+                result = g_emv_terminal.select_application(s_use_confirm)
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `select_application.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : select_application : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "read_data":
+                result = g_emv_terminal.read_data()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `read_data.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : read_data : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+
             default:
                 etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : none implementation.<br />`);
                 continue;

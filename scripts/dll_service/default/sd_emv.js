@@ -306,14 +306,14 @@
         /**
          * @public 
          * @function dll_service.default.sd_emv.select_application.
-         * @param {string} s_aid hex string AID( selected by user)
          * @param {string} s_use_confirm decimal string 1 : confirm the selected aid user.
+         * @param {string} s_aid hex string AID( selected by user)
          * @return {Promise} processing result.
          * @description select application
          */
         _dll_service.default.sd_emv.prototype.select_application = function (
-            s_aid,
-            s_use_confirm
+            s_use_confirm,
+            s_aid
         ) {
 
             var this_sd_dll = this;
@@ -324,9 +324,6 @@
             ];
 
             if (typeof s_aid === 'string') {
-                ar_parameter.push('AID:b:' + s_aid);
-            }
-            else if (s_aid === '') {
                 ar_parameter.push('AID:b:' + s_aid);
             }
 
