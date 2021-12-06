@@ -517,6 +517,30 @@
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
         }
 
+        /**
+         * @public 
+         * @function dll_service.default.sd_emv.etc_gets
+         * @param {Array} ar_tags_string - array hex string tag, each item format : "hex tag:n:0 or length(decimal)"
+         * @return {Promise} processing result.
+         * @description get tlv data from terminal
+         */
+        _dll_service.default.sd_emv.prototype.etc_gets = function (
+            ar_tags_string
+        ) {
+
+            var this_sd_dll = this;
+            var ar_parameter = [
+                'transaction',
+                this._n_slot.toString(),
+                'etc_gets'
+            ];
+
+            if (Array.isArray(ar_tags_string)) {
+                ar_parameter = ar_parameter.concat(ar_tags_string);
+            }
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
 
     }//!_dll_service.default.sd_emv
 

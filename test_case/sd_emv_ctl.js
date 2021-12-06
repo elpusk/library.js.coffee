@@ -365,7 +365,7 @@ function sd_emv_run_fun(s_fun_name) {
                     .then(
                         function (s_rx) {
                             if (_check_rx_for_emv_run_fun(s_rx, 1)) {
-                                etc_tools_add_msg_to_paragraph("p_middle", 14, `read_data.<br />`);
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `read_data : ${s_rx}.<br />`);
                             }
                             else {
                                 etc_tools_add_msg_to_paragraph("p_middle", 14, `error : read_data : ${s_rx}.<br />`);
@@ -379,7 +379,26 @@ function sd_emv_run_fun(s_fun_name) {
                         }
                     );
                 break;
-
+            case "etc_gets":
+                var s_tag_para = ["9c:n:0","5f2a:n:0","5f36:n:0","9f02:n:0","9f03:n:0"];
+                result = g_emv_terminal.etc_gets(s_tag_para)
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `etc_gets : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : etc_gets : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
             default:
                 etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : none implementation.<br />`);
                 continue;

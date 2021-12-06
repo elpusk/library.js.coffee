@@ -141,6 +141,13 @@
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
+        //
+        s_ctl_name = "bt_emv_etc_gets";
+        s_event_handler = `sd_emv_run_fun("etc_gets")`;
+        s_message = "etc_gets";
+        b_break = true;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
         //////////////////////////
         //bottom button
         s_parent_name = "p_top_ctl1";
