@@ -379,8 +379,183 @@ function sd_emv_run_fun(s_fun_name) {
                         }
                     );
                 break;
+            case "offline_data_authentication"://////
+                result = g_emv_terminal.offline_data_authentication()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `offline_data_authentication : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : offline_data_authentication : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "processing_restrictions":
+                result = g_emv_terminal.processing_restrictions()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `processing_restrictions : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : processing_restrictions : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+
+            case "cardholder_verification":
+                result = g_emv_terminal.cardholder_verification()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `cardholder_verification : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : cardholder_verification : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+
+            case "terminal_risk_managment":
+                result = g_emv_terminal.terminal_risk_managment()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `terminal_risk_managment : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : terminal_risk_managment : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+
+            case "terminal_action_analysis":
+                result = g_emv_terminal.terminal_action_analysis()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `terminal_action_analysis : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : terminal_action_analysis : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "card_action_analysis":
+                result = g_emv_terminal.card_action_analysis()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `card_action_analysis : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : card_action_analysis : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "go_online":
+                result = g_emv_terminal.go_online()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `go_online : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : go_online : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "complete_transaction":
+                result = g_emv_terminal.complete_transaction()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `complete_transaction : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : complete_transaction : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+            case "end_transaction":
+                result = g_emv_terminal.end_transaction()
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `end_transaction : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : end_transaction : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+                break;
+
             case "etc_gets":
-                var s_tag_para = ["9c:n:0","5f2a:n:0","5f36:n:0","9f02:n:0","9f03:n:0"];
+                var s_tag_para = [];//["9c:n:0","5f2a:n:0","5f36:n:0","9f02:n:0","9f03:n:0"];
                 result = g_emv_terminal.etc_gets(s_tag_para)
                     .then(
                         function (s_rx) {

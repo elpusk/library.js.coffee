@@ -536,7 +536,9 @@
             ];
 
             if (Array.isArray(ar_tags_string)) {
-                ar_parameter = ar_parameter.concat(ar_tags_string);
+                if (ar_tags_string.length > 0) {
+                    ar_parameter = ar_parameter.concat(ar_tags_string);
+                }
             }
 
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
