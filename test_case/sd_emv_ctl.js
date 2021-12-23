@@ -582,3 +582,330 @@ function sd_emv_run_fun(s_fun_name) {
     } while (false);
     return result;
 }
+
+/**
+ * @function sd_emv_run__all()
+ * @description run all phases of emv transaction.
+ *          
+ */
+function sd_emv_run_all() {
+    g_emv_terminal.get_status()
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 2)) {
+                    if (s_rx[1] === 'active' || s_rx[1] === 'deactive') {
+                        etc_tools_add_msg_to_paragraph("p_middle", 14, `get_status : ${s_rx}.<br />`);
+                        return g_emv_terminal.power_off();
+                    }
+                }
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error get_status : ${s_rx}.<br />`);
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error none card : ${event_error}.<br />`);
+                console.log("get_status : " + event_error);
+            }
+        )
+        //power off
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `power_off : ${s_rx}.<br />`);
+                    return g_emv_terminal.power_on();
+                }
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error power_off : ${s_rx}.<br />`);
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error power_off : ${event_error}.<br />`);
+                console.log("power_off : " + event_error);
+            }
+        )
+        //power on
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 2)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `atr : ${s_rx}.<br />`);
+                    var s_hex_9c_tag_value = "00";//1 byte  ISO 8583:1987
+                    var s_hex_5f2a_tag_value = "0410";//2 bytes ISO 4217
+                    var s_hex_5f36_tag_value = "00";//1 byte
+                    var s_dec_9f02_tag_value = "0";
+                    var s_dec_9f03_tag_value = "0";
+                    return g_emv_terminal.initialize_transaction(
+                        s_hex_9c_tag_value,
+                        s_hex_5f2a_tag_value,
+                        s_hex_5f36_tag_value,
+                        s_dec_9f02_tag_value,
+                        s_dec_9f03_tag_value
+                    );
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : power_on : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error power_on : ${event_error}.<br />`);
+                console.log("power_on : " + event_error);
+            }
+        )
+        //initialize_transaction
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `initialize_transaction : ${s_rx}.<br />`);
+                    var s_use_pse = "1";
+                    return g_emv_terminal.build_candidate_list(s_use_pse);
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : initialize_transaction : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error initialize_transaction : ${event_error}.<br />`);
+                console.log("initialize_transaction : " + event_error);
+            }
+        )
+        //build_candidate_list
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `build_candidate_list : ${s_rx}.<br />`);
+                    var s_use_confirm = "0";
+                    return g_emv_terminal.select_application(s_use_confirm);
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : build_candidate_list : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error build_candidate_list : ${event_error}.<br />`);
+                console.log("build_candidate_list : " + event_error);
+            }
+        )
+        //select_application
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `select_application : ${s_rx}.<br />`);
+                    return g_emv_terminal.read_data();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : select_application : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error select_application : ${event_error}.<br />`);
+                console.log("select_application : " + event_error);
+            }
+        )
+        //read_data   
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `read_data : ${s_rx}.<br />`);
+                    return g_emv_terminal.offline_data_authentication();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : read_data : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error read_data : ${event_error}.<br />`);
+                console.log("read_data : " + event_error);
+            }
+        )
+        //offline_data_authentication
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `offline_data_authentication : ${s_rx}.<br />`);
+                    return g_emv_terminal.processing_restrictions();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : offline_data_authentication : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error offline_data_authentication : ${event_error}.<br />`);
+                console.log("offline_data_authentication : " + event_error);
+            }
+        )
+        //processing_restrictions
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `processing_restrictions : ${s_rx}.<br />`);
+                    return g_emv_terminal.cardholder_verification();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : processing_restrictions : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error processing_restrictions : ${event_error}.<br />`);
+                console.log("processing_restrictions : " + event_error);
+            }
+        )
+        //cardholder_verification
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `cardholder_verification : ${s_rx}.<br />`);
+                    return g_emv_terminal.terminal_risk_managment();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : cardholder_verification : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error cardholder_verification : ${event_error}.<br />`);
+                console.log("cardholder_verification : " + event_error);
+            }
+        )
+        //terminal_risk_managment
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `terminal_risk_managment : ${s_rx}.<br />`);
+                    return g_emv_terminal.terminal_action_analysis();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : terminal_risk_managment : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error terminal_risk_managment : ${event_error}.<br />`);
+                console.log("terminal_risk_managment : " + event_error);
+            }
+        )
+        //terminal_action_analysis
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `terminal_action_analysis : ${s_rx}.<br />`);
+                    g_emv_terminal.card_action_analysis();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : terminal_action_analysis : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error terminal_action_analysis : ${event_error}.<br />`);
+                console.log("terminal_action_analysis : " + event_error);
+            }
+        )
+        //card_action_analysis
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `card_action_analysis : ${s_rx}.<br />`);
+                    return g_emv_terminal.go_online();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : card_action_analysis : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error terminal_action_analysis : ${event_error}.<br />`);
+                console.log(" : " + event_error);
+            }
+        )
+        //go_online
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `go_online : ${s_rx}.<br />`);
+                    return g_emv_terminal.complete_transaction();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : go_online : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error go_online : ${event_error}.<br />`);
+                console.log( "go_online : " + event_error);
+            }
+        )
+        //complete_transaction
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `complete_transaction : ${s_rx}.<br />`);
+                    return g_emv_terminal.end_transaction();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : complete_transaction : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error complete_transaction : ${event_error}.<br />`);
+                console.log("complete_transaction : " + event_error);
+            }
+        )
+        //end_transaction
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `end_transaction : ${s_rx}.<br />`);
+                    return g_emv_terminal.power_off();
+                }
+                else {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `error : end_transaction : ${s_rx}.<br />`);
+                }
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error end_transaction : ${event_error}.<br />`);
+                console.log("end_transaction : " + event_error);
+            }
+        )
+        //power off
+        .then(
+            function (s_rx) {
+                if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                    etc_tools_add_msg_to_paragraph("p_middle", 14, `power_off : ${s_rx}.<br />`);
+                    return g_emv_terminal.power_on();
+                }
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error power_off : ${s_rx}.<br />`);
+            }
+        )
+        .catch(
+            function (event_error) {
+                etc_tools_add_msg_to_paragraph("p_middle", 14, `error power_off : ${event_error}.<br />`);
+                console.log("power_off : " + event_error);
+            }
+        )
+        ;
+
+
+}
+
