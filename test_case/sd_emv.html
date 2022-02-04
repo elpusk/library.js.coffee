@@ -70,104 +70,104 @@
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_get_status";
-        s_event_handler = `sd_emv_run_fun("get_status")`;
+        s_event_handler = `sd_emv_run_fun(["get_status"])`;
         s_message = "get_status";
         b_break = true;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_power_on";
-        s_event_handler = `sd_emv_run_fun("power_on")`;
+        s_event_handler = `sd_emv_run_fun(["power_on"])`;
         s_message = "power_on";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_power_off";
-        s_event_handler = `sd_emv_run_fun("power_off")`;
+        s_event_handler = `sd_emv_run_fun(["power_off"])`;
         s_message = "power_off";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
         //
         s_ctl_name = "bt_emv_initialize_transaction";
-        s_event_handler = `sd_emv_run_fun("initialize_transaction")`;
+        s_event_handler = `sd_emv_run_fun(["initialize_transaction"])`;
         s_message = "initialize_transaction";
         b_break = true;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_build_candidate_list";
-        s_event_handler = `sd_emv_run_fun("build_candidate_list")`;
+        s_event_handler = `sd_emv_run_fun(["build_candidate_list"])`;
         s_message = "build_candidate_list";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_select_application";
-        s_event_handler = `sd_emv_run_fun("select_application")`;
+        s_event_handler = `sd_emv_run_fun(["select_application"])`;
         s_message = "select_application";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_read_data";
-        s_event_handler = `sd_emv_run_fun("read_data")`;
+        s_event_handler = `sd_emv_run_fun(["read_data"])`;
         s_message = "read_data";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_offline_data_authentication";
-        s_event_handler = `sd_emv_run_fun("offline_data_authentication")`;
+        s_event_handler = `sd_emv_run_fun(["offline_data_authentication"])`;
         s_message = "offline_data_authentication";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_processing_restrictions";
-        s_event_handler = `sd_emv_run_fun("processing_restrictions")`;
+        s_event_handler = `sd_emv_run_fun(["processing_restrictions"])`;
         s_message = "processing_restrictions";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_cardholder_verification";
-        s_event_handler = `sd_emv_run_fun("cardholder_verification")`;
+        s_event_handler = `sd_emv_run_fun(["cardholder_verification"])`;
         s_message = "cardholder_verification";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_terminal_risk_managment";
-        s_event_handler = `sd_emv_run_fun("terminal_risk_managment")`;
+        s_event_handler = `sd_emv_run_fun(["terminal_risk_managment"])`;
         s_message = "terminal_risk_managment";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_terminal_action_analysis";
-        s_event_handler = `sd_emv_run_fun("terminal_action_analysis")`;
+        s_event_handler = `sd_emv_run_fun(["terminal_action_analysis"])`;
         s_message = "terminal_action_analysis";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_card_action_analysis";
-        s_event_handler = `sd_emv_run_fun("card_action_analysis")`;
+        s_event_handler = `sd_emv_run_fun(["card_action_analysis"])`;
         s_message = "card_action_analysis";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_go_online";
-        s_event_handler = `sd_emv_run_fun("go_online")`;
+        s_event_handler = `sd_emv_run_fun(["go_online"])`;
         s_message = "go_online";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_complete_transaction";
-        s_event_handler = `sd_emv_run_fun("complete_transaction")`;
+        s_event_handler = `sd_emv_run_fun(["complete_transaction"])`;
         s_message = "complete_transaction";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         s_ctl_name = "bt_emv_end_transaction";
-        s_event_handler = `sd_emv_run_fun("end_transaction")`;
+        s_event_handler = `sd_emv_run_fun(["end_transaction"])`;
         s_message = "end_transaction";
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
         //
         s_ctl_name = "bt_emv_etc_gets";
-        s_event_handler = `sd_emv_run_fun("etc_gets")`;
+        s_event_handler = `sd_emv_run_fun(["etc_gets"])`;
         s_message = "etc_gets";
         b_break = true;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
@@ -233,7 +233,12 @@
     </script>
 
     <script type="text/javascript">
-        window.addEventListener("load", sd_emv_ini_server, false);
+        function on_load() {
+            var s_yymmdd = "161131";
+            //sd_emv_ini_server(s_yymmdd)
+            sd_emv_ini_server();
+        }
+        window.addEventListener("load", on_load, false);
     </script>
 </BODY>
 

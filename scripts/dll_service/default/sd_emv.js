@@ -23,12 +23,13 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2021
- * @version 1.0.0
+ * @version 1.1.0
  * @description sd_emv.dll controller of elpusk framework coffee javascript library .
  * <br /> error rules
  * <br /> * coffee framework error : generates promise reject or calls error callback function.
  * <br /> 
  * <br />  2021.11.29 - release 1.0.
+ * <br />  2022.01.27 - release 1.1. change option format. "name:type:value" -> "set name:name:type:value"
  * 
  * @namespace dll_service.default.sd_emv
  */
@@ -198,10 +199,10 @@
                 this._n_slot.toString()
             ];
 
-            ar_parameter.push('TAGT_TERMINAL_TYPE:b:' + s_hex_9f35_tag_value);
-            ar_parameter.push('TAGT_TERMINAL_COUNTRY_CODE:b:' + s_hex_9f1a_tag_value);
-            ar_parameter.push('TAGT_TRANSACTION_DATE:b:' + s_hex_9a_tag_value);
-            ar_parameter.push('TAGT_TERMINAL_CAPABILITIES:b:' + s_hex_9f33_tag_value);
+            ar_parameter.push(':TAGT_TERMINAL_TYPE:b:' + s_hex_9f35_tag_value);
+            ar_parameter.push(':TAGT_TERMINAL_COUNTRY_CODE:b:' + s_hex_9f1a_tag_value);
+            ar_parameter.push(':TAGT_TRANSACTION_DATE:b:' + s_hex_9a_tag_value);
+            ar_parameter.push(':TAGT_TERMINAL_CAPABILITIES:b:' + s_hex_9f33_tag_value);
 
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
         }
@@ -266,11 +267,11 @@
                 'it'
             ];
 
-            ar_parameter.push('TAGT_TRANSACTION_TYPE:b:' + s_hex_9c_tag_value);
-            ar_parameter.push('TAGT_TANSACTION_CURRENCY_CODE:b:' + s_hex_5f2a_tag_value);
-            ar_parameter.push('TAGT_TRANSACTION_CURRENCY_EXPONENT:b:' + s_hex_5f36_tag_value);
-            ar_parameter.push('TAGT_AMOUNT_AUTHORISED_NUMERIC:n:' + s_dec_9f02_tag_value);
-            ar_parameter.push('TAGT_AMOUNT_OTHER_NUMERIC:n:' + s_dec_9f03_tag_value);
+            ar_parameter.push(':TAGT_TRANSACTION_TYPE:b:' + s_hex_9c_tag_value);
+            ar_parameter.push(':TAGT_TANSACTION_CURRENCY_CODE:b:' + s_hex_5f2a_tag_value);
+            ar_parameter.push(':TAGT_TRANSACTION_CURRENCY_EXPONENT:b:' + s_hex_5f36_tag_value);
+            ar_parameter.push(':TAGT_AMOUNT_AUTHORISED_NUMERIC:n:' + s_dec_9f02_tag_value);
+            ar_parameter.push(':TAGT_AMOUNT_OTHER_NUMERIC:n:' + s_dec_9f03_tag_value);
 
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
         }
@@ -297,7 +298,7 @@
                 'transaction',
                 this._n_slot.toString(),
                 'bcl',
-                'PSE:n:' + s_pse
+                ':PSE:n:' + s_pse
             ];
 
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
@@ -324,14 +325,14 @@
             ];
 
             if (typeof s_aid === 'string') {
-                ar_parameter.push('AID:b:' + s_aid);
+                ar_parameter.push(':AID:b:' + s_aid);
             }
 
             if (s_use_confirm === '1') {
-                ar_parameter.push('CONFIRM:n:1');
+                ar_parameter.push(':CONFIRM:n:1');
             }
             else {
-                ar_parameter.push('CONFIRM:n:0');
+                ar_parameter.push(':CONFIRM:n:0');
             }
 
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
@@ -466,10 +467,16 @@
         /**
          * @public 
          * @function dll_service.default.sd_emv.go_online
+         * @param {string|Array} s_get_tags 
+         * string type case : get the tag value that is defined sd_emv.dll(default)
+         * this value can be "AUTHORISATION_REQUEST", "FINANCIAL_REQUEST", "FINANCIAL_REQUEST_CONFIRM", "BATCH_DATA_CAPTURE", "RECONCILATION", "ONLINE_ADVICE", "REVERSAL" or "MSR_AUTHORISATION_REQUEST".
+         * Array type case : each item must be formatted to ":XXXX:n:y".  XXXX represents 2 bytes by hex code. y is deciaml code.
          * @return {Promise} processing result.
-         * @description go online.
+         * @description get a tag values for processing online.
          */
-        _dll_service.default.sd_emv.prototype.go_online = function () {
+        _dll_service.default.sd_emv.prototype.go_online = function (
+            s_get_tags
+        ) {
 
             var this_sd_dll = this;
             var ar_parameter = [
@@ -478,9 +485,104 @@
                 'go'
             ];
 
+            do {
+                if (Array.isArray(s_get_tags)) {
+                    var s_pattern = /^:[0-9A-Fa-f]{1,4}:n:\d$/;
+                    //may be user defined tags
+                    for (var i = 0; i < s_get_tags.length; i++) {
+                        if (typeof s_get_tags[i] !== 'string') {
+                            continue;
+                        }
+                        if (s_pattern.test(s_get_tags[i])) {
+                            ar_parameter.push(s_get_tags[i]);
+                        }
+                    }//end for
+                    continue;
+                }
+                //default tags
+                if (typeof s_get_tags !== 'string') {
+                    continue;
+                }
+                switch (s_get_tags) {
+                    case 'AUTHORISATION_REQUEST':
+                    case 'FINANCIAL_REQUEST':
+                    case 'FINANCIAL_REQUEST_CONFIRM':
+                    case 'BATCH_DATA_CAPTURE':
+                    case 'RECONCILATION':
+                    case 'ONLINE_ADVICE':
+                    case 'REVERSAL':
+                    case 'MSR_AUTHORISATION_REQUEST':
+                        ar_parameter.push(':' + s_get_tags + ':s:');
+                        break;
+                    default:
+                        continue;
+                }//end switch
+            } while (false);
+
             return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
         }
 
+        /**
+         * @public 
+         * @function dll_service.default.sd_emv.go_online_response
+         * @param {string} s_issuer_arc : Authentication Response code can be  
+         * "approval"(server accepts this transaction),
+         * "decline"(server declines this transaction),
+         * "referral"(server request referral to this transaction),
+         * "invalid"(server response has a invalid format.) or
+         * "none".(server no response)
+         * @param {string} s_issuer_data : authentication data from server.
+         * each two characters represent 2 bytes by hex code.
+         * @param {string} s_referral_decision : the decision of referral when s_issuer_arc is "referral". can be
+         * "approval"(bank officer accepts this transaction),
+         * "decline"(bank officer declines this transaction)
+         * @return {Promise} processing result.
+         * @description get a tag values for processing online.
+         */
+        _dll_service.default.sd_emv.prototype.go_online_response = function (
+            s_issuer_arc,
+            s_issuer_data,
+            s_referral_decision
+        ) {
+
+            var this_sd_dll = this;
+            var ar_parameter = [
+                'transaction',
+                this._n_slot.toString(),
+                'gor'
+            ];
+
+            do {
+                switch (s_issuer_arc) {
+                    case "approval":
+                    case "decline":
+                    case "invalid":
+                    case "none":
+                        ar_parameter.push(':ISSUER_ARC:s:' + s_issuer_arc);
+                        break;
+                    case "referral":
+                        ar_parameter.push(':ISSUER_ARC:s:' + s_issuer_arc);
+                        switch (s_referral_decision) {
+                            case "approval":
+                            case "decline":
+                                ar_parameter.push(':REFERRAL_DECISION:s:' + s_referral_decision);
+                                break;
+                            default:
+                                continue;//error
+                        }//end switch
+                    default:
+                        continue;//error
+                }//end switch
+
+                var s_pattern = /^[0-9A-Fa-f]$/;
+                if (!s_pattern.test(s_issuer_data)) {
+                    continue;
+                }
+                ar_parameter.push(':ISSUER_DATA:b:' + s_issuer_data);
+            } while (false);
+
+            return this.sd_execute(this._n_in_id, this._n_out_id, ar_parameter);
+        }
         /**
          * @public 
          * @function dll_service.default.sd_emv.complete_transaction

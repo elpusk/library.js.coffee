@@ -31,7 +31,9 @@ function sd_emv_cb_system_event(s_action_code, s_data_field) {
 var g_dev_path = "";
 var g_emv_terminal;
 
-function sd_emv_ini_server() {
+var g_response_of_go_online = [];
+
+function sd_emv_ini_server(s_yymmdd_for_debug) {
 
     elpusk.framework.coffee.set_system_event_handler(sd_emv_cb_system_event);
     //
@@ -140,8 +142,14 @@ function sd_emv_ini_server() {
                         var s_hex_9f35_tag_value = "11";//1 byte hex string( CONTROL_BY_FINANCIAL | TERMINAL_TYPE_ATTENDED_ONLINE)
                         var s_hex_9f1a_tag_value = "0410";//2 bytes hex string  ISO 3166, KOR
                         var s_hex_9a_tag_value = s_year + s_month + s_day;//3 byets YYMMDD
-                        var s_hex_9f33_tag_value = "06E8E8";//3 bytes hex string 
+                        var s_hex_9f33_tag_value = "60E8E8";//3 bytes hex string 
 
+                        if(typeof s_yymmdd_for_debug === 'string'){
+                            var s_pattern = /^\d{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/;
+                            if (s_pattern.test(s_yymmdd_for_debug)) {
+                                s_hex_9a_tag_value = s_yymmdd_for_debug;//override for debugging
+                            }
+                        }
                         return g_emv_terminal.terminal_on(
                             s_hex_9f35_tag_value,
                             s_hex_9f1a_tag_value,
@@ -196,6 +204,12 @@ function sd_emv_ini_server() {
         ;
 }
 
+/**
+ * 
+ * @param {*} s_rx string array, received data
+ * @param {*} n_mandotry the number of mandotry string on s_rx array.
+ * @returns 
+ */
 function _check_rx_for_emv_run_fun(s_rx, n_mandotry) {
     console.log(s_rx);
     var b_result = false;
@@ -219,19 +233,23 @@ function _check_rx_for_emv_run_fun(s_rx, n_mandotry) {
 }
 /**
  * 
- * @param {*} s_fun_name 
+ * @param {Array} ar_parameter - the first item have to be a function name.
  * @returns promise or undefined
  */
-function sd_emv_run_fun(s_fun_name) {
+function sd_emv_run_fun(ar_parameter) {
     var result = undefined;
     do {
-        if (typeof s_fun_name !== 'string') {
+        if(!Array.isArray(ar_parameter)){
+            continue;
+        }
+        if(ar_parameter.length == 0){
             continue;
         }
         if (typeof g_emv_terminal !== 'object') {
             continue;
         }
 
+        var s_fun_name = ar_parameter[0];
         switch (s_fun_name) {
             case "get_status":
                 result = g_emv_terminal.get_status()
@@ -497,9 +515,11 @@ function sd_emv_run_fun(s_fun_name) {
                     );
                 break;
             case "go_online":
-                result = g_emv_terminal.go_online()
+                var s_get_tags = 'AUTHORISATION_REQUEST';
+                result = g_emv_terminal.go_online(s_get_tags)
                     .then(
-                        function (s_rx) {
+                        function (s_rx) {//g_response_of_go_online
+                            //g_response_of_go_online.push
                             if (_check_rx_for_emv_run_fun(s_rx, 1)) {
                                 etc_tools_add_msg_to_paragraph("p_middle", 14, `go_online : ${s_rx}.<br />`);
                             }
@@ -515,6 +535,28 @@ function sd_emv_run_fun(s_fun_name) {
                         }
                     );
                 break;
+            case "go_online_response":
+                var s_issuer_arc = "approval";
+                var s_issuer_data = "";
+                var s_referral_decision = "approval";
+                result = g_emv_terminal.go_online_response(s_issuer_arc,s_issuer_data, s_referral_decision)
+                    .then(
+                        function (s_rx) {
+                            if (_check_rx_for_emv_run_fun(s_rx, 1)) {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `go_online_response : ${s_rx}.<br />`);
+                            }
+                            else {
+                                etc_tools_add_msg_to_paragraph("p_middle", 14, `error : go_online_response : ${s_rx}.<br />`);
+                            }
+                        }
+                    )
+                    .catch(
+                        function (event_error) {
+                            etc_tools_add_msg_to_paragraph("p_middle", 14, `error ${s_fun_name} : ${event_error}.<br />`);
+                            console.log(s_fun_name + " : " + event_error);
+                        }
+                    );
+            break;
             case "complete_transaction":
                 result = g_emv_terminal.complete_transaction()
                     .then(
