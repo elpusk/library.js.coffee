@@ -153,6 +153,12 @@
         b_break = false;
         etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
 
+        s_ctl_name = "bt_emv_go_online_response";
+        s_event_handler = `sd_emv_run_fun(["go_online_response"])`;
+        s_message = "go_online_response";
+        b_break = false;
+        etc_tools_add_button(s_parent_name, s_ctl_name, s_event_handler, s_message,b_break);
+
         s_ctl_name = "bt_emv_complete_transaction";
         s_event_handler = `sd_emv_run_fun(["complete_transaction"])`;
         s_message = "complete_transaction";

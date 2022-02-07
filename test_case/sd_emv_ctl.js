@@ -537,7 +537,7 @@ function sd_emv_run_fun(ar_parameter) {
                 break;
             case "go_online_response":
                 var s_issuer_arc = "approval";
-                var s_issuer_data = "";
+                var s_issuer_data = "910A12345678123456783030";
                 var s_referral_decision = "approval";
                 result = g_emv_terminal.go_online_response(s_issuer_arc,s_issuer_data, s_referral_decision)
                     .then(

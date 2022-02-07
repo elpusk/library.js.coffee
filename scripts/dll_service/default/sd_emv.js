@@ -574,7 +574,7 @@
                         continue;//error
                 }//end switch
 
-                var s_pattern = /^[0-9A-Fa-f]$/;
+                var s_pattern = /^[0-9A-Fa-f]+/;
                 if (!s_pattern.test(s_issuer_data)) {
                     continue;
                 }
