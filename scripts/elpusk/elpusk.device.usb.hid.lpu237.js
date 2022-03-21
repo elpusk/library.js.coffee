@@ -1,7 +1,7 @@
 /**
- * 2020.10.08
+ * 2022.03.18
  * @license MIT
- * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ * Copyright (c) 2022 Elpusk.Co.,Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,8 @@
  * SOFTWARE.
  * 
  * @author developer 00000006
- * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.9.0
+ * @copyright Elpusk.Co.,Ltd 2022
+ * @version 1.10.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -48,6 +48,9 @@
  *                    - support lpu237 hid bootloader.
  * <br />   2020.10.13 -release 1.9
  *                     - support buzzer frequency input on xml setting file.
+ * <br />   2022.03.21 -release 1.10
+ *                     - support mmd1100 reset interval.( support from firmware ganymede 5.16)
+ *                     - fix bug in _get_key_symbol_string_by_hid_key_code_number()
  * @namespace
  */
 'use strict';
@@ -104,7 +107,7 @@
 		var _type_change_parameter = {
             cp_GlobalPrePostfixSendCondition : 0,
             //
-            cp_IndicateErrorCondition : 1,
+            cp_Blank_4bytes : 1,
             //
 			cp_EnableiButton : 2,
 			cp_Interface : 3,
@@ -167,14 +170,7 @@
             //
 			cp_Prefix_iButton : 126, cp_Postfix_iButton : 127,
 			cp_Prefix_Uart : 128, cp_Postfix_Uart : 129,
-            cp_BtcConfigData : 130,
-            cp_EnableF12iButton : 131, 
-            cp_EnableZerosiButton : 132, 
-            cp_EnableZeros7TimesiButton : 133, 
-            cp_EnableAddmitCodeStickiButton : 134,
-            cp_EnableIgnoreISO1 : 135,
-            cp_EnableIgnoreISO3 : 136,
-            cp_EnableRemoveColon : 137
+            cp_BtcConfigData : 130
 		};
 
         /**
@@ -203,7 +199,7 @@
 			gt_get_version : 13,
 			gt_get_name : 14,
             gt_get_global_prepostfix_send_condition : 15,
-            gt_get_indicate_error_condition : 16,
+            gt_get_blank_4byets : 16,
             //
 			gt_get_interface : 17,
 			gt_get_language : 18,
@@ -265,85 +261,72 @@
             //
 			gt_get_prefix_ibutton : 140, gt_get_postfix_ibutton : 141,
 			gt_get_prefix_uart : 142, gt_get_postfix_uart : 143,
-            gt_get_f12_ibutton : 144, gt_get_zeros_ibutton : 145, gt_get_zeros7_times_ibutton : 146, gt_get_addmit_code_stick_ibutton : 147,
+
             // get_get_x is more exist at the end of this defintion.
             /////////////////////////////
             //set
-            gt_set_global_prepostfix_send_condition : 148,
-            gt_set_indicate_error_condition : 149,
+            gt_set_global_prepostfix_send_condition : 145,
+            gt_set_blank_4byets : 146,
             //
-			gt_set_interface : 150,
-			gt_set_language : 151, get_set_keymap : 152,
-			gt_set_buzzer_count : 153,
-			gt_set_enable_iso1 : 154, gt_set_enable_iso2 : 155, gt_set_enable_iso3 : 156,
-			gt_set_direction1 : 157, gt_set_direction2 : 158, gt_set_direction3 : 159,
-            gt_set_global_prefix : 160,  gt_set_global_postfix : 161,
+			gt_set_interface : 147,
+			gt_set_language : 148, get_set_keymap : 149,
+			gt_set_buzzer_count : 150,
+			gt_set_enable_iso1 : 151, gt_set_enable_iso2 : 152, gt_set_enable_iso3 : 153,
+			gt_set_direction1 : 154, gt_set_direction2 : 155, gt_set_direction3 : 156,
+            gt_set_global_prefix : 157,  gt_set_global_postfix : 158,
             
-            gt_set_iso1_number_combi : 162,      gt_set_iso2_number_combi : 163,      gt_set_iso3_number_combi : 164,
+            gt_set_iso1_number_combi : 159,      gt_set_iso2_number_combi : 160,      gt_set_iso3_number_combi : 161,
 
-            gt_set_iso1_Combi0_MaxSize : 165,    gt_set_iso1_Combi1_MaxSize : 166,    gt_set_iso1_Combi2_MaxSize : 167,
-            gt_set_iso2_Combi0_MaxSize : 168,    gt_set_iso2_Combi1_MaxSize : 169,    gt_set_iso2_Combi2_MaxSize : 170,
-            gt_set_iso3_Combi0_MaxSize : 171,    gt_set_iso3_Combi1_MaxSize : 172,    gt_set_iso3_Combi2_MaxSize : 173,
+            gt_set_iso1_Combi0_MaxSize : 162,    gt_set_iso1_Combi1_MaxSize : 163,    gt_set_iso1_Combi2_MaxSize : 164,
+            gt_set_iso2_Combi0_MaxSize : 165,    gt_set_iso2_Combi1_MaxSize : 166,    gt_set_iso2_Combi2_MaxSize : 167,
+            gt_set_iso3_Combi0_MaxSize : 168,    gt_set_iso3_Combi1_MaxSize : 169,    gt_set_iso3_Combi2_MaxSize : 170,
             
-            gt_set_iso1_Combi0_BitSize : 174,    gt_set_iso1_Combi1_BitSize : 175,    gt_set_iso1_Combi2_BitSize : 176,
-            gt_set_iso2_Combi0_BitSize : 177,    gt_set_iso2_Combi1_BitSize : 178,    gt_set_iso2_Combi2_BitSize : 179,
-            gt_set_iso3_Combi0_BitSize : 180,    gt_set_iso3_Combi1_BitSize : 181,    gt_set_iso3_Combi2_BitSize : 182,
+            gt_set_iso1_Combi0_BitSize : 171,    gt_set_iso1_Combi1_BitSize : 172,    gt_set_iso1_Combi2_BitSize : 173,
+            gt_set_iso2_Combi0_BitSize : 174,    gt_set_iso2_Combi1_BitSize : 175,    gt_set_iso2_Combi2_BitSize : 176,
+            gt_set_iso3_Combi0_BitSize : 177,    gt_set_iso3_Combi1_BitSize : 178,    gt_set_iso3_Combi2_BitSize : 179,
 
-            gt_set_iso1_Combi0_DataMask : 183,   gt_set_iso1_Combi1_DataMask : 184,   gt_set_iso1_Combi2_DataMask : 185,
-            gt_set_iso2_Combi0_DataMask : 186,   gt_set_iso2_Combi1_DataMask : 187,   gt_set_iso2_Combi2_DataMask : 188,
-            gt_set_iso3_Combi0_DataMask : 189,   gt_set_iso3_Combi1_DataMask : 190,   gt_set_iso3_Combi2_DataMask : 191,
+            gt_set_iso1_Combi0_DataMask : 180,   gt_set_iso1_Combi1_DataMask : 181,   gt_set_iso1_Combi2_DataMask : 182,
+            gt_set_iso2_Combi0_DataMask : 183,   gt_set_iso2_Combi1_DataMask : 184,   gt_set_iso2_Combi2_DataMask : 185,
+            gt_set_iso3_Combi0_DataMask : 186,   gt_set_iso3_Combi1_DataMask : 187,   gt_set_iso3_Combi2_DataMask : 188,
 
-            gt_set_iso1_Combi0_UseParity : 192,  gt_set_iso1_Combi1_UseParity : 193,   gt_set_iso1_Combi2_UseParity : 194,
-            gt_set_iso2_Combi0_UseParity : 195,  gt_set_iso2_Combi1_UseParity : 196,   gt_set_iso2_Combi2_UseParity : 197,
-            gt_set_iso3_Combi0_UseParity : 198,  gt_set_iso3_Combi1_UseParity : 199,   gt_set_iso3_Combi2_UseParity : 200,
+            gt_set_iso1_Combi0_UseParity : 189,  gt_set_iso1_Combi1_UseParity : 190,   gt_set_iso1_Combi2_UseParity : 191,
+            gt_set_iso2_Combi0_UseParity : 192,  gt_set_iso2_Combi1_UseParity : 193,   gt_set_iso2_Combi2_UseParity : 194,
+            gt_set_iso3_Combi0_UseParity : 195,  gt_set_iso3_Combi1_UseParity : 196,   gt_set_iso3_Combi2_UseParity : 197,
 
-            gt_set_iso1_Combi0_ParityType : 201, gt_set_iso1_Combi1_ParityType : 202, gt_set_iso1_Combi2_ParityType : 203,
-            gt_set_iso2_Combi0_ParityType : 204, gt_set_iso2_Combi1_ParityType : 205, gt_set_iso2_Combi2_ParityType : 206,
-            gt_set_iso3_Combi0_ParityType : 207, gt_set_iso3_Combi1_ParityType : 208, gt_set_iso3_Combi2_ParityType : 209,
+            gt_set_iso1_Combi0_ParityType : 198, gt_set_iso1_Combi1_ParityType : 199, gt_set_iso1_Combi2_ParityType : 200,
+            gt_set_iso2_Combi0_ParityType : 201, gt_set_iso2_Combi1_ParityType : 202, gt_set_iso2_Combi2_ParityType : 203,
+            gt_set_iso3_Combi0_ParityType : 204, gt_set_iso3_Combi1_ParityType : 205, gt_set_iso3_Combi2_ParityType : 206,
 
-            gt_set_iso1_Combi0_STX_L : 210,      gt_set_iso1_Combi1_STX_L : 211,      gt_set_iso1_Combi2_STX_L : 212,
-            gt_set_iso2_Combi0_STX_L : 213,      gt_set_iso2_Combi1_STX_L : 214,      gt_set_iso2_Combi2_STX_L : 215,
-            gt_set_iso3_Combi0_STX_L : 216,      gt_set_iso3_Combi1_STX_L : 217,      gt_set_iso3_Combi2_STX_L : 218,
+            gt_set_iso1_Combi0_STX_L : 207,      gt_set_iso1_Combi1_STX_L : 208,      gt_set_iso1_Combi2_STX_L : 209,
+            gt_set_iso2_Combi0_STX_L : 210,      gt_set_iso2_Combi1_STX_L : 211,      gt_set_iso2_Combi2_STX_L : 212,
+            gt_set_iso3_Combi0_STX_L : 213,      gt_set_iso3_Combi1_STX_L : 214,      gt_set_iso3_Combi2_STX_L : 215,
 
-            gt_set_iso1_Combi0_ETX_L : 219,      gt_set_iso1_Combi1_ETX_L : 220,      gt_set_iso1_Combi2_ETX_L : 221,
-            gt_set_iso2_Combi0_ETX_L : 222,      gt_set_iso2_Combi1_ETX_L : 223,      gt_set_iso2_Combi2_ETX_L : 224,
-            gt_set_iso3_Combi0_ETX_L : 225,      gt_set_iso3_Combi1_ETX_L : 226,      gt_set_iso3_Combi2_ETX_L : 227,
+            gt_set_iso1_Combi0_ETX_L : 216,      gt_set_iso1_Combi1_ETX_L : 217,      gt_set_iso1_Combi2_ETX_L : 218,
+            gt_set_iso2_Combi0_ETX_L : 219,      gt_set_iso2_Combi1_ETX_L : 220,      gt_set_iso2_Combi2_ETX_L : 221,
+            gt_set_iso3_Combi0_ETX_L : 222,      gt_set_iso3_Combi1_ETX_L : 223,      gt_set_iso3_Combi2_ETX_L : 224,
 
-            gt_set_iso1_Combi0_UseErrorCorrect : 228,    gt_set_iso1_Combi1_UseErrorCorrect : 229,    gt_set_iso1_Combi2_UseErrorCorrect : 230,
-            gt_set_iso2_Combi0_UseErrorCorrect : 231,    gt_set_iso2_Combi1_UseErrorCorrect : 232,    gt_set_iso2_Combi2_UseErrorCorrect : 233,
-            gt_set_iso3_Combi0_UseErrorCorrect : 234,    gt_set_iso3_Combi1_UseErrorCorrect : 235,    gt_set_iso3_Combi2_UseErrorCorrect : 236,
+            gt_set_iso1_Combi0_UseErrorCorrect : 225,    gt_set_iso1_Combi1_UseErrorCorrect : 226,    gt_set_iso1_Combi2_UseErrorCorrect : 227,
+            gt_set_iso2_Combi0_UseErrorCorrect : 228,    gt_set_iso2_Combi1_UseErrorCorrect : 229,    gt_set_iso2_Combi2_UseErrorCorrect : 230,
+            gt_set_iso3_Combi0_UseErrorCorrect : 231,    gt_set_iso3_Combi1_UseErrorCorrect : 232,    gt_set_iso3_Combi2_UseErrorCorrect : 233,
 
-            gt_set_iso1_Combi0_ECMType : 237,            gt_set_iso1_Combi1_ECMType : 238,            gt_set_iso1_Combi2_ECMType : 239,
-            gt_set_iso2_Combi0_ECMType : 240,            gt_set_iso2_Combi1_ECMType : 241,            gt_set_iso2_Combi2_ECMType : 242,
-            gt_set_iso3_Combi0_ECMType : 243,            gt_set_iso3_Combi1_ECMType : 244,            gt_set_iso3_Combi2_ECMType : 245,
+            gt_set_iso1_Combi0_ECMType : 234,            gt_set_iso1_Combi1_ECMType : 235,            gt_set_iso1_Combi2_ECMType : 236,
+            gt_set_iso2_Combi0_ECMType : 237,            gt_set_iso2_Combi1_ECMType : 238,            gt_set_iso2_Combi2_ECMType : 239,
+            gt_set_iso3_Combi0_ECMType : 240,            gt_set_iso3_Combi1_ECMType : 241,            gt_set_iso3_Combi2_ECMType : 242,
 
-            gt_set_iso1_Combi0_AddValue : 246,           gt_set_iso1_Combi1_AddValue : 247,          gt_set_iso1_Combi2_AddValue : 248,
-            gt_set_iso2_Combi0_AddValue : 249,          gt_set_iso2_Combi1_AddValue : 250,          gt_set_iso2_Combi2_AddValue : 251,
-            gt_set_iso3_Combi0_AddValue : 252,          gt_set_iso3_Combi1_AddValue : 253,          gt_set_iso3_Combi2_AddValue : 254,
+            gt_set_iso1_Combi0_AddValue : 243,           gt_set_iso1_Combi1_AddValue : 244,          gt_set_iso1_Combi2_AddValue : 245,
+            gt_set_iso2_Combi0_AddValue : 246,          gt_set_iso2_Combi1_AddValue : 247,          gt_set_iso2_Combi2_AddValue : 248,
+            gt_set_iso3_Combi0_AddValue : 249,          gt_set_iso3_Combi1_AddValue : 250,          gt_set_iso3_Combi2_AddValue : 251,
             //          
-            gt_set_private_prefix10 : 255,   gt_set_private_prefix11 : 256,   gt_set_private_prefix12 : 257, 
-            gt_set_private_prefix20 : 258,   gt_set_private_prefix21 : 259,   gt_set_private_prefix22 : 260,  
-            gt_set_private_prefix30 : 261,   gt_set_private_prefix31 : 262,   gt_set_private_prefix32 : 263,
+            gt_set_private_prefix10 : 252,   gt_set_private_prefix11 : 253,   gt_set_private_prefix12 : 254, 
+            gt_set_private_prefix20 : 255,   gt_set_private_prefix21 : 256,   gt_set_private_prefix22 : 257,  
+            gt_set_private_prefix30 : 258,   gt_set_private_prefix31 : 259,   gt_set_private_prefix32 : 260,
             
-            gt_set_private_postfix10 : 264,  gt_set_private_postfix11 : 265,  gt_set_private_postfix12 : 266,
-            gt_set_private_postfix20 : 267,  gt_set_private_postfix21 : 268,  gt_set_private_postfix22 : 269, 
-            gt_set_private_postfix30 : 270,  gt_set_private_postfix31 : 271,  gt_set_private_postfix32 : 272,
+            gt_set_private_postfix10 : 261,  gt_set_private_postfix11 : 262,  gt_set_private_postfix12 : 263,
+            gt_set_private_postfix20 : 264,  gt_set_private_postfix21 : 265,  gt_set_private_postfix22 : 266, 
+            gt_set_private_postfix30 : 267,  gt_set_private_postfix31 : 268,  gt_set_private_postfix32 : 269,
             //
-			gt_set_prefix_ibutton : 273, gt_set_postfix_ibutton : 274,
-			gt_set_prefix_uart : 275, gt_set_postfix_uart : 276,
-            gt_set_f12_ibutton : 277, 
-            gt_set_zeros_ibutton : 278, 
-            gt_set_zeros7_times_ibutton : 279, 
-            gt_set_addmit_code_stick_ibutton : 230,
-
-            //additional 
-            gt_get_ignore_iso1 : 231,
-            gt_get_ignore_iso3 : 232,
-            gt_get_remove_colon : 233,
-
-            gt_set_ignore_iso1 : 234,
-            gt_set_ignore_iso3 : 235,
-            gt_set_remove_colon : 236
+			gt_set_prefix_ibutton : 270, gt_set_postfix_ibutton : 271,
+			gt_set_prefix_uart : 272, gt_set_postfix_uart : 273
         };
                 
         /**
@@ -358,10 +341,7 @@
             SYS_OFFSET_VERSION : 28,
             SYS_OFFSET_NAME : 12,
             SYS_OFFSET_G_TAG_CONDITION : 83,
-            SYS_OFFSET_INDICATE_ERROR_CONDITION : 0,
-            SYS_OFFSET_IGNORE_ISO1 : 0,
-            SYS_OFFSET_IGNORE_ISO3 : 0,
-            SYS_OFFSET_REMOVE_COLON : 0,
+            SYS_OFFSET_BLANK_4BYTES : 0,
             SYS_OFFSET_INTERFACE : 42,
             SYS_OFFSET_KEYMAP : 103,
             SYS_OFFSET_BUZZER_FREQ : 43,
@@ -387,10 +367,6 @@
             SYS_OFFSET_IBUTTON_G_POST : 777,
             SYS_OFFSET_UART_G_PRE : 822,
             SYS_OFFSET_UART_G_POST : 837,
-            SYS_OFFSET_F12_IBUTTON : 0,
-            SYS_OFFSET_ZEROS_IBUTTON : 0,
-            SYS_OFFSET_ZERO_7TIMES_IBUTTON : 0,
-            SYS_OFFSET_ADDMIT_CODE_STCIK_IBUTTON : 0,
             SYS_OFFSET_CONTAINER_MAP_INDEX : 103,
             SYS_OFFSET_INFOMSR_MAP_INDEX : [334,521,708]
         };
@@ -406,10 +382,7 @@
             SYS_SIZE_VERSION : 4,
             SYS_SIZE_NAME : 16,
             SYS_SIZE_G_TAG_CONDITION : 4,
-            SYS_SIZE_INDICATE_ERROR_CONDITION : 4,
-            SYS_SIZE_IGNORE_ISO1 : 4,
-            SYS_SIZE_IGNORE_ISO3 : 4,
-            SYS_SIZE_REMOVE_COLON : 4,
+            SYS_SIZE_BLANK_4BYTES : 4,
             SYS_SIZE_INTERFACE : 1,
             SYS_SIZE_KEYMAP : 4,
             SYS_SIZE_BUZZER_FREQ : 4,
@@ -435,10 +408,6 @@
             SYS_SIZE_IBUTTON_G_POST : 15,
             SYS_SIZE_UART_G_PRE : 15,
             SYS_SIZE_UART_G_POST : 15,
-            SYS_SIZE_F12_IBUTTON : 4,
-            SYS_SIZE_ZEROS_IBUTTON : 4,
-            SYS_SIZE_ZERO_7TIMES_IBUTTON : 4,
-            SYS_SIZE_ADDMIT_CODE_STCIK_IBUTTON : 4,
             SYS_SIZE_CONTAINER_MAP_INDEX : 4,
             SYS_SIZE_INFOMSR_MAP_INDEX : [4,4,4]
         }; 
@@ -933,7 +902,8 @@
                     continue;
                 }
 
-                s_hid_key_code = n_hid_key_code.toString(16).toLowerCase();
+                //s_hid_key_code = n_hid_key_code.toString(16).toLowerCase();
+                s_hid_key_code = elpusk.util.get_byte_hex_string_from_number(n_hid_key_code)
 
 
                 if( s_hid_key_code === elpusk.util.keyboard.const.HIDKEY________F1 ){
@@ -1439,10 +1409,11 @@
          * @description the definition of i-button reading mode.
         */        
 		var _type_ibutton_mode = {
-			ibutton_zeros : 0,
-			ibutton_f12 : 1,
-			ibutton_zeros7 : 2,
-			ibutton_addmit : 3
+            ibutton_none : 0x02,
+			ibutton_zeros : 0x00,
+			ibutton_f12 : 0x01,
+			ibutton_zeros7 : 0x04,
+			ibutton_addmit : 0x08
 		};
 
         /**
@@ -1520,6 +1491,9 @@
                     continue;
                 }
                 switch(type_ibutton_mode){
+                    case _type_ibutton_mode.ibutton_none:
+                        s_value = "None mode";
+                        break;
                     case _type_ibutton_mode.ibutton_zeros:
                         s_value = "Zeros mode";
                         break;
@@ -1539,6 +1513,69 @@
             return s_value;
         }
 
+        /**
+         * @private
+         * @function _get_mmd1100_reset_interval_string
+         * @param {number} n_interval 0~240, multiple of 16
+         * @param {boolean} b_device_version_greater_then_5_18 true device firmware version is greater then ganymede 5.18.
+         * @returns {string} reset interval
+         */
+         function _get_mmd1100_reset_interval_string( n_interval,b_device_version_greater_then_5_18 ){
+            var s_value = "unknown";
+            do{
+                if( typeof n_interval !== 'number'){
+                    continue;
+                }
+                if( n_interval <0 ){
+                    continue;
+                }
+                if(n_interval > 240){
+                    continue;
+                }
+                if(n_interval === 0){
+                    s_value = "0(default, interval - 03:22)";
+                    continue;
+                }
+                if(n_interval === 240){
+                    if( b_device_version_greater_then_5_18 ){
+                        s_value = "240(disable)";
+                    }
+                    else{
+                        s_value = "240(don't use code)";
+                    }
+                    continue;
+                }
+
+                var n_code = n_interval % 16;
+                if(n_code != 0){
+                    continue;
+                }
+
+                s_value = n_interval.toString();
+
+                switch(n_code)
+                {
+                case 16: s_value += "(interval - 06:43)"; break;
+                case 32: s_value += "(interval - 13:27)"; break;
+                case 64: s_value += "(interval - 26:53)"; break;
+                case 80: s_value += "(interval - 33:36)"; break;
+                case 96: s_value += "(interval - 40:19)"; break;
+                case 112: s_value += "(interval - 47:03)"; break;
+                case 128: s_value += "(interval - 53:46)"; break;
+                case 144: s_value += "(interval - 00:29)"; break;
+                case 160: s_value += "(interval - 07:12)"; break;
+                case 176: s_value += "(interval - 13:55)"; break;
+                case 192: s_value += "(interval - 20:39)"; break;
+                case 208: s_value += "(interval - 27:22)"; break;
+                case 224: s_value += "(interval - 34:05)"; break;
+                default:
+                    s_value = "";
+                    continue;                        
+                }//end switch
+            }while(false);
+            return s_value;
+        }
+
         /** 
          * @private 
          * @readonly
@@ -1553,9 +1590,9 @@
 
         /**
          * @private
-         * @function _get_ibutton_mode_string
-         * @param {number} type_ibutton_mode _type_ibutton_mode value.
-         * @returns {string} i-button reading mode.
+         * @function _get_direction_string
+         * @param {number} type_direction _type_direction value. card reading direction
+         * @returns {string} card reading direction mode.
          */
         function _get_direction_string( type_direction ){
             var s_value = "unknown";
@@ -1678,6 +1715,16 @@
                 + version[1].toString(10) + "." 
                 + version[2].toString(10) + "." 
                 + version[3].toString(10);
+
+                if(version[0] <= 4){//callisto board
+                    s_value += "(LPU237)";
+                }
+                else if(version[0] == 5){
+                    s_value += "(LPU237 ,LPU-207 or LPU208)";
+                }
+                else if(version[0] == 10){
+                    s_value += "(LPU-208D)";
+                }
             }while(false);
             return s_value;
         }
@@ -2225,13 +2272,12 @@
         
         /**
          * @private
-         * @function _get_indicate_error_condition_from_response
+         * @function _get_blank_4bytes_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} false - When any track is not a error, reader indicate success-processing.
-         * <br />   true - When all track are not a error, reader indicate success-processing.
+         * @returns {null|number array} number array - blank field 4 bytes number.
          * <br /> null - error.
          */
-		function _get_indicate_error_condition_from_response(s_response){
+		function _get_blank_4bytes_from_response(s_response){
             var b_result = null;
 
 			do {
@@ -2240,119 +2286,16 @@
                     continue;
                 }
 
-                var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
+                var n_size = _type_system_size.SYS_SIZE_BLANK_4BYTES;
                 if( _get_length_member_of_response(s_response) !== n_size ){
                     continue;
                 }
 
                 c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[1] & 0x01 ){
-                    b_result = false;
-                }
-                else{
-                    b_result = true;
-                }
+                return c_blank;
 			} while (false);
 			return b_result;
         }
-
-        /**
-         * @private
-         * @function _get_ignore_iso1_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - If 1 & 2 track data is equal, send 2 track data only.
-         * <br />   true - else
-         * <br /> null - error.
-         */
-		function _get_ignore_iso1_from_response(s_response){
-            var b_result = null;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO1;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[1] & 0x02 ){
-                    b_result = true;
-                }
-                else{
-                    b_result = false;
-                }
-			} while (false);
-			return b_result;
-        }
-        /**
-         * @private
-         * @function _get_ignore_iso3_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - If 2 & 3 track data is equal, send 2 track data only.
-         * <br />   false - else.
-         * <br /> null - error.
-         */
-		function _get_ignore_iso3_from_response(s_response){
-            var b_result = null;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO3;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[1] & 0x04 ){
-                    b_result = true;
-                }
-                else{
-                    b_result = false;
-                }
-			} while (false);
-			return b_result;
-        }
-        /**
-         * @private
-         * @function _get_remove_colon_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - If a track ETXL is 0xe0 and the first data is ASCII ':', then track's ':' isn't sent.
-         * <br />   false - else.
-         * <br /> null - error.
-         */
-		function _get_remove_colon_from_response(s_response){
-            var b_result = null;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_REMOVE_COLON;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[1] & 0x08 ){
-                    b_result = true;
-                }
-                else{
-                    b_result = false;
-                }
-			} while (false);
-			return b_result;
-        }
-
 
         //////////////////
         /**
@@ -3191,119 +3134,6 @@
         
         /**
          * @private
-         * @function _get_f12_ibutton_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} the current i-button mode is F12.
-         */
-		function _get_f12_ibutton_from_response(s_response){
-            var b_result = false;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x01 ){
-                    b_result = true;
-                }
-			} while (false);
-			return b_result;
-        }
-        
-        /**
-         * @private
-         * @function _get_zeros_ibutton_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} the current i-button mode is zeros.
-         */
-		function _get_zeros_ibutton_from_response(s_response){
-            var b_result = false;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x02 ){
-                    b_result = true;
-                }
-			} while (false);
-			return b_result;
-        }
-        
-        /**
-         * @private
-         * @function _get_zeros_7times_ibutton_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} the current i-button mode is 7 times zeros.
-         */
-		function _get_zeros_7times_ibutton_from_response(s_response){
-            var b_result = false;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x04 ){
-                    b_result = true;
-                }
-			} while (false);
-			return b_result;
-        }
-        
-        /**
-         * @private
-         * @function _get_addmit_code_stick_ibutton_from_response
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} the current i-button mode is addmit codestick.
-         */
-		function _get_addmit_code_stick_ibutton_from_response(s_response){
-            var b_result = false;
-
-			do {
-                var c_blank = [];
-				if (!_is_success_response(s_response)){
-                    continue;
-                }
-
-                var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-                if( _get_length_member_of_response(s_response) !== n_size ){
-                    continue;
-                }
-
-                c_blank = _get_data_field_member_of_response_by_number_array(s_response);
-                if( c_blank[2] & 0x08 ){
-                    b_result = true;
-                }
-			} while (false);
-			return b_result;
-        }
-
-        
-        /**
-         * @private
          * @function _get_global_pre_postfix_send_condition_from_string
          * @param {string} s_string - "and" or "or"
          * @returns {(null|boolean)} true - if all track is not error,global pro/postfix will be sent. 
@@ -3699,7 +3529,7 @@
         /**
          * @private
          * @function _get_ibutton_mode_from_string
-         * @param {string} s_string - "zeros", "f12", "zeros7" or "addimat"
+         * @param {string} s_string - "none", "zeros", "f12", "zeros7" or "addimat"
          * @returns {number} the current i-button mode is F12.
          * <br /> negative - error.
          */
@@ -3708,6 +3538,10 @@
 
 			do {
 				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "none"){
+                    n_value = _type_ibutton_mode.ibutton_none;
                     continue;
                 }
                 if( s_string === "zeros"){
@@ -3787,6 +3621,42 @@
                     continue;
                 }
  			} while (false);
+			return n_value;
+        }
+
+        /**
+         * @private
+         * @function _get_mmd1100_reset_interval_from_string
+         * @param {string} s_string - "default", "disable", "0", "10, "20, ... "240"
+         * @returns {number} 0~240, multiple of 16
+         * <br /> negative - error.
+         */
+         function _get_mmd1100_reset_interval_from_string(s_string){
+            var n_value = -1;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "default"){
+                    n_value = 0;
+                    continue;
+                }
+                if( s_string === "disable"){
+                    n_value = 240;
+                    continue;
+                }
+
+                var n_interval = parseInt(s_string);
+
+                if( isNaN(n_interval) ){
+                    continue;
+                }
+                if( (n_interval % 16) !== 0){
+                    continue;
+                }
+                n_value = n_interval;
+			} while (false);
 			return n_value;
         }
 
@@ -3953,49 +3823,13 @@
 
         /**
          * @private
-         * @function _generate_get_indicate_error_condition
+         * @function _generate_get_blank_4bytes
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
         */
-        function _generate_get_indicate_error_condition(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_INDICATE_ERROR_CONDITION;
-            var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_ignore_iso1
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */
-        function _generate_get_ignore_iso1(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_IGNORE_ISO1;
-            var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO1;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_ignore_iso3
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */
-        function _generate_get_ignore_iso3(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_IGNORE_ISO3;
-            var n_size = _type_system_size.SYS_SIZE_IGNORE_ISO3;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_remove_colon
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */
-        function _generate_get_remove_colon(queue_s_tx){
-            var n_offset = _type_system_offset. SYS_OFFSET_REMOVE_COLON;
-            var n_size = _type_system_size. SYS_SIZE_REMOVE_COLON;
+        function _generate_get_blank_4bytes(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_BLANK_4BYTES;
+            var n_size = _type_system_size.SYS_SIZE_BLANK_4BYTES;
             return _generate_config_get(queue_s_tx,n_offset,n_size);
         }
 
@@ -4671,54 +4505,6 @@
             return _generate_config_get(queue_s_tx,n_offset,n_size);
         }
 
-        /**
-         * @private
-         * @function _generate_get_f12_ibutton
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */        
-        function _generate_get_f12_ibutton(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_F12_IBUTTON;
-            var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_zeros_ibutton
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */        
-        function _generate_get_zeros_ibutton(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_ZEROS_IBUTTON;
-            var n_size = _type_system_size.SYS_SIZE_ZEROS_IBUTTON;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_zeros_7times_ibutton
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */        
-        function _generate_get_zeros_7times_ibutton(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_ZERO_7TIMES_IBUTTON;
-            var n_size = _type_system_size.SYS_SIZE_ZERO_7TIMES_IBUTTON;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }
-
-        /**
-         * @private
-         * @function _generate_get_addmit_code_stick_ibutton
-         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
-         * @return {boolean} true(success) or false(failure).
-        */        
-        function _generate_get_addmit_code_stick_ibutton(queue_s_tx){
-            var n_offset = _type_system_offset.SYS_OFFSET_ADDMIT_CODE_STCIK_IBUTTON;
-            var n_size = _type_system_size.SYS_SIZE_ADDMIT_CODE_STCIK_IBUTTON;
-            return _generate_config_get(queue_s_tx,n_offset,n_size);
-        }        
-
         //generate IO pattern with _generate_request()
         /**
          * @private
@@ -4783,54 +4569,21 @@
 
         /**
          * @private
-         * @function _generate_set_indicate_error_condition
+         * @function _generate_set_blank_4byets
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
          * @returns {boolean} true(success) or false(failure).
          */        
-        function _generate_set_indicate_error_condition(queue_s_tx,cblank){
-            var n_offset = _type_system_offset.SYS_OFFSET_INDICATE_ERROR_CONDITION;
-            var n_size = _type_system_size.SYS_SIZE_INDICATE_ERROR_CONDITION;
+        function _generate_set_blank_4byets(queue_s_tx,cblank){
+            var n_offset = _type_system_offset.SYS_OFFSET_BLANK_4BYTES;
+            var n_size = _type_system_size.SYS_SIZE_BLANK_4BYTES;
             var s_data = "";
 
-            for( var i = 0; i<4; i++ ){
+            for( var i = 0; i<n_size; i++ ){
                 s_data = s_data + elpusk.util.get_byte_hex_string_from_number(cblank[i]);
             }//end for
 
             return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_ignore_iso1
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_ignore_iso1(queue_s_tx,cblank){
-            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_ignore_iso3
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_ignore_iso3(queue_s_tx,cblank){
-            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_remove_colon
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_remove_colon(queue_s_tx,cblank){
-            return _generate_set_indicate_error_condition(queue_s_tx,cblank);
         }
 
         /**
@@ -5283,58 +5036,6 @@
 
         /**
          * @private
-         * @function _generate_set_f12_ibutton
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_f12_ibutton(queue_s_tx,cblank){
-            var n_offset = _type_system_offset.SYS_OFFSET_F12_IBUTTON;
-            var n_size = _type_system_size.SYS_SIZE_F12_IBUTTON;
-            var s_data = "";
-
-            for( var i = 0; i<4; i++ ){
-                s_data.push(elpusk.util.get_byte_hex_string_from_number(cblank[i]));
-            }//end for
-
-            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_zeros_ibutton
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {{boolean} true(success) or false(failure).
-         */        
-        function _generate_set_zeros_ibutton(queue_s_tx,cblank){
-            return _generate_set_f12_ibutton(queue_s_tx,cblank);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_zeros_7times_ibutton
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_zeros_7times_ibutton(queue_s_tx,cblank){
-            return _generate_set_f12_ibutton(queue_s_tx,cblank);
-        }
-
-        /**
-         * @private
-         * @function _generate_set_addmit_code_stick
-         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {number[]} cblank 4 int array.
-         * @returns {boolean} true(success) or false(failure).
-         */        
-        function _generate_set_addmit_code_stick(queue_s_tx,cblank){
-            return _generate_set_f12_ibutton(queue_s_tx,cblank);
-        }
-
-        /**
-         * @private
          * @function _generate_enter_opos_mode
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
@@ -5637,7 +5338,35 @@
             this._s_prefix_ibutton = null;//you must include the length in front of this array.
             this._s_postfix_ibutton = null;//you must include the length in front of this array.
 
-            this._n_ibutton_mode = _type_ibutton_mode.ibutton_zeros;
+            /*
+            //
+            //@cBlank
+            //{0,0,0,7},	//cBlank[3]' 0 bit set - test msr object0
+            //cBlank[3]' 1 bit set - test msr object1
+            //cBlank[3]' 2 bit set - test msr object2
+            {0,0,0,0x17},	//cBlank[3]' 0 bit set - test msr object0
+            //cBlank[3]' 1 bit set - test msr object1
+            //cBlank[3]' 2 bit set - test msr object2
+
+            //cBlank[3]' 4 bit set - test buzzer
+            //cBlank[2]' 0 bit set - send F12 key for releasing i-button
+            //cBlank[2]' 1 bit set - disable send '00000000' for releasing i-button
+            //cBlank[2]' 2 bit set - send 7 times zero for releasing i-button.
+            //cBlank[2]' 3 bit set - send Addmitt type for contact and discontact i-button.
+
+            //cBlank[1]' 0 bit set - If any track is normal reading done, indicates success.
+            //cBlank[1]' 1 bit set - If 1 & 2 track data is equal, send 2 track data only.
+            //cBlank[1]' 2 bit set - If 2 & 3 track data is equal, send 2 track data only.
+            //cBlank[1]' 3 bit set - If a track ETXL is 0xe0 and the first data is ASCII ':', then  track's ':' isn't sent.
+
+            //add v.5.16
+            //cBlank[1]' 4 bit ~ 7 bit - MMD1100 reset interval.(Tr)
+            //Tr = (n+1)Tw = (n+1)*700msec
+            // n = cBlank[1] & 0xF0;(0~240), n%0x10 == 0
+            // if n is 0, use default interval
+            // if n is 240, disable reset.
+            // max interval Tr-max = (224+1)*700m = 157.5sec - 2 min 37.5sec
+             */
             this._c_blank = [0,0,0,0];
     
             //rs232
@@ -6448,7 +6177,7 @@
          * <br /> false - the current i-button mode isn't F12 mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_f12_ibutton = function(){ 
-            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_f12){
+            if( this._c_blank[2] & 0x01 ){
                 return true;
             }
             else{
@@ -6463,7 +6192,7 @@
          * <br /> false - the current i-button mode isn't zeros mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton = function(){ 
-            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros){
+            if( this._c_blank[2] & 0x02 ){
                 return true;
             }
             else{
@@ -6478,7 +6207,7 @@
          * <br /> false - the current i-button mode isn't zeros7 mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton = function(){ 
-            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_zeros7){
+            if( this._c_blank[2] & 0x04 ){
                 return true;
             }
             else{
@@ -6493,12 +6222,22 @@
          * <br /> false - the current i-button mode isn't ibutton_addmit mode.
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton = function(){ 
-            if( this._n_ibutton_mode === _type_ibutton_mode.ibutton_addmit){
+            if( this._c_blank[2] & 0x08 ){
                 return true;
             }
             else{
                 return false;
             }
+        }        
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_mmd1100_reset_interval
+         * @returns {number} 0~240, multiples of 16
+         */        
+         _elpusk.device.usb.hid.lpu237.prototype.get_mmd1100_reset_interval = function(){ 
+             var n_interval = this._c_blank[1] & 0xF0;
+             return n_interval;
         }        
 
         /**
@@ -6640,14 +6379,8 @@
                         s_description = "get name"; break;
                     case _type_generated_tx_type.gt_get_global_prepostfix_send_condition:
                         s_description = "get global send condition"; break;
-                    case _type_generated_tx_type.gt_get_indicate_error_condition:
-                        s_description = "get indication error condition."; break;
-                    case _type_generated_tx_type.gt_get_ignore_iso1:
-                        s_description = "get_ignore_iso1."; break;
-                    case _type_generated_tx_type.gt_get_ignore_iso3:
-                        s_description = "get_ignore_iso3."; break;
-                    case _type_generated_tx_type.gt_get_remove_colon:
-                        s_description = "get_remove_colon."; break;
+                    case _type_generated_tx_type.gt_get_blank_4byets:
+                        s_description = "get blank 4bytes."; break;
                     case _type_generated_tx_type.gt_get_interface:
                         s_description = "get interface"; break;
                     case _type_generated_tx_type.gt_get_language:
@@ -6910,26 +6643,11 @@
                         s_description = "get uart prefix"; break;
                     case _type_generated_tx_type.gt_get_postfix_uart:
                         s_description = "get uart postfix"; break;
-                    case _type_generated_tx_type.gt_get_f12_ibutton:
-                        s_description = "get i-button F12 mode"; break;
-                    case _type_generated_tx_type.gt_get_zeros_ibutton:
-                        s_description = "get i-button Zeros mode"; break;
-                    case _type_generated_tx_type.gt_get_zeros7_times_ibutton:
-                        s_description = "get i-button Zeros7 mode"; break;
-                    case _type_generated_tx_type.gt_get_addmit_code_stick_ibutton:
-                        s_description = "get i-button Codestick mode"; break;
 
                     case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
                         s_description = "set global send condition"; break;
-                    case _type_generated_tx_type.gt_set_indicate_error_condition:
-                        s_description = "set_indicate_error_condition"; break;
-                    //
-                    case _type_generated_tx_type.gt_set_ignore_iso1:
-                        s_description = "set_ignore_iso1."; break;
-                    case _type_generated_tx_type.gt_set_ignore_iso3:
-                        s_description = "set_ignore_iso3."; break;
-                    case _type_generated_tx_type.gt_set_remove_colon:
-                        s_description = "set_remove_colon."; break;
+                    case _type_generated_tx_type.gt_set_blank_4byets:
+                        s_description = "set blank 4bytes"; break;
 
                     case _type_generated_tx_type.gt_set_interface:
                         s_description = "set interface"; break;
@@ -7193,14 +6911,6 @@
                         s_description = "set uart prefix"; break;
                     case _type_generated_tx_type.gt_set_postfix_uart:
                         s_description = "set uart postfix"; break;
-                    case _type_generated_tx_type.gt_set_f12_ibutton:
-                        s_description = "set i-button F12 mode"; break;
-                    case _type_generated_tx_type.gt_set_zeros_ibutton:
-                        s_description = "set i-button Zeros mode"; break;
-                    case _type_generated_tx_type.gt_set_zeros7_times_ibutton:
-                        s_description = "set i-button Zeros7 mode"; break;
-                    case _type_generated_tx_type.gt_set_addmit_code_stick_ibutton:
-                        s_description = "set i-button Codestick mode"; break;
                     default:
                         continue;
                 }//end switch
@@ -7329,34 +7039,10 @@
                         
                     if( !_generate_get_uart_postfix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_postfix_uart );
-                        
-                    if( !_generate_get_f12_ibutton(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_f12_ibutton );
-                        
-                    if( !_generate_get_zeros_ibutton(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros_ibutton );
                 }
 
-                if( _first_version_greater_then_second_version([4,0,0,0],this._version) ){
-                    if( _first_version_greater_then_second_version(this._version, [3,15,0,0]) ){
-                        if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros7_times_ibutton );
-                    }
-                    if( _first_version_greater_then_second_version(this._version, [3,16,0,0]) ){
-                        if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_addmit_code_stick_ibutton );
-                    }
-                }
-                else{
-                    if( _first_version_greater_then_second_version(this._version, [5,7,0,0]) ){
-                        if( !_generate_get_zeros_7times_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_zeros7_times_ibutton );
-                    }
-                    if( _first_version_greater_then_second_version(this._version, [5,8,0,0]) ){
-                        if( !_generate_get_addmit_code_stick_ibutton(this._dequeu_s_tx) ){continue;}
-                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_addmit_code_stick_ibutton );
-                    }
-                }
+                if( !_generate_get_blank_4bytes(this._dequeu_s_tx) ){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_blank_4byets );
 
                 b_result = true;
                 for( var i = 0; i<_const_the_number_of_track; i++){
@@ -7396,19 +7082,6 @@
                 }
 
                 if( b_run_combination ){
-                    
-                    if( !_generate_get_indicate_error_condition(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_indicate_error_condition );
-
-                    if( !_generate_get_ignore_iso1(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_ignore_iso1 );
-
-                    if( !_generate_get_ignore_iso3(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_ignore_iso3 );
-
-                    if( !_generate_get_remove_colon(this._dequeu_s_tx) ){continue;}
-                    this._deque_generated_tx.push( _type_generated_tx_type.gt_get_remove_colon );
-                    //
                     var ii=0;
                     var jj=0;
                     for( ii = 0; ii<_const_the_number_of_track; ii++){
@@ -7497,6 +7170,12 @@
                 if(!_generate_enter_config_mode(this._dequeu_s_tx) ){ continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_enter_config );
 
+                //. set cBlank
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Blank_4bytes ) >= 0 ){
+                    if (!_generate_set_blank_4byets(this._dequeu_s_tx,this._c_blank)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_blank_4byets );
+                }
+
                 //
                 if( _first_version_greater_then_second_version(this._version,[3,0,0,0])){
 
@@ -7523,29 +7202,8 @@
                         if (!_generate_set_uart_postfix(this._dequeu_s_tx,this._s_postfix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_postfix_uart );
                     }
-
-                    do {//ibutton setting
-                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableF12iButton ) >= 0 ){
-                            if (!_generate_set_f12_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.get_enable_f12_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_f12_ibutton );
-                        }
-
-                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZerosiButton ) >= 0 ){
-                            if (!_generate_set_zeros_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_zeros_ibutton );
-                        }
-
-                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableZeros7TimesiButton ) >= 0 ){
-                            if (!_generate_set_zeros_7times_ibutton(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_7times_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_zeros7_times_ibutton );
-                        }
-
-                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_EnableAddmitCodeStickiButton ) >= 0 ){
-                            if (!_generate_set_addmit_code_stick(this._dequeu_s_tx,_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton() )){continue;}
-                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_addmit_code_stick_ibutton );
-                        }
-                    } while (false);
                 }
+
                 //. set globalPrePostfixSendCondition
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_GlobalPrePostfixSendCondition ) >= 0 ){
                     if (!_generate_set_global_pre_postfix_send_condition(this._dequeu_s_tx,this._b_global_pre_postfix_send_condition)){continue;}
@@ -7963,6 +7621,7 @@
                 var s_value = null;
                 var n_value = 0;
                 var version = [];
+                var blank = [];
                 var n_generated_tx = this._deque_generated_tx.shift();
 
                 switch (n_generated_tx) {
@@ -8060,52 +7719,10 @@
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_indicate_error_condition:
-                    b_value = _get_indicate_error_condition_from_response(s_response);
-                    if( b_value !== null ){   
-                        if( b_value ){
-                            this._c_blank[1] = this._c_blank[1] & 0xfe;
-                        }
-                        else{
-                            this._c_blank[1] = this._c_blank[1] | 0x01;
-                        }
-                        b_result = true;
-                    }
-                    break;
-
-                case _type_generated_tx_type.gt_get_ignore_iso1:
-                    b_value = _get_ignore_iso1_from_response(s_response);
-                    if( b_value !== null ){   
-                        if( b_value ){
-                            this._c_blank[1] = this._c_blank[1] | 0x02;
-                        }
-                        else{
-                            this._c_blank[1] = this._c_blank[1] & 0xfd;
-                        }
-                        b_result = true;
-                    }
-                    break;
-                case _type_generated_tx_type.gt_get_ignore_iso3:
-                    b_value = _get_ignore_iso3_from_response(s_response);
-                    if( b_value !== null ){   
-                        if( b_value ){
-                            this._c_blank[1] = this._c_blank[1] | 0x04;
-                        }
-                        else{
-                            this._c_blank[1] = this._c_blank[1] & 0xfb;
-                        }
-                        b_result = true;
-                    }
-                    break;
-                case _type_generated_tx_type.gt_get_remove_colon:
-                    b_value = _get_remove_colon_from_response(s_response);
-                    if( b_value !== null ){   
-                        if( b_value ){
-                            this._c_blank[1] = this._c_blank[1] | 0x08;
-                        }
-                        else{
-                            this._c_blank[1] = this._c_blank[1] & 0xf7;
-                        }
+                case _type_generated_tx_type.gt_get_blank_4byets:
+                    blank = _get_blank_4bytes_from_response(s_response);
+                    if( blank !== null ){  
+                        this._c_blank =  blank;
                         b_result = true;
                     }
                     break;
@@ -8583,35 +8200,8 @@
                         b_result = true;
                     }
                     break;
-                case _type_generated_tx_type.gt_get_f12_ibutton:
-                    if( _get_f12_ibutton_from_response(s_response) ){
-                        this._n_ibutton_mode = _type_ibutton_mode.ibutton_f12;
-                    }
-                    b_result = true;
-                    break;
-                case _type_generated_tx_type.gt_get_zeros_ibutton:
-                    if( _get_zeros_ibutton_from_response(s_response) ){
-                        this._n_ibutton_mode = _type_ibutton_mode.ibutton_zeros;
-                    }
-                    b_result = true;
-                    break;
-                case _type_generated_tx_type.gt_get_zeros7_times_ibutton:
-                    if( _get_zeros_7times_ibutton_from_response(s_response) ){
-                        this._n_ibutton_mode = _type_ibutton_mode.ibutton_zeros7;
-                    }
-                    b_result = true;
-                    break;
-                case _type_generated_tx_type.gt_get_addmit_code_stick_ibutton:
-                    if( _get_addmit_code_stick_ibutton_from_response(s_response) ){
-                        this._n_ibutton_mode = _type_ibutton_mode.ibutton_addmit;
-                    }
-                    b_result = true;
-                    break;
                 case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
-                case _type_generated_tx_type.gt_set_indicate_error_condition:
-                case _type_generated_tx_type.gt_set_ignore_iso1:
-                case _type_generated_tx_type.gt_set_ignore_iso3:
-                case _type_generated_tx_type.gt_set_remove_colon:
+                case _type_generated_tx_type.gt_set_blank_4byets:
                 case _type_generated_tx_type.gt_set_interface:
                 case _type_generated_tx_type.gt_set_language:
                 case _type_generated_tx_type.get_set_keymap:
@@ -8741,10 +8331,6 @@
                 case _type_generated_tx_type.gt_set_postfix_ibutton:
                 case _type_generated_tx_type.gt_set_prefix_uart:
                 case _type_generated_tx_type.gt_set_postfix_uart:
-                case _type_generated_tx_type.gt_set_f12_ibutton:
-                case _type_generated_tx_type.gt_set_zeros_ibutton:
-                case _type_generated_tx_type.gt_set_zeros7_times_ibutton:
-                case _type_generated_tx_type.gt_set_addmit_code_stick_ibutton:
                     b_result = _is_success_response(s_response);
                     break;
                 default:
@@ -8860,7 +8446,6 @@
             ss.setItem(s_key_p+'_s_prefix_ibutton',JSON.stringify(this._s_prefix_ibutton));
             ss.setItem(s_key_p+'_s_postfix_ibutton',JSON.stringify(this._s_postfix_ibutton));
 
-            ss.setItem(s_key_p+'_n_ibutton_mode',JSON.stringify(this._n_ibutton_mode));
             ss.setItem(s_key_p+'_c_blank',JSON.stringify(this._c_blank));
 
             //rs232
@@ -8904,7 +8489,6 @@
             this._s_private_postfix = JSON.parse(ss.getItem(s_key_p+'_s_private_postfix'));
             this._s_prefix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_prefix_ibutton'));
             this._s_postfix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_postfix_ibutton'));
-            this._n_ibutton_mode = JSON.parse(ss.getItem(s_key_p+'_n_ibutton_mode'));
             this._c_blank = JSON.parse(ss.getItem(s_key_p+'_c_blank'));
             this._s_prefix_uart = JSON.parse(ss.getItem(s_key_p+'_s_prefix_uart'));
             this._s_postfix_uart = JSON.parse(ss.getItem(s_key_p+'_s_postfix_uart'));
@@ -8955,6 +8539,7 @@
                         var b_ignore_iso3 = null;
                         var b_remove_colon = null;
                         var n_ibutton = null;
+                        var n_reset_interval = null;
                         var n_direction = null;
                         var s_gpre = null;
                         var s_gpost = null;
@@ -9094,6 +8679,17 @@
                                         continue;
                                     }
                                 }
+
+                                // ibutton attribute
+                                s_attr_name = "mmd1100_reset_interval";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_reset_interval = _get_mmd1100_reset_interval_from_string(s_attr);
+                                    if( n_reset_interval < 0 ){
+                                        continue;
+                                    }
+                                }
+                                
                                 // direction attribute
                                 s_attr_name = "direction";
                                 if( ele.hasAttribute(s_attr_name)){
@@ -9414,11 +9010,11 @@
                                     b_indicate_set = false;
                                 }
                                 if( b_indicate_all_success_is_success && b_indicate_set ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] & 0xfe;
                                 }
                                 else if( !b_indicate_all_success_is_success && !b_indicate_set ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_IndicateErrorCondition );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x01;
                                 }
                             }
@@ -9428,11 +9024,11 @@
                                     b_ignore_iso1_cur = true;
                                 }
                                 if( b_ignore_iso1 && !b_ignore_iso1_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO1 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x02;
                                 }
                                 else if( !b_ignore_iso1 && b_ignore_iso1_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO1 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] & 0xfd;
                                 }
                             }
@@ -9442,11 +9038,11 @@
                                     b_ignore_iso3_cur = true;
                                 }
                                 if( b_ignore_iso3 && !b_ignore_iso3_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO3 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x04;
                                 }
                                 else if( !b_ignore_iso3 && b_ignore_iso3_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableIgnoreISO3 );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] & 0xfb;
                                 }
                             }
@@ -9456,19 +9052,20 @@
                                     b_remove_colon_cur = true;
                                 }
                                 if( b_remove_colon && !b_remove_colon_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableRemoveColon );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] | 0x08;
                                 }
                                 else if( !b_remove_colon && b_remove_colon_cur ){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableRemoveColon );
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
                                     this._device._c_blank[1] =  this._device._c_blank[1] & 0xf7;
                                 }
                             }
 
                             if( n_ibutton !== null ){
-                                if(this._device._n_ibutton_mode !== n_ibutton){
-                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_EnableF12iButton );
-                                    this._device._n_ibutton_mode = n_ibutton;
+                                if((this._device._c_blank[2]&0x0F) !== n_ibutton){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
+                                    this._device._c_blank[2] = this._device._c_blank[2] & 0xF0;
+                                    this._device._c_blank[2] = this._device._c_blank[2] | n_ibutton;
                                 }
                             }
                             if( n_direction !== null ){
@@ -9479,6 +9076,13 @@
                                     this._device._n_direction[_type_msr_track_Numer.iso1_track] = n_direction;
                                     this._device._n_direction[_type_msr_track_Numer.iso2_track] = n_direction;
                                     this._device._n_direction[_type_msr_track_Numer.iso3_track] = n_direction;
+                                }
+                            }
+                            if(n_reset_interval != null ){
+                                if((this._device._c_blank[1]&0xF0) !== n_reset_interval){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Blank_4bytes );
+                                    this._device._c_blank[1] = this._device._c_blank[1] & 0x0F;
+                                    this._device._c_blank[1] = this._device._c_blank[1] | n_reset_interval;
                                 }
                             }
 
@@ -9773,8 +9377,15 @@
 
                 s_description = s_description + "Buzzer frequency : " + (_get_freqency_from_timer_count(this._dw_buzzer_count)/1000).toFixed(0) + " KHz(" + String(this._dw_buzzer_count) + ")\n";
                 s_description = s_description + "The supported functions : " + _get_function_string(this._n_device_function) + "\n";
+
+                if( this._b_device_is_mmd1000 ){
+                    s_description = s_description + "Msr decoder : MMD1100\n";
+                }
+                else{
+                    s_description = s_description + "Msr decoder : Magtek\n";
+                }
                 
-                s_description = s_description + "i-Button mode : " + _get_ibutton_mode_string(this._n_ibutton_mode) + "\n";
+                s_description = s_description + "i-Button mode : " + _get_ibutton_mode_string(this._c_blank[2]&0x0F) + "\n";
 
                 if(this._b_global_pre_postfix_send_condition){
                     s_description = s_description + "MSR global pre/postfixs sending condition : send when all track isn't error.\n";
@@ -9812,6 +9423,18 @@
                 }
                 else{
                     s_description = s_description + "remove colon : not remove colon.\n";
+                }
+
+                var b_device_version_greater_then_5_18 = false;
+                if( _first_version_greater_then_second_version( this._version,[5,18,0,0]) ){
+                    if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                        b_device_version_greater_then_5_18 = true;
+                    }
+                }
+                if( _first_version_greater_then_second_version( this._version,[5,15,0,0]) ){
+                    if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                        s_description = s_description + "mmd1100 reset interval : " + _get_mmd1100_reset_interval_string(this._c_blank[1]&0xF0,b_device_version_greater_then_5_18) + "\n";
+                    }
                 }
 
                 s_description = s_description + "MSR global prefixs : " + this._s_global_prefix + "\n";
@@ -9962,8 +9585,17 @@
                     as_value[n_count] = _get_function_string(this._n_device_function);
                     //
                     ++n_count;
+                    as_name[n_count] = "Msr decoder";
+                    if( this._b_device_is_mmd1000 ){
+                        as_value[n_count] = "MMD1100";
+                    }
+                    else{
+                        as_value[n_count] = "Magtek";
+                    }
+                    //
+                    ++n_count;
                     as_name[n_count] = "i-Button mode";
-                    as_value[n_count] = _get_ibutton_mode_string(this._n_ibutton_mode);
+                    as_value[n_count] = _get_ibutton_mode_string(this._c_blank[2]&0x0F);
                     //
                     ++n_count;
                     as_name[n_count] = "blank data";
@@ -10015,6 +9647,20 @@
                     }
                     else{
                         as_value[n_count] = "remove colon : not remove colon.";
+                    }
+                    //
+                    var b_device_version_greater_then_5_18 = false;
+                    if( _first_version_greater_then_second_version( this._version,[5,18,0,0]) ){
+                        if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                            b_device_version_greater_then_5_18 = true;
+                        }
+                    }
+                    if( _first_version_greater_then_second_version( this._version,[5,15,0,0]) ){
+                        if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                            ++n_count;
+                            as_name[n_count] = "mmd1100 reset interval";
+                            as_value[n_count] = _get_mmd1100_reset_interval_string(this._c_blank[1]&0xF0,b_device_version_greater_then_5_18);
+                        }
                     }
                     //
                     ++n_count;

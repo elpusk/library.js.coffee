@@ -18,7 +18,8 @@ common	:	ignore1		: "enable" or "disable"( if ISO1 data is equal to ISO2 data, d
 common	:	ignore3		: "enable" or "disable"( if ISO2 data is equal to ISO3 data, don't send ISO3 data.)
 common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first character is colon,  don't send colon.)
 common 	:	direction:  : "bidirectional","forward" or "backward"
-common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
+common	:	ibutton		: "none", "zeros", "f12", "zeros7" or "addimat"
+common	:	mmd1100_reset_interval : "default", "disable", "0"(default), "10, "20, ... "240"(disable), 0~240, multiple of 16
 =====================================================================================================================================================
 global	:	prefix		: pair[][], the first [] - modifier, the second [] - keycode of USB HID keybaord or the symbol of keycode.
 global	:	postfix		: the available modifier [] - none, [s] - press left-shift key, [a] - press left-alt key, [c] - press left-ctrl key
@@ -209,6 +210,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 		rm_colon	= "disable"
 		direction	="bidirectional"
 		ibutton		="zeros"
+		mmd1100_reset_interval = "default"
 	/>
 
 	<global
