@@ -1,5 +1,5 @@
 /**
- * 2022.03.18
+ * 2022.03.29
  * @license MIT
  * Copyright (c) 2022 Elpusk.Co.,Ltd.
  *
@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.10.0
+ * @version 1.11.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -51,6 +51,8 @@
  * <br />   2022.03.21 -release 1.10
  *                     - support mmd1100 reset interval.( support from firmware ganymede 5.16)
  *                     - fix bug in _get_key_symbol_string_by_hid_key_code_number()
+ * <br />   2022.03.29 - release 1.11.0
+ *                     - fix bug get_string_html_table() and get_string().
  * @namespace
  */
 'use strict';
@@ -9403,7 +9405,7 @@
                 +"c_blank : 0x" + this._c_blank[0].toString(16)
                 +": 0x" + this._c_blank[1].toString(16)
                 +": 0x" + this._c_blank[2].toString(16)
-                +": 0x" + this._c_blank[0].toString(16)
+                +": 0x" + this._c_blank[3].toString(16)
                 +"\n";
                 //////////////////////
                 if(this._c_blank[1]&0x02){
@@ -9602,7 +9604,7 @@
                     as_value[n_count] = "0x" + this._c_blank[0].toString(16)
                     +" : 0x" + this._c_blank[1].toString(16)
                     +" : 0x" + this._c_blank[2].toString(16)
-                    +" : 0x" + this._c_blank[0].toString(16);
+                    +" : 0x" + this._c_blank[3].toString(16);
                     //
                     ++n_count;
                     as_name[n_count] = "MSR global pre/postfixs sending condition";
