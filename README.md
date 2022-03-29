@@ -6,7 +6,7 @@ v1.12.2 - remove _elpusk.framework.coffee.get_session_number() method.
 # elpusk.device.usb.hid.lpu237
 lpu237 device protocol JavaScript  library for cmi-js.
 
-v1.11
+v1.12
 
 # elpusk.framework.coffee.ctl_lpu237
 lpu237 device control JavaScript  library for cmi-js.

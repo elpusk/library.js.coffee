@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.11.0
+ * @version 1.12.0
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -53,6 +53,8 @@
  *                     - fix bug in _get_key_symbol_string_by_hid_key_code_number()
  * <br />   2022.03.29 - release 1.11.0
  *                     - fix bug get_string_html_table() and get_string().
+ * <br />   2022.03.29 - release 1.12.0
+ *                     - add setting of track order parameter.
  * @namespace
  */
 'use strict';
@@ -172,7 +174,9 @@
             //
 			cp_Prefix_iButton : 126, cp_Postfix_iButton : 127,
 			cp_Prefix_Uart : 128, cp_Postfix_Uart : 129,
-            cp_BtcConfigData : 130
+            cp_BtcConfigData : 130,
+            //
+            cp_TrackOrder : 131
 		};
 
         /**
@@ -263,6 +267,7 @@
             //
 			gt_get_prefix_ibutton : 140, gt_get_postfix_ibutton : 141,
 			gt_get_prefix_uart : 142, gt_get_postfix_uart : 143,
+            gt_get_track_order : 144,
 
             // get_get_x is more exist at the end of this defintion.
             /////////////////////////////
@@ -328,7 +333,8 @@
             gt_set_private_postfix30 : 267,  gt_set_private_postfix31 : 268,  gt_set_private_postfix32 : 269,
             //
 			gt_set_prefix_ibutton : 270, gt_set_postfix_ibutton : 271,
-			gt_set_prefix_uart : 272, gt_set_postfix_uart : 273
+			gt_set_prefix_uart : 272, gt_set_postfix_uart : 273,
+            gt_set_track_order : 274
         };
                 
         /**
@@ -343,6 +349,7 @@
             SYS_OFFSET_VERSION : 28,
             SYS_OFFSET_NAME : 12,
             SYS_OFFSET_G_TAG_CONDITION : 83,
+            SYS_OFFSET_CONTAINER_TRACK_ORDER : 91,
             SYS_OFFSET_BLANK_4BYTES : 0,
             SYS_OFFSET_INTERFACE : 42,
             SYS_OFFSET_KEYMAP : 103,
@@ -384,6 +391,7 @@
             SYS_SIZE_VERSION : 4,
             SYS_SIZE_NAME : 16,
             SYS_SIZE_G_TAG_CONDITION : 4,
+            SYS_SIZE_CONTAINER_TRACK_ORDER : 12,
             SYS_SIZE_BLANK_4BYTES : 4,
             SYS_SIZE_INTERFACE : 1,
             SYS_SIZE_KEYMAP : 4,
@@ -2271,7 +2279,34 @@
 			} while (false);
 			return b_result;
         }
-        
+
+        /**
+         * @private
+         * @function _get_track_order_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {null|number array} 3 item number array
+         * <br /> null - error.
+         */
+         function _get_track_order_from_response(s_response){
+            var b_result = null;
+
+			do {
+                var order = [];
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_CONTAINER_TRACK_ORDER;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                order = _get_data_field_member_of_response_by_number_array(s_response);
+                return order;
+			} while (false);
+			return b_result;
+        }
+
         /**
          * @private
          * @function _get_blank_4bytes_from_response
@@ -3159,6 +3194,49 @@
                 }
 			} while (false);
 			return b_result;
+        }
+
+        /**
+         * @private
+         * @function _get_track_order_from_string
+         * @param {string} s_string - "and" or "or"
+         * @returns {(null|array number)} the order of track
+         * <br /> null - error.
+         */
+         function _get_track_order_from_string(s_string){
+			var n_order = null;
+
+			do {
+				if (typeof s_string !== 'string'){
+                    continue;
+                }
+                if( s_string === "123"){
+                    n_order = [0,1,2];
+                    continue;
+                }
+                if( s_string === "132"){
+                    n_order = [0,2,1];
+                    continue;
+                }
+                if( s_string === "213"){
+                    n_order = [1,0,2];
+                    continue;
+                }
+                if( s_string === "231"){
+                    n_order = [1,2,0];
+                    continue;
+                }
+                if( s_string === "312"){
+                    n_order = [2,0,1];
+                    continue;
+                }
+                if( s_string === "321"){
+                    n_order = [2,1,0];
+                    continue;
+                }
+
+            } while (false);
+			return n_order;
         }
         
         /**
@@ -4571,6 +4649,25 @@
 
         /**
          * @private
+         * @function _generate_set_track_order
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {array number} array_n_order 3 item array of number
+         * @returns {boolean} true(success) or false(failure).
+         */
+         function _generate_set_track_order(queue_s_tx, array_n_order){
+            var n_offset = _type_system_offset.SYS_OFFSET_CONTAINER_TRACK_ORDER;
+            var n_size = _type_system_size.SYS_SIZE_CONTAINER_TRACK_ORDER;
+            var s_data = "";
+
+            for( var i = 0; i<array_n_order.length; i++ ){
+                s_data = s_data + elpusk.util.get_dword_hex_string_from_number(array_n_order[i]);
+            }//end for
+
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_data);
+        }
+
+        /**
+         * @private
          * @function _generate_set_blank_4byets
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {number[]} cblank 4 int array.
@@ -5317,6 +5414,7 @@
             this._b_enable_iso = [true,true,true];
     
             this._n_direction = [_type_direction.dir_bidectional,_type_direction.dir_bidectional,_type_direction.dir_bidectional];
+            this._n_order = [0,1,2];
     
             this._s_global_prefix = null;//you must include the length in front of this array.
             this._s_global_postfix = null;//you must include the length in front of this array.
@@ -5513,6 +5611,15 @@
          */
 		_elpusk.device.usb.hid.lpu237.prototype.get_global_pre_postfix_send_condition = function(){
             return this._b_global_pre_postfix_send_condition; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_track_order
+         * @returns {array,number} the sending order of msr track. 
+         */
+         _elpusk.device.usb.hid.lpu237.prototype.get_track_order = function(){
+            return this._n_order; 
         }
 
         /**
@@ -7212,6 +7319,12 @@
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_set_global_prepostfix_send_condition );
                 }
 
+                // .set order of info object
+                if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_TrackOrder ) >= 0 ){
+                    if (!_generate_set_track_order(this._dequeu_s_tx,this._n_order)){continue;}
+                    this._deque_generated_tx.push( _type_generated_tx_type.gt_set_track_order );
+                }
+
                 // . set interface
                 if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Interface ) >= 0 ){
                     if (!_generate_set_interface(this._dequeu_s_tx,this._n_interface )){continue;}
@@ -7624,6 +7737,7 @@
                 var n_value = 0;
                 var version = [];
                 var blank = [];
+                var order = [];
                 var n_generated_tx = this._deque_generated_tx.shift();
 
                 switch (n_generated_tx) {
@@ -7718,6 +7832,13 @@
                     b_value = _get_global_pre_postfix_send_condition_from_response(s_response);
                     if( b_value !== null ){                    
                         this._b_global_pre_postfix_send_condition = b_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_track_order:
+                    order = _get_track_order_from_response(s_response);
+                    if( order !== null ){  
+                        this._n_order = order;
                         b_result = true;
                     }
                     break;
@@ -8203,6 +8324,7 @@
                     }
                     break;
                 case _type_generated_tx_type.gt_set_global_prepostfix_send_condition:
+                case _type_generated_tx_type.gt_set_track_order: 
                 case _type_generated_tx_type.gt_set_blank_4byets:
                 case _type_generated_tx_type.gt_set_interface:
                 case _type_generated_tx_type.gt_set_language:
@@ -8414,7 +8536,8 @@
             var ss = window.sessionStorage;
 
             ss.setItem(s_key_p+'_b_global_pre_postfix_send_condition',JSON.stringify(this._b_global_pre_postfix_send_condition));
-    
+            ss.setItem(s_key_p+'_n_order',JSON.stringify(this._n_order));
+
             ///////////////////////////////
             //device parameters
             ss.setItem(s_key_p+'_n_interface',JSON.stringify(this._n_interface));
@@ -8465,6 +8588,7 @@
             var ss = window.sessionStorage;
             
             this._b_global_pre_postfix_send_condition = JSON.parse(ss.getItem(s_key_p+'_b_global_pre_postfix_send_condition'));
+            this._n_order = JSON.parse(ss.getItem(s_key_p+'_n_order'));
     
             ///////////////////////////////
             //device parameters
@@ -8536,6 +8660,7 @@
                         var n_language = null;
                         var array_b_enable_track = [null,null,null];
                         var b_condition = null;
+                        var n_order = null;
                         var b_indicate_all_success_is_success = null;
                         var b_ignore_iso1 = null;
                         var b_ignore_iso3 = null;
@@ -8634,6 +8759,16 @@
                                         continue;
                                     }
                                 }
+                                // track_order attribute
+                                s_attr_name = "track_order";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    n_order = _get_track_order_from_string(s_attr);
+                                    if( n_order === null ){
+                                        continue;
+                                    }
+                                }
+
                                 // indication attribute
                                 s_attr_name = "indication";
                                 if( ele.hasAttribute(s_attr_name)){
@@ -9006,6 +9141,13 @@
                                     this._device._b_global_pre_postfix_send_condition = b_condition;
                                 }
                             }
+                            if(n_order !== null){
+                                if( (this._device._n_order[0] !== n_order[0]) || (this._device._n_order[1] !== n_order[1]) || (this._device._n_order[2] !== n_order[2]) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_TrackOrder );
+                                    this._device._n_order = n_order;
+                                }
+                            }
+
                             if( b_indicate_all_success_is_success !== null ){
                                 var b_indicate_set= true;
                                 if( !(this._device._c_blank[1]&0x01) ){
@@ -9380,21 +9522,29 @@
                 s_description = s_description + "Buzzer frequency : " + (_get_freqency_from_timer_count(this._dw_buzzer_count)/1000).toFixed(0) + " KHz(" + String(this._dw_buzzer_count) + ")\n";
                 s_description = s_description + "The supported functions : " + _get_function_string(this._n_device_function) + "\n";
 
-                if( this._b_device_is_mmd1000 ){
-                    s_description = s_description + "Msr decoder : MMD1100\n";
+                if(this._b_device_is_ibutton_only){
+                    s_description = s_description + "Msr decoder : None\n";
                 }
                 else{
-                    s_description = s_description + "Msr decoder : Magtek\n";
+                    if( this._b_device_is_mmd1000 ){
+                        s_description = s_description + "Msr decoder : MMD1100\n";
+                    }
+                    else{
+                        s_description = s_description + "Msr decoder : Magtek\n";
+                    }
                 }
-                
                 s_description = s_description + "i-Button mode : " + _get_ibutton_mode_string(this._c_blank[2]&0x0F) + "\n";
 
                 if(this._b_global_pre_postfix_send_condition){
                     s_description = s_description + "MSR global pre/postfixs sending condition : send when all track isn't error.\n";
                 }
                 else{
-                    s_description = s_description + "MSR global pre/postfixs sending condition : send when a track isn't error.\n";
+                    s_description = s_description + "MSR global pre/postfixs sending condition : send when a track isn't error.\n";    
                 }
+
+                s_description = s_description + "MSR track order : "; 
+                s_description = s_description + (this._n_order[0]+1).toString() + (this._n_order[1]+1).toString() + (this._n_order[2]+1).toString() + "\n";
+
                 if(this._c_blank[1]&0x01){
                     s_description = s_description + "indication error condition : If any track is not error, it is success.\n";
                 }
@@ -9588,11 +9738,16 @@
                     //
                     ++n_count;
                     as_name[n_count] = "Msr decoder";
-                    if( this._b_device_is_mmd1000 ){
-                        as_value[n_count] = "MMD1100";
+                    if(this._b_device_is_ibutton_only){
+                        as_value[n_count] = "None";
                     }
                     else{
-                        as_value[n_count] = "Magtek";
+                        if( this._b_device_is_mmd1000 ){
+                            as_value[n_count] = "MMD1100";
+                        }
+                        else{
+                            as_value[n_count] = "Magtek";
+                        }
                     }
                     //
                     ++n_count;
@@ -9614,6 +9769,10 @@
                     else{
                         as_value[n_count] = "send when any track isn't error.";
                     }
+                    //
+                    ++n_count;
+                    as_name[n_count] = "MSR track order";
+                    as_value[n_count] =  (this._n_order[0]+1).toString() + (this._n_order[1]+1).toString() + (this._n_order[2]+1).toString();
                     //
                     ++n_count;
                     as_name[n_count] = "indication error condition";

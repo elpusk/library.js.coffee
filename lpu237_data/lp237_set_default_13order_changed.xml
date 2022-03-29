@@ -18,7 +18,7 @@ common	:	ignore1		: "enable" or "disable"( if ISO1 data is equal to ISO2 data, d
 common	:	ignore3		: "enable" or "disable"( if ISO2 data is equal to ISO3 data, don't send ISO3 data.)
 common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first character is colon,  don't send colon.)
 common 	:	direction:  : "bidirectional","forward" or "backward"
-common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
+common	:	ibutton		: "none", "zeros", "f12", "zeros7" or "addimat"
 common	:	mmd1100_reset_interval : "default", "disable", "0"(default), "10, "20, ... "240"(disable), 0~240, multiple of 16
 common	:	track_order	: "123", "132", "213", "231", "312", "321" ( MSR track order , ex : "123" - the first data is 1 track, the second data is 2 track, the third data is 3 track)
 =====================================================================================================================================================
@@ -199,7 +199,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 <lpu237>
 	<common
 		interface	="usb_kb"
-		buzzer		="off"
+		buzzer		="on"
 		language	="usa_english"
 		iso1		="enable"
 		iso2		="enable"
@@ -212,7 +212,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 		direction	="bidirectional"
 		ibutton		="zeros"
 		mmd1100_reset_interval = "default"
-		track_order = "123"
+		track_order = "321"
 	/>
 
 	<global

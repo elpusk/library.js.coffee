@@ -20,6 +20,7 @@ common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first charact
 common 	:	direction:  : "bidirectional","forward" or "backward"
 common	:	ibutton		: "none", "zeros", "f12", "zeros7" or "addimat"
 common	:	mmd1100_reset_interval : "default", "disable", "0"(default), "10, "20, ... "240"(disable), 0~240, multiple of 16
+common	:	track_order	: "123", "132", "213", "231", "312", "321" ( MSR track order , ex : "123" - the first data is 1 track, the second data is 2 track, the third data is 3 track)
 =====================================================================================================================================================
 global	:	prefix		: pair[][], the first [] - modifier, the second [] - keycode of USB HID keybaord or the symbol of keycode.
 global	:	postfix		: the available modifier [] - none, [s] - press left-shift key, [a] - press left-alt key, [c] - press left-ctrl key
@@ -211,6 +212,7 @@ ibutton	:	postfix		: hex-format : use lower case.
 		direction	="bidirectional"
 		ibutton		="zeros"
 		mmd1100_reset_interval = "disable"
+		track_order = "123"
 	/>
 
 	<global
