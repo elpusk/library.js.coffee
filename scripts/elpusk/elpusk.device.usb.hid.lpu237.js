@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.12.0
+ * @version 1.12.1
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -1572,12 +1572,12 @@
                 case 96: s_value += "(interval - 40:19)"; break;
                 case 112: s_value += "(interval - 47:03)"; break;
                 case 128: s_value += "(interval - 53:46)"; break;
-                case 144: s_value += "(interval - 00:29)"; break;
-                case 160: s_value += "(interval - 07:12)"; break;
-                case 176: s_value += "(interval - 13:55)"; break;
-                case 192: s_value += "(interval - 20:39)"; break;
-                case 208: s_value += "(interval - 27:22)"; break;
-                case 224: s_value += "(interval - 34:05)"; break;
+                case 144: s_value += "(interval - 01:00:29)"; break;
+                case 160: s_value += "(interval - 01:07:12)"; break;
+                case 176: s_value += "(interval - 01:13:55)"; break;
+                case 192: s_value += "(interval - 01:20:39)"; break;
+                case 208: s_value += "(interval - 01:27:22)"; break;
+                case 224: s_value += "(interval - 01:34:05)"; break;
                 default:
                     s_value = "";
                     continue;                        
