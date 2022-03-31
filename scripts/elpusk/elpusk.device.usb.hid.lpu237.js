@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.12.1
+ * @version 1.12.2
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -55,6 +55,8 @@
  *                     - fix bug get_string_html_table() and get_string().
  * <br />   2022.03.29 - release 1.12.0
  *                     - add setting of track order parameter.
+ * <br />   2022.03.31 - release 1.12.2
+ *                     - fix _get_mmd1100_reset_interval_string() bug.(mssing 48)
  * @namespace
  */
 'use strict';
@@ -1556,17 +1558,17 @@
                     continue;
                 }
 
-                var n_code = n_interval % 16;
-                if(n_code != 0){
+                if((n_interval % 16)!= 0){
                     continue;
                 }
 
                 s_value = n_interval.toString();
 
-                switch(n_code)
+                switch(n_interval)
                 {
                 case 16: s_value += "(interval - 06:43)"; break;
                 case 32: s_value += "(interval - 13:27)"; break;
+                case 48: s_value += "(interval - 20:10)"; break;
                 case 64: s_value += "(interval - 26:53)"; break;
                 case 80: s_value += "(interval - 33:36)"; break;
                 case 96: s_value += "(interval - 40:19)"; break;
