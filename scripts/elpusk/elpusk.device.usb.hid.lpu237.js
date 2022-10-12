@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.12.2
+ * @version 1.12.3
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -57,6 +57,9 @@
  *                     - add setting of track order parameter.
  * <br />   2022.03.31 - release 1.12.2
  *                     - fix _get_mmd1100_reset_interval_string() bug.(mssing 48)
+ * <br />   2022.03.31 - release 1.12.3
+ *                     - fix LPU-208D function string MSR & i-button -> MSR & SCR
+ * 
  * @namespace
  */
 'use strict';
@@ -1226,9 +1229,10 @@
          * @private
          * @function _get_function_string
          * @param {number} type_function _type_function value.
+         * @param {number[]} version 4 number array
          * @returns {string} supported functions.
          */
-        function _get_function_string( type_function ){
+        function _get_function_string( type_function,version ){
             var s_value = "unknown";
             do{
                 if( typeof type_function !== 'number'){
@@ -1243,6 +1247,9 @@
                         break;
                     case _type_function.fun_msr_ibutton:
                         s_value = "MSR and i-button";
+                        if(_is_version_ten(version)){
+                            s_value = "MSR and SCR";
+                        }
                         break;
                     case _type_function.fun_ibutton:
                         s_value = "i-button only";
@@ -1741,6 +1748,34 @@
             return s_value;
         }
         
+        /**
+         * @private
+         * @function _is_version_ten
+         * @param {number[]} version 4 number array
+         * @returns {boolean} If version is 10.x.y.z,return true.
+         */
+         function _is_version_ten( version ){
+            var b_is_ten = false;
+            var s_value = "0.0.0.0";
+            do{
+                if( !Array.isArray(version)){
+                    continue;
+                }
+                if( version.length !== 4 ){
+                    continue;
+                }
+
+                s_value = version[0].toString(10) + "." 
+                + version[1].toString(10) + "." 
+                + version[2].toString(10) + "." 
+                + version[3].toString(10);
+
+                if(version[0] == 10){
+                    b_is_ten = true;
+                }
+            }while(false);
+            return b_is_ten;
+        }
 
         /**
          * @private
@@ -9522,7 +9557,7 @@
                 s_description = s_description + "MSD bootloader running time : " + String(this._dw_boot_run_time) + "\n";
 
                 s_description = s_description + "Buzzer frequency : " + (_get_freqency_from_timer_count(this._dw_buzzer_count)/1000).toFixed(0) + " KHz(" + String(this._dw_buzzer_count) + ")\n";
-                s_description = s_description + "The supported functions : " + _get_function_string(this._n_device_function) + "\n";
+                s_description = s_description + "The supported functions : " + _get_function_string(this._n_device_function,this._version) + "\n";
 
                 if(this._b_device_is_ibutton_only){
                     s_description = s_description + "Msr decoder : None\n";
@@ -9736,7 +9771,7 @@
                     //
                     ++n_count;
                     as_name[n_count] = "The supported functions";
-                    as_value[n_count] = _get_function_string(this._n_device_function);
+                    as_value[n_count] = _get_function_string(this._n_device_function,this._version);
                     //
                     ++n_count;
                     as_name[n_count] = "Msr decoder";
