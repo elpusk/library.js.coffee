@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- lpu237 magnetic card reader default setting values -->
+
+<!-- the defined values of attribute
+=====================================================================================================================================================
+tag	:	attribute	:	values
+=====================================================================================================================================================
+global	:	prefix		: pair[][], the first [] - modifier, the second [] - keycode of USB HID keybaord or the symbol of keycode.
+global	:	postfix		: the available modifier [] - none, [s] - press left-shift key, [a] - press left-alt key, [c] - press left-ctrl key
+=====================================================================================================================================================
+ -->
+
+
+<lpu237>
+	<global
+		prefix		="[][g][][p][][r][][e][][f][][i][][enter]"
+	/>
+</lpu237>	

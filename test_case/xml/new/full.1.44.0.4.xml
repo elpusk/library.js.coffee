@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- For mapper 1.44.0.4, full setting parameters -->
+
+<lpu237>
+	<common
+		buzzer	="on"
+		condition	="and"
+		direction	="forward"
+		ibutton	="zeros"
+		interface	="usb_kb"
+		iso1	="enable"
+		iso2	="enable"
+		iso3	="enable"
+		language	="usa_english"
+	/>
+	<global
+		postfix	="[s][0][s][1][s][2][s][3][s][4][s][5][][enter]"
+		prefix	="[][0][][1][][2][][3][][4][][5][][enter]"
+	/>
+	<ibutton
+		postfix	="[s][0][s][1][s][2][s][3][s][4][s][5][][enter]"
+		prefix	="[][0][][1][][2][][3][][4][][5][][7]"
+	/>
+	<iso1
+		postfix	="[s][0][s][1][s][2][s][3][s][4][s][5][][enter]"
+		prefix	="[][0][][1][][2][][3][][4][][5][][7]"
+	/>
+	<iso2
+		postfix	="[s][0][s][1][s][2][s][3][s][4][s][5][][enter]"
+		prefix	="[][0][][1][][2][][3][][4][][5][][7]"
+	/>
+	<iso3
+		postfix	="[s][0][s][1][s][2][s][3][s][4][s][5][][enter]"
+		prefix	="[][0][][1][][2][][3][][4][][5][][7]"
+	/>
+</lpu237>

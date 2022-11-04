@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- lpu237 magnetic card reader default setting values -->
+
+<!-- the defined values of attribute
+=====================================================================================================================================================
+tag	:	attribute	:	values
+=====================================================================================================================================================
+common	:	interface	: "usb_kb" , "usb_hid" or "rs232"
+common	:	buzzer		: "on" , "off" or frequency number 1000 ~ 30000( unit Hz )
+common	:	language	: "usa_english" , "spanish", "danish", "french", "german", "italian", "norwegian", "swedish", "hebrew" or "turkey"
+common	:	iso1		: "enable" or "disable"
+common	:	iso2		: "enable" or "disable"	
+common	:	iso3		: "enable" or "disable"
+common	:	condition	: "and" or "or"( and - if all track are not error,global pro/postfix will be sent. )
+common	:	indication	: "and" or "or"( and - When all track are not a error, reader indicate success-processing.)
+common	:	ignore1		: "enable" or "disable"( if ISO1 data is equal to ISO2 data, don't send ISO1 data.)
+common	:	ignore3		: "enable" or "disable"( if ISO2 data is equal to ISO3 data, don't send ISO3 data.)
+common	:	rm_colon	: "enable" or "disable"( if ETXL is 0xe0 and the first character is colon,  don't send colon.)
+common 	:	direction:  : "bidirectional","forward" or "backward"
+common	:	ibutton		: "none", "zeros", "f12", "zeros7" or "addimat"
+common	:	mmd1100_reset_interval : "default", "disable", "0"(default), "16", "32", ... "240"(disable), 0~240, multiple of 16
+common	:	track_order	: "123", "132", "213", "231", "312", "321" ( MSR track order , ex : "123" - the first data is 1 track, the second data is 2 track, the third data is 3 track)
+ -->
+
+
+<lpu237>
+	<common
+		rm_colon	= "disable"
+	/>
+
+</lpu237>	

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- lpu237 magnetic card reader default setting values -->
+
+<!-- the defined values of attribute
+=====================================================================================================================================================
+tag	:	attribute	:	values
+=====================================================================================================================================================
+iso1	:	combination	: the number of combination.(1~3)
+
+iso1	:	max_size0		: the maximun size of combination index 0 for iso1 track.
+iso1	:	max_size1		: the maximun size of combination index 1 for iso1 track.
+iso1	:	max_size2		: the maximun size of combination index 2 for iso1 track.
+
+iso1	:	bit_size0		: the data bit size of combination index 0 for iso1 track.(1~8)
+iso1	:	bit_size1		: the data bit size of combination index 1 for iso1 track.(1~8)
+iso1	:	bit_size2		: the data bit size of combination index 2 for iso1 track.(1~8)
+
+iso1	:	data_mask0	: the data mask of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	data_mask1	: the data mask of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	data_mask2	: the data mask of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	use_parity0	: wether or not use parity bit of combination index 0 for iso1 track.( "enable" or "disable" )
+iso1	:	use_parity1	: wether or not use parity bit of combination index 1 for iso1 track.
+iso1	:	use_parity2	: wether or not use parity bit of combination index 2 for iso1 track.
+
+iso1	:	parity_type0	: the parity type of combination index 0 for iso1 track.( "odd" or "even" )
+iso1	:	parity_type1	: the parity type of combination index 1 for iso1 track.
+iso1	:	parity_type2	: the parity type of combination index 2 for iso1 track.
+
+iso1	:	stxl0		: the start sentinel pattern of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	stxl1		: the start sentinel pattern of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	stxl2		: the start sentinel pattern of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	etxl0		: the end sentinel pattern of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	etxl1		: the end sentinel pattern of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	etxl2		: the end sentinel pattern of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	use_error_correct0	:  wether or not use error correction method of combination index 0 for iso1 track.( "enable" or "disable" )
+iso1	:	use_error_correct1	:  wether or not use error correction method of combination index 1 for iso1 track.
+iso1	:	use_error_correct2	:  wether or not use error correction method of combination index 2 for iso1 track.
+
+iso1	:	error_correct_type0	:  the used error correction method of combination index 0 for iso1 track.( "lrc" - LRC method or )
+iso1	:	error_correct_type1	:  the used error correction method of combination index 1 for iso1 track.( "invlrc" - inversion LRC method or )
+iso1	:	error_correct_type2	:  the used error correction method of combination index 2 for iso1 track.( "crc" - CRC method)
+
+iso1	:	add_value0	:  For converting to ASCII code, the value of combination index 0 for iso1 track.( number 0~255 )
+iso1	:	add_value1	:  For converting to ASCII code, the value of combination index 1 for iso1 track.
+iso1	:	add_value2	:  For converting to ASCII code, the value of combination index 2 for iso1 track.
+
+// attribute "prefix" & "postfix" are old style. Don't use in new project.
+iso1	:	prefix		: [sa] - press left-shift & alt key, [sc] - press left-shift & ctrl key, [ac] - press left-alt & ctrl key
+iso1	:	postfix		: [sac] - press left-shift & alt & ctrl key.
+
+iso1	:	prefix0		: the combination index 0 for iso1 track. equal to "prefix" attribute. "prefix0" will override "prefix" attribute.
+iso1	:	prefix1		: the combination index 1 for iso1 track. format is equal to "prefix" attribute.
+iso1	:	prefix2		: the combination index 2 for iso1 track. format is equal to "prefix" attribute.
+
+iso1	:	postfix0	: the combination index 0 for iso1 track. equal to "postfix" attribute. "postfix0" will override "postfix" attribute.
+iso1	:	postfix1	: the combination index 1 for iso1 track. format is equal to "postfix" attribute.
+iso1	:	postfix2	: the combination index 2 for iso1 track. format is equal to "postfix" attribute.
+=====================================================================================================================================================
+ -->
+
+
+<lpu237>
+	<iso1
+		bit_size0	="7"
+	/>
+</lpu237>	
