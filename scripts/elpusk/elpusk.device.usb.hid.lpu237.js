@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.12.3
+ * @version 1.13
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -59,6 +59,8 @@
  *                     - fix _get_mmd1100_reset_interval_string() bug.(mssing 48)
  * <br />   2022.03.31 - release 1.12.3
  *                     - fix LPU-208D function string MSR & i-button -> MSR & SCR
+ * <br />   2022.11.04 - release 1.13
+ *                     - add ibutton remove tag and remove pre/posfix. expanded structure to version 4.0 
  * 
  * @namespace
  */
@@ -99,6 +101,9 @@
         var _const_the_number_of_support_language = 11;	//the number of supported language.
         var _const_max_size_tag_byte = 14;
         var _const_max_size_tag_key = _const_max_size_tag_byte/2;
+
+        var _const_max_size_tag_remove_byte = 40;
+        var _const_max_size_tag_remove_key = _const_max_size_tag_remove_byte/2;
 
         var _const_address_system_hid_key_map_offset = 0x400;	//size 1K
         var _const_address_system_ps2_key_map_offset = 0x800;	//size 1K
@@ -181,7 +186,9 @@
 			cp_Prefix_Uart : 128, cp_Postfix_Uart : 129,
             cp_BtcConfigData : 130,
             //
-            cp_TrackOrder : 131
+            cp_TrackOrder : 131,
+            cp_iButton_Remove : 132,
+            cp_Prefix_iButton_Remove : 133, cp_Postfix_iButton_Remove : 134
 		};
 
         /**
@@ -339,7 +346,14 @@
             //
 			gt_set_prefix_ibutton : 270, gt_set_postfix_ibutton : 271,
 			gt_set_prefix_uart : 272, gt_set_postfix_uart : 273,
-            gt_set_track_order : 274
+            gt_set_track_order : 274,
+            //
+            gt_get_version_structure : 275,
+            gt_get_ibutton_remove : 276,
+            gt_get_prefix_ibutton_remove : 277, gt_get_postfix_ibutton_remove : 278,
+            //
+            gt_set_ibutton_remove : 279,
+            gt_set_prefix_ibutton_remove : 280, gt_set_postfix_ibutton_remove : 281
         };
                 
         /**
@@ -352,6 +366,7 @@
 
         var _type_system_offset = {
             SYS_OFFSET_VERSION : 28,
+            SYS_OFFSET_VERSION_STRUCTURE : 8,
             SYS_OFFSET_NAME : 12,
             SYS_OFFSET_G_TAG_CONDITION : 83,
             SYS_OFFSET_CONTAINER_TRACK_ORDER : 91,
@@ -382,7 +397,10 @@
             SYS_OFFSET_UART_G_PRE : 822,
             SYS_OFFSET_UART_G_POST : 837,
             SYS_OFFSET_CONTAINER_MAP_INDEX : 103,
-            SYS_OFFSET_INFOMSR_MAP_INDEX : [334,521,708]
+            SYS_OFFSET_INFOMSR_MAP_INDEX : [334,521,708],
+            SYS_OFFSET_IBUTTON_REMOVE : 852,
+            SYS_OFFSET_IBUTTON_G_PRE_REMOVE : 923,
+            SYS_OFFSET_IBUTTON_G_POST_REMOVE : 938
         };
 
         /**
@@ -394,6 +412,7 @@
          */
         var _type_system_size = {
             SYS_SIZE_VERSION : 4,
+            SYS_SIZE_VERSION_STRUCTURE : 4,
             SYS_SIZE_NAME : 16,
             SYS_SIZE_G_TAG_CONDITION : 4,
             SYS_SIZE_CONTAINER_TRACK_ORDER : 12,
@@ -424,7 +443,10 @@
             SYS_SIZE_UART_G_PRE : 15,
             SYS_SIZE_UART_G_POST : 15,
             SYS_SIZE_CONTAINER_MAP_INDEX : 4,
-            SYS_SIZE_INFOMSR_MAP_INDEX : [4,4,4]
+            SYS_SIZE_INFOMSR_MAP_INDEX : [4,4,4],
+            SYS_SIZE_IBUTTON_REMOVE : 41,
+            SYS_SIZE_IBUTTON_G_PRE_REMOVE : 15,
+            SYS_SIZE_IBUTTON_G_POST_REMOVE : 15
         }; 
 
 		var _type_format = {
@@ -1717,7 +1739,7 @@
         /**
          * @private
          * @function _get_version_string
-         * @param {number[]} version 4 number array
+         * @param {number[]} version 4 number array(system version)
          * @returns {string} version string
          */
         function _get_version_string( version ){
@@ -1744,6 +1766,31 @@
                 else if(version[0] == 10){
                     s_value += "(LPU-208D)";
                 }
+            }while(false);
+            return s_value;
+        }
+
+        /**
+         * @private
+         * @function _get_version_structure_string
+         * @param {number[]} version 4 number array(strcuture version)
+         * @returns {string} version string
+         */
+         function _get_version_structure_string( version ){
+            var s_value = "0.0.0.0";
+            do{
+                if( !Array.isArray(version)){
+                    continue;
+                }
+                if( version.length !== 4 ){
+                    continue;
+                }
+
+                s_value = version[0].toString(10) + "." 
+                + version[1].toString(10) + "." 
+                + version[2].toString(10) + "." 
+                + version[3].toString(10);
+
             }while(false);
             return s_value;
         }
@@ -1780,12 +1827,13 @@
         /**
          * @private
          * @function _first_version_greater_then_second_version
+         * @param {boolean} b_equal true : if first_version is equal to second_version, return true. 
          * @param {number[]} first_version 4 number array. this value indicate version.
          * @param {number[]} second_version 4 number array. this value indicate version.
          * @returns {boolean} true - first_version is greater then second_version.
          * <br /> false - else case.
          */
-        function _first_version_greater_then_second_version(first_version,second_version){
+        function _first_version_greater_then_second_version(b_equal,first_version,second_version){
             var b_result = false;
 
             do{
@@ -1854,11 +1902,17 @@
                 }
 
                 j++;
-                if( ar1[j] <= ar2[j] ){
+                if( ar1[j] < ar2[j] ){
+                    continue;
+                }
+                if( ar1[j] > ar2[j] ){
+                    b_result = true;
                     continue;
                 }
 
-                b_result = true;
+                if(b_equal){
+                    b_result = true;
+                }
 
             }while(false);
             return b_result;
@@ -1883,13 +1937,13 @@
                 }
                 var n_offset = 0;
                 var n_size = 1;
-                if( parseInt(s_response.substr(n_offset*2,n_size*2),16) !== 0x52 ){
+                if( parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16) !== 0x52 ){
                     continue;//invalid prefix
                 }
                 b_result = true;
                 n_offset++;
 
-                var c_result = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                var c_result = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( c_result === 0xFF ){
                     continue;//good
                 }
@@ -1921,13 +1975,13 @@
                 }
                 var n_offset = 0;
                 var n_size = 1;
-                if( parseInt(s_response.substr(n_offset*2,n_size*2),16) !== 0x52 ){
+                if( parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16) !== 0x52 ){
                     continue;//invalid prefix
                 }
                 b_result = true;
                 n_offset++;
 
-                var c_result = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                var c_result = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( c_result === 0xFF ){
                     continue;//good
                 }
@@ -1991,7 +2045,7 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
 
             }while(false);
             return n_length;
@@ -2018,7 +2072,7 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( n_length <= 0 ){
                     continue;
                 }
@@ -2027,7 +2081,8 @@
                 var c_val = 0;
 
                 for( var i = 0; i<n_length; i++ ){
-                    c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    ++n_offset;
+                    c_val = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                     n_data.push(c_val);
                 }//end for
 
@@ -2056,7 +2111,7 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( n_length <= 0 ){
                     continue;
                 }
@@ -2065,7 +2120,8 @@
                 var n_val = 0;
 
                 for( var i = 0; i<n_length; i++ ){
-                    n_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    ++n_offset;
+                    n_val = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                     if( n_val == 0){
                         break;//terminate null
                     }
@@ -2097,12 +2153,13 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( n_length <= 0 ){
                     continue;
                 }
                 
-                s_data = s_response.substr((++n_offset)*2,n_length*2);
+                ++n_offset;
+                s_data = s_response.substring(n_offset*2,n_offset*2+n_length*2);
             }while(false);
             return s_data;
         }
@@ -2128,7 +2185,7 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( n_length <= 0 ){
                     continue;
                 }
@@ -2137,7 +2194,8 @@
                 var c_val = 0;
 
                 for( var i = 0; i<n_length; i++ ){
-                    c_val = parseInt(s_response.substr((++n_offset)*2,n_size*2),16);
+                    ++n_offset;
+                    c_val = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                     if( c_val !== 0 ){
                         b_result = true;
                         break;
@@ -2170,12 +2228,13 @@
                 var n_offset = 2;
                 var n_size = 1;
 
-                n_length = parseInt(s_response.substr(n_offset*2,n_size*2),16);
+                n_length = parseInt(s_response.substring(n_offset*2,n_offset*2+n_size*2),16);
                 if( n_length <= 0 ){
                     continue;
                 }
                 
-                s_data = s_response.substr((++n_offset)*2,n_length*2);
+                ++n_offset;
+                s_data = s_response.substring(n_offset*2,n_offset*2+n_length*2);
                 n_data = elpusk.util.get_number_from_little_endian_hex_string(s_data);
             }while(false);
             return n_data;
@@ -2199,6 +2258,31 @@
                 }
 
                 var n_size = _type_system_size.SYS_SIZE_VERSION;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                version = _get_data_field_member_of_response_by_number_array(s_response);
+			} while (false);
+			return version;
+        }
+
+        /**
+         * @private
+         * @function _get_version_structure_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {(null|number[])} version - number 4 array for version data.
+         * <br /> null - processing failure.
+         */
+         function _get_version_structure_from_response(s_response ){
+            var version = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+
+                var n_size = _type_system_size.SYS_SIZE_VERSION_STRUCTURE;
                 if( _get_length_member_of_response(s_response) !== n_size ){
                     continue;
                 }
@@ -3108,6 +3192,31 @@
 
         /**
          * @private
+         * @function _get_ibutton_remove_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {(null|string)} hex string format.
+         * <br /> null - error.
+         */
+         function _get_ibutton_remove_from_response(s_response){
+			var s_data = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_IBUTTON_REMOVE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
          * @function _get_ibutton_prefix_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
          * @returns {(null|string)} hex string format.
@@ -3122,6 +3231,31 @@
                 }
                 
                 var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_PRE;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_ibutton_prefix_remove_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {(null|string)} hex string format.
+         * <br /> null - error.
+         */
+         function _get_ibutton_prefix_remove_from_response(s_response){
+			var s_data = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_PRE_REMOVE;
                 if( _get_length_member_of_response(s_response) !== n_size ){
                     continue;
                 }
@@ -3147,6 +3281,31 @@
                 }
                 
                 var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_POST;
+                if( _get_length_member_of_response(s_response) !== n_size ){
+                    continue;
+                }
+
+                s_data = _get_data_field_member_of_response_by_hex_string(s_response);
+			} while (false);
+			return s_data;
+        }
+
+        /**
+         * @private
+         * @function _get_ibutton_postfix_remove_from_response
+         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @returns {(null|string)} hex string format.
+         * <br /> null - error.
+         */
+         function _get_ibutton_postfix_remove_from_response(s_response){
+			var s_data = null;
+
+			do {
+				if (!_is_success_response(s_response)){
+                    continue;
+                }
+                
+                var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_POST_REMOVE;
                 if( _get_length_member_of_response(s_response) !== n_size ){
                     continue;
                 }
@@ -3504,11 +3663,12 @@
         /**
          * @private
          * @function _get_hid_key_pair_hex_string_from_string
+         * @param {boolean} b_ibutton_remove - true : s_string contains "i-button remove indicator" 
          * @param {string} s_string - "xml tag string"
          * @returns {(null|string)} hex string format.( included length in front. )
          * <br /> null - error.
          */
-        function _get_hid_key_pair_hex_string_from_string(s_string){
+        function _get_hid_key_pair_hex_string_from_string(b_ibutton_remove,s_string){
 
             var s_hex_result = null;
             var b_all_zero = true;
@@ -3522,7 +3682,12 @@
                 s_src = s_src.trim();
     
                 if( s_src.length === 0 ){
-                    s_hex_result = "000000000000000000000000000000";//15 byets 
+                    if(b_ibutton_remove){
+                        s_hex_result = '00'.repeat(41);//41 bytes 
+                    }
+                    else{
+                        s_hex_result = '00'.repeat(15);//15 bytes 
+                    }
                     continue;
                 }
     
@@ -3632,7 +3797,12 @@
                     s_len = "0" + s_len;
                 }
                 if( b_all_zero ){
-                    s_hex_result = "000000000000000000000000000000";//15 bytes
+                    if(b_ibutton_remove){
+                        s_hex_result = '00'.repeat(41);//41 bytes 
+                    }
+                    else{
+                        s_hex_result = '00'.repeat(15);//15 bytes 
+                    }
                 }
                 else{
                     s_hex_result = s_len + s_hex_result;
@@ -3871,6 +4041,18 @@
        function _generate_get_version(queue_s_tx){
             var n_offset = _type_system_offset.SYS_OFFSET_VERSION;
             var n_size = _type_system_size.SYS_SIZE_VERSION;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
+         * @function _generate_get_version_structure
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */
+         function _generate_get_version_structure(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_VERSION_STRUCTURE;
+            var n_size = _type_system_size.SYS_SIZE_VERSION_STRUCTURE;
             return _generate_config_get(queue_s_tx,n_offset,n_size);
         }
 
@@ -4600,6 +4782,42 @@
 
         /**
          * @private
+         * @function _generate_get_ibutton_remove
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */        
+         function _generate_get_ibutton_remove(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_REMOVE;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
+         * @function _generate_get_ibutton_prefix_remove
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */        
+         function _generate_get_ibutton_prefix_remove(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_PRE_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_PRE_REMOVE;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
+         * @function _generate_get_ibutton_postfix_remove
+         * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
+         * @return {boolean} true(success) or false(failure).
+        */        
+        function _generate_get_ibutton_postfix_remove(queue_s_tx){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_POST_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_POST_REMOVE;
+            return _generate_config_get(queue_s_tx,n_offset,n_size);
+        }
+
+        /**
+         * @private
          * @function _generate_get_uart_prefix
          * @param {string[]} queue_s_tx generated request will be saved in this queue( array type ).
          * @return {boolean} true(success) or false(failure).
@@ -5146,6 +5364,45 @@
 
         /**
          * @private
+         * @function _generate_set_ibutton_remove
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {string} s_tag setting data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+         function _generate_set_ibutton_remove(queue_s_tx,s_tag){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_REMOVE;
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_ibutton_prefix_remove
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {string} s_tag setting data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+         function _generate_set_ibutton_prefix_remove(queue_s_tx,s_tag){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_PRE_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_PRE_REMOVE;
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
+        }
+
+        /**
+         * @private
+         * @function _generate_set_ibutton_postfix_remove
+         * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
+         * @param {string} s_tag setting data.
+         * @returns {boolean} true(success) or false(failure).
+         */        
+        function _generate_set_ibutton_postfix_remove(queue_s_tx,s_tag){
+            var n_offset = _type_system_offset.SYS_OFFSET_IBUTTON_G_POST_REMOVE;
+            var n_size = _type_system_size.SYS_SIZE_IBUTTON_G_POST_REMOVE;
+            return _generate_config_set(queue_s_tx,n_offset,n_size,s_tag);
+        }
+
+        /**
+         * @private
          * @function _generate_set_uart_prefix
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
          * @param {string} s_tag setting data.
@@ -5404,6 +5661,74 @@
         }
 
         /**
+         * @private
+         * @function _get_tag_remove_by_symbol
+         * @param {number} n_language language index number 0~10. type is _type_keyboard_language_index.
+         * @param {string} s_len_tag_hex this string is received from device by hex string format.
+         * @returns {string | null} string format of symbol of tag.
+         * <br /> error return null.
+         */
+         function _get_tag_remove_by_symbol(n_language,s_len_tag_hex){
+            var s_symbols = null;
+
+            do{
+                if( typeof n_language !== 'number'){
+                    continue;
+                }
+                if( typeof s_len_tag_hex !== 'string'){
+                    continue;
+                }
+                if( (s_len_tag_hex.length % 2) !== 0){
+                    continue;
+                }
+
+                s_symbols = "";
+
+                var s_one_byte = "";
+                var n_len = 0;
+                var n_tag = [];
+
+                //change hex string -> byte array.
+                for( var i = 0; i<s_len_tag_hex.length; i=i+2 ){
+                    s_one_byte = s_len_tag_hex.substring(i,i+2);
+                    n_tag.push(parseInt(s_one_byte,16));
+                }//end for
+
+                n_len = n_tag.shift();
+                if( n_len === 0 ){
+                    continue;//none tag
+                }
+                if( n_len > _const_max_size_tag_remove_byte ){
+                    n_len = _const_max_size_tag_remove_byte;
+                }
+                n_tag.length = n_len;
+
+                //
+                var c_mod = 0;
+                var c_key = 0;
+                for( var i = 0; i<n_tag.length; i=i+2 ){
+                    if(n_tag[i] === 0 && n_tag[i+1] === 0 ){
+                        continue;
+                    }
+                    if(n_tag[i]===0xff ){
+                        //ascii code format
+                        s_symbols = s_symbols
+                        + "[]["
+                        + elpusk.util.get_ascii_symbol_from_char_code(n_tag[i+1])//String.fromCharCode(n_tag[i+1]);
+                        + "]";
+                        continue;
+                    }
+                    //hid keyboard code.
+                    s_symbols = s_symbols 
+                    + "[" + _get_key_symbol_string_by_hid_modifier_code_number(n_tag[i]) + "]"
+                    + "[" + _get_key_symbol_string_by_hid_key_code_number(n_tag[i+1]) + "]"
+                }//end for i
+
+            }while(false);
+            return s_symbols;
+        }
+
+        /**
          * @class lpu237
          * @classdesc this class support protocol layer for lpu237 magnetic card reader.
          * @constructs elpusk.device.usb.hid.lpu237
@@ -5432,6 +5757,7 @@
             this._s_uid= null;
             this._n_device_function = _type_function.fun_none;
             this._version = [0,0,0,0];
+            this._version_structure = [0,0,0,0];
     
             //device information
             this._b_is_hid_boot = false;
@@ -5474,6 +5800,11 @@
             //i-button
             this._s_prefix_ibutton = null;//you must include the length in front of this array.
             this._s_postfix_ibutton = null;//you must include the length in front of this array.
+
+            this._s_ibutton_remove = null;//you must include the length in front of this array.
+
+            this._s_prefix_ibutton_remove = null;//you must include the length in front of this array.
+            this._s_postfix_ibutton_remove = null;//you must include the length in front of this array.
 
             /*
             //
@@ -5614,6 +5945,27 @@
                 }
 
                 version = this._version;
+            }while(false);
+            return version;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_version_structure
+         * @returns {(null|number[])} 4 number array or null - error
+         */
+         _elpusk.device.usb.hid.lpu237.prototype.get_version_structure = function(){
+            var version = null;
+
+            do{
+                if( !Array.isArray(this._version) ){
+                    continue;
+                }
+                if( this._version_structure.length !== 4 ){
+                    continue;
+                }
+
+                version = this._version_structure;
             }while(false);
             return version;
         }
@@ -5780,6 +6132,15 @@
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_system_version = function(){ 
             return  this._version; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_structure_version
+         * @returns {number[]} 4 number array.
+         */        
+         _elpusk.device.usb.hid.lpu237.prototype.get_structure_version = function(){ 
+            return  this._version_structure; 
         }
 
         /**
@@ -6300,6 +6661,33 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ibutton_remove
+         * @returns {string} hex string or null
+         */        
+         _elpusk.device.usb.hid.lpu237.prototype.get_ibutton_remove = function(){ 
+            return this._s_ibutton_remove; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_prefix_ibutton_remove
+         * @returns {string} hex string or null
+         */        
+         _elpusk.device.usb.hid.lpu237.prototype.get_prefix_ibutton_remove = function(){ 
+            return this._s_prefix_ibutton_remove; 
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_postfix_ibutton_remove
+         * @returns {string} hex string or null
+         */        
+		_elpusk.device.usb.hid.lpu237.prototype.get_postfix_ibutton_remove = function(){ 
+            return this._s_postfix_ibutton_remove; 
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_prefix_uart
          * @returns {string} hex string or null
          */        
@@ -6339,10 +6727,10 @@
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_zeros_ibutton = function(){ 
             if( this._c_blank[2] & 0x02 ){
-                return true;
+                return false;
             }
             else{
-                return false;
+                return true;
             }
         }
 
@@ -6369,6 +6757,21 @@
          */        
 		_elpusk.device.usb.hid.lpu237.prototype.get_enable_addmit_code_stick_ibutton = function(){ 
             if( this._c_blank[2] & 0x08 ){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }        
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_enable_none_ibutton
+         * @returns {boolean} true - the current i-button mode is none mode.
+         * <br /> false - the current i-button mode isn't none mode.(none mode -user defined)
+         */        
+         _elpusk.device.usb.hid.lpu237.prototype.get_enable_none_ibutton = function(){ 
+            if( (this._c_blank[2] & 0x0f)==0x02 ){
                 return true;
             }
             else{
@@ -6440,13 +6843,13 @@
 
             do{
                 var n_index = 2*2;
-                var n_length = parseInt(s_data_field.substr(n_index,2),16);
+                var n_length = parseInt(s_data_field.substring(n_index,n_index+2),16);
                 if(n_length<=0){
                     continue;
                 }
 
                 n_index += 2;
-                s_data = s_data_field.substr(n_index,n_length*2);
+                s_data = s_data_field.substring(n_index,n_index+n_length*2);
 
             }while(false);
             return s_data;
@@ -6495,6 +6898,8 @@
                 switch (n_type) {
                     case _type_generated_tx_type.gt_get_version:
                         s_description = "get version"; break;
+                    case _type_generated_tx_type.gt_get_version_structure:
+                         s_description = "get strcuture version"; break;
                     case _type_generated_tx_type.gt_type_device:
                         s_description = "get device type"; break;
                     case _type_generated_tx_type.gt_type_ibutton:
@@ -6785,6 +7190,15 @@
                         s_description = "get i-button prefix"; break;
                     case _type_generated_tx_type.gt_get_postfix_ibutton:
                         s_description = "get i-button postfix"; break;
+
+                    case _type_generated_tx_type.gt_get_ibutton_remove:
+                        s_description = "get i-button remove"; break;
+    
+                    case _type_generated_tx_type.gt_get_prefix_ibutton_remove:
+                        s_description = "get i-button prefix remove"; break;
+                    case _type_generated_tx_type.gt_get_postfix_ibutton_remove:
+                        s_description = "get i-button postfix remove"; break;
+    
                     case _type_generated_tx_type.gt_get_prefix_uart:
                         s_description = "get uart prefix"; break;
                     case _type_generated_tx_type.gt_get_postfix_uart:
@@ -7053,6 +7467,15 @@
                         s_description = "set i-button prefix"; break;
                     case _type_generated_tx_type.gt_set_postfix_ibutton:
                         s_description = "set i-button postfix"; break;
+
+                    case _type_generated_tx_type.gt_set_ibutton_remove:
+                        s_description = "set i-button remove"; break;
+    
+                    case _type_generated_tx_type.gt_set_prefix_ibutton_remove:
+                        s_description = "set i-button prefix remove"; break;
+                    case _type_generated_tx_type.gt_set_postfix_ibutton_remove:
+                        s_description = "set i-button postfix remove "; break;
+
                     case _type_generated_tx_type.gt_set_prefix_uart:
                         s_description = "set uart prefix"; break;
                     case _type_generated_tx_type.gt_set_postfix_uart:
@@ -7091,6 +7514,9 @@
 
                 if( !_generate_get_version(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_get_version );
+
+                if( !_generate_get_version_structure(this._dequeu_s_tx) ){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_version_structure );
                 
                 if( !_generate_get_device_type(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_type_device );
@@ -7126,14 +7552,14 @@
                 //this._version, 
                 //_b_device_is_standard and _b_device_is_ibutton_only settting by get_system_info.
 				if (this._b_device_is_standard) {
-                    if( _first_version_greater_then_second_version( this._version,[3,6,0,4]) ){
+                    if( _first_version_greater_then_second_version( false,this._version,[3,6,0,4]) ){
                         //i-button support from greater then v3.6.0.4
                         if( !_generate_get_device_ibutton_type(this._dequeu_s_tx) ){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_type_ibutton );
 					}
 				}
 
-				if( _first_version_greater_then_second_version( this._version,[3,6,0,4]) ){
+				if( _first_version_greater_then_second_version( false,this._version,[3,6,0,4]) ){
                     //i-button support from greater then v3.6.0.4
                     if( !_generate_get_uid(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_read_uid );
@@ -7173,7 +7599,7 @@
                 }
                 b_result = false;
 
-                if( _first_version_greater_then_second_version( this._version,[3,0,0,0]) ){
+                if( _first_version_greater_then_second_version( false,this._version,[3,0,0,0]) ){
                     if( !_generate_get_ibutton_prefix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_prefix_ibutton );
                         
@@ -7185,6 +7611,17 @@
                         
                     if( !_generate_get_uart_postfix(this._dequeu_s_tx) ){continue;}
                     this._deque_generated_tx.push( _type_generated_tx_type.gt_get_postfix_uart );
+
+                    if( _first_version_greater_then_second_version( true,this._version_structure,[4,0,0,0]) ){
+                        if( !_generate_get_ibutton_remove(this._dequeu_s_tx) ){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_ibutton_remove );
+
+                        if( !_generate_get_ibutton_prefix_remove(this._dequeu_s_tx) ){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_prefix_ibutton_remove );
+                            
+                        if( !_generate_get_ibutton_postfix_remove(this._dequeu_s_tx) ){continue;}
+                        this._deque_generated_tx.push( _type_generated_tx_type.gt_get_postfix_ibutton_remove );
+                    }
                 }
 
                 if( !_generate_get_blank_4bytes(this._dequeu_s_tx) ){continue;}
@@ -7217,12 +7654,12 @@
 
                 //
                 var b_run_combination = false;
-                if( _first_version_greater_then_second_version( this._version,[5,12,0,0]) ){
+                if( _first_version_greater_then_second_version( false,this._version,[5,12,0,0]) ){
                     b_run_combination = true;//support from ganymede v5.13
                 }
-                if( _first_version_greater_then_second_version( [4,0,0,0],this._version) ){
+                if( _first_version_greater_then_second_version( false,[4,0,0,0],this._version) ){
                     //callisto
-                    if( _first_version_greater_then_second_version( this._version,[3,20,0,0]) ){
+                    if( _first_version_greater_then_second_version( false,this._version,[3,20,0,0]) ){
                         b_run_combination = true;//support from callisto v3.21
                     }
                 }
@@ -7323,7 +7760,7 @@
                 }
 
                 //
-                if( _first_version_greater_then_second_version(this._version,[3,0,0,0])){
+                if( _first_version_greater_then_second_version( false,this._version,[3,0,0,0])){
 
                     // . set iButton Pretag
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton ) >= 0 ){
@@ -7347,6 +7784,26 @@
                     if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_Uart ) >= 0 ){
                         if (!_generate_set_uart_postfix(this._dequeu_s_tx,this._s_postfix_uart )){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.gt_set_postfix_uart );
+                    }
+
+                    if( _first_version_greater_then_second_version( true,this._version,[3,0,0,0])){
+                        // . set iButton remove
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_iButton_Remove ) >= 0 ){
+                            if (!_generate_set_ibutton_remove(this._dequeu_s_tx,this._s_ibutton_remove )){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_ibutton_remove );
+                        }
+
+                        // . set iButton Pretag remove
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Prefix_iButton_Remove ) >= 0 ){
+                            if (!_generate_set_ibutton_prefix_remove(this._dequeu_s_tx,this._s_prefix_ibutton_remove )){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_prefix_ibutton_remove );
+                        }
+
+                        // . set iButton Posttag remove
+                        if( elpusk.util.find_from_set( this._set_change_parameter, _type_change_parameter.cp_Postfix_iButton_Remove ) >= 0 ){
+                            if (!_generate_set_ibutton_postfix_remove(this._dequeu_s_tx,this._s_postfix_ibutton_remove )){continue;}
+                            this._deque_generated_tx.push( _type_generated_tx_type.gt_set_postfix_ibutton_remove );
+                        }
                     }
                 }
 
@@ -7468,12 +7925,12 @@
                 }
 
                 var b_run_combination = false;
-                if( _first_version_greater_then_second_version( this._version,[5,12,0,0]) ){
+                if( _first_version_greater_then_second_version( false,this._version,[5,12,0,0]) ){
                     b_run_combination = true;//support from ganymede v5.13
                 }
-                if( _first_version_greater_then_second_version( [4,0,0,0],this._version) ){
+                if( _first_version_greater_then_second_version( false,[4,0,0,0],this._version) ){
                     //callisto
-                    if( _first_version_greater_then_second_version( this._version,[3,20,0,0]) ){
+                    if( _first_version_greater_then_second_version( false,this._version,[3,20,0,0]) ){
                         b_run_combination = true;//support from callisto v3.21
                     }
                 }
@@ -7783,10 +8240,10 @@
                     if( version === null ){
                         break;
                     }
-                    if( _first_version_greater_then_second_version(version,[1,1,0,0])){
-                        if( _first_version_greater_then_second_version(version,[2,2,0,0])){
+                    if( _first_version_greater_then_second_version( false,version,[1,1,0,0] )){
+                        if( _first_version_greater_then_second_version( false,version,[2,2,0,0] )){
                             this._b_is_hid_boot = true;
-                            if( _first_version_greater_then_second_version(version,[3,3,0,2])){
+                            if( _first_version_greater_then_second_version( false,version,[3,3,0,2] )){
                                 // From FW version 3.4.0.1, Keymapping table was removed from firmware.
                                 // therefor less then equal version 3.3.0.2, Don't call SetKeyMapToDevice() method of CMsrDevice class. 
                                 this._b_removed_key_map_table = true;
@@ -7798,6 +8255,15 @@
                     }
                     //
                     this._version = version;
+                    b_result = true;
+                    break;
+                case _type_generated_tx_type.gt_get_version_structure:
+                    version = _get_version_structure_from_response(s_response);
+                    if( version === null ){
+                        break;
+                    }
+                    //
+                    this._version_structure = version;
                     b_result = true;
                     break;
                 case _type_generated_tx_type.gt_type_device:
@@ -8346,6 +8812,27 @@
                         b_result = true;
                     }
                     break;
+                case _type_generated_tx_type.gt_get_ibutton_remove:
+                    s_value = _get_ibutton_remove_from_response(s_response);
+                    if( s_value !== null ){
+                        this._s_ibutton_remove = s_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_prefix_ibutton_remove:
+                    s_value = _get_ibutton_prefix_remove_from_response(s_response);
+                    if( s_value !== null ){
+                        this._s_prefix_ibutton_remove = s_value;
+                        b_result = true;
+                    }
+                    break;
+                case _type_generated_tx_type.gt_get_postfix_ibutton_remove:
+                    s_value = _get_ibutton_postfix_remove_from_response(s_response);
+                    if( s_value !== null ){
+                        this._s_postfix_ibutton_remove = s_value;
+                        b_result = true;
+                    }
+                    break;
                 case _type_generated_tx_type.gt_get_prefix_uart:
                     s_value = _get_uart_prefix_from_response(s_response);
                     if( s_value !== null ){
@@ -8490,6 +8977,9 @@
                 case _type_generated_tx_type.gt_set_private_postfix32:
                 case _type_generated_tx_type.gt_set_prefix_ibutton:
                 case _type_generated_tx_type.gt_set_postfix_ibutton:
+                case _type_generated_tx_type.gt_set_ibutton_remove:
+                case _type_generated_tx_type.gt_set_prefix_ibutton_remove:
+                case _type_generated_tx_type.gt_set_postfix_ibutton_remove:
                 case _type_generated_tx_type.gt_set_prefix_uart:
                 case _type_generated_tx_type.gt_set_postfix_uart:
                     b_result = _is_success_response(s_response);
@@ -8608,6 +9098,10 @@
             ss.setItem(s_key_p+'_s_prefix_ibutton',JSON.stringify(this._s_prefix_ibutton));
             ss.setItem(s_key_p+'_s_postfix_ibutton',JSON.stringify(this._s_postfix_ibutton));
 
+            ss.setItem(s_key_p+'_s_ibutton_remove',JSON.stringify(this._s_ibutton_remove));
+            ss.setItem(s_key_p+'_s_prefix_ibutton_remove',JSON.stringify(this._s_prefix_ibutton_remove));
+            ss.setItem(s_key_p+'_s_postfix_ibutton_remove',JSON.stringify(this._s_postfix_ibutton_remove));
+
             ss.setItem(s_key_p+'_c_blank',JSON.stringify(this._c_blank));
 
             //rs232
@@ -8652,6 +9146,12 @@
             this._s_private_postfix = JSON.parse(ss.getItem(s_key_p+'_s_private_postfix'));
             this._s_prefix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_prefix_ibutton'));
             this._s_postfix_ibutton = JSON.parse(ss.getItem(s_key_p+'_s_postfix_ibutton'));
+
+            this._s_ibutton_remove = JSON.parse(ss.getItem(s_key_p+'_s_ibutton_remove'));
+
+            this._s_prefix_ibutton_remove = JSON.parse(ss.getItem(s_key_p+'_s_prefix_ibutton_remove'));
+            this._s_postfix_ibutton_remove = JSON.parse(ss.getItem(s_key_p+'_s_postfix_ibutton_remove'));
+
             this._c_blank = JSON.parse(ss.getItem(s_key_p+'_c_blank'));
             this._s_prefix_uart = JSON.parse(ss.getItem(s_key_p+'_s_prefix_uart'));
             this._s_postfix_uart = JSON.parse(ss.getItem(s_key_p+'_s_postfix_uart'));
@@ -8724,6 +9224,11 @@
                         var s_pposttag = [[null,null,null],[null,null,null],[null,null,null]];
                         var s_ipre = null;
                         var s_ipost = null;
+
+                        var s_iremove = null;
+                        var s_ipre_remove = null;
+                        var s_ipost_remove = null;
+
                         var s_upre = null;
                         var s_upost = null;
 
@@ -8884,7 +9389,7 @@
                                 s_attr_name = "prefix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_gpre = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_gpre = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_gpre === null ){
                                         continue;
                                     }
@@ -8893,7 +9398,7 @@
                                 s_attr_name = "postfix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_gpost = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_gpost = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_gpost === null ){
                                         continue;
                                     }
@@ -8913,7 +9418,7 @@
                                     s_attr_name = "prefix";
                                     if( ele.hasAttribute(s_attr_name)){
                                         s_attr = ele.getAttribute(s_attr_name);
-                                        s_ppretag[0][0] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                        s_ppretag[0][0] = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                         if( s_ppretag[0][0] === null ){
                                             continue;
                                         }
@@ -8922,7 +9427,7 @@
                                     s_attr_name = "postfix";
                                     if( ele.hasAttribute(s_attr_name)){
                                         s_attr = ele.getAttribute(s_attr_name);
-                                        s_pposttag[0][0] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                        s_pposttag[0][0] = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                         if( s_pposttag[0][0] === null ){
                                             continue;
                                         }
@@ -9053,7 +9558,7 @@
                                         s_attr_name += String(i);
                                         if( ele.hasAttribute(s_attr_name)){
                                             s_attr = ele.getAttribute(s_attr_name);
-                                            s_ppretag[n_track][i] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                            s_ppretag[n_track][i] = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                             if( s_ppretag[n_track][i] === null ){
                                                 break;//exit for
                                             }
@@ -9063,7 +9568,7 @@
                                         s_attr_name += String(i);
                                         if( ele.hasAttribute(s_attr_name)){
                                             s_attr = ele.getAttribute(s_attr_name);
-                                            s_pposttag[n_track][i] = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                            s_pposttag[n_track][i] = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                             if( s_pposttag[n_track][i] === null ){
                                                 break;//exit for
                                             }
@@ -9085,7 +9590,7 @@
                                 s_attr_name = "prefix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_ipre = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_ipre = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_ipre === null ){
                                         continue;
                                     }
@@ -9094,11 +9599,41 @@
                                 s_attr_name = "postfix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_ipost = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_ipost = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_ipost === null ){
                                         continue;
                                     }
                                 }
+
+                                // remove attribute
+                                s_attr_name = "remove";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_iremove = _get_hid_key_pair_hex_string_from_string(true,s_attr);
+                                    if( s_iremove === null ){
+                                        continue;
+                                    }
+                                }
+
+                                // prefix_remove attribute
+                                s_attr_name = "prefix_remove";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ipre_remove = _get_hid_key_pair_hex_string_from_string(false,s_attr);
+                                    if( s_ipre_remove === null ){
+                                        continue;
+                                    }
+                                }
+                                // postfix_remove attribute
+                                s_attr_name = "postfix_remove";
+                                if( ele.hasAttribute(s_attr_name)){
+                                    s_attr = ele.getAttribute(s_attr_name);
+                                    s_ipost_remove = _get_hid_key_pair_hex_string_from_string(false,s_attr);
+                                    if( s_ipost_remove === null ){
+                                        continue;
+                                    }
+                                }
+
                             }//the end of ibutton element.
 
                             //uart element or rs232
@@ -9110,7 +9645,7 @@
                                 s_attr_name = "prefix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_upre = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_upre = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_upre === null ){
                                         continue;
                                     }
@@ -9119,7 +9654,7 @@
                                 s_attr_name = "postfix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_upost = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_upost = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_upost === null ){
                                         continue;
                                     }
@@ -9134,7 +9669,7 @@
                                 s_attr_name = "prefix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_upre = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_upre = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_upre === null ){
                                         continue;
                                     }
@@ -9143,7 +9678,7 @@
                                 s_attr_name = "postfix";
                                 if( ele.hasAttribute(s_attr_name)){
                                     s_attr = ele.getAttribute(s_attr_name);
-                                    s_upost = _get_hid_key_pair_hex_string_from_string(s_attr);
+                                    s_upost = _get_hid_key_pair_hex_string_from_string(false,s_attr);
                                     if( s_upost === null ){
                                         continue;
                                     }
@@ -9291,6 +9826,27 @@
                                     this._device._s_postfix_ibutton = s_ipost; 
                                 }
                             }
+
+                            if( s_iremove !== null ){
+                                if( !_is_equal_tag( this._device._s_ibutton_remove,s_iremove) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_iButton_Remove );
+                                    this._device._s_ibutton_remove = s_iremove;
+                                }
+                            }
+                            if( s_ipre_remove !== null ){
+                                if( !_is_equal_tag( this._device._s_prefix_ibutton_remove,s_ipre_remove) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_iButton_Remove );
+                                    this._device._s_prefix_ibutton_remove = s_ipre_remove;
+                                }
+                            }
+                            if( s_ipost_remove !== null ){
+                                if( !_is_equal_tag(this._device._s_postfix_ibutton_remove,s_ipost_remove) ){
+                                    elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Postfix_iButton_Remove );
+                                    this._device._s_postfix_ibutton_remove = s_ipost_remove; 
+                                }
+                            }
+
+
                             if( s_upre !== null ){
                                 if( !_is_equal_tag(this._device._s_prefix_uart,s_upre) ){
                                     elpusk.util.insert_to_set ( this._device._set_change_parameter, _type_change_parameter.cp_Prefix_Uart );
@@ -9541,6 +10097,7 @@
                 s_description = s_description + "System name : " + this._s_name + "\n";
 
                 s_description = s_description + "System version : " + _get_version_string(this._version) + "\n";
+                s_description = s_description + "Structure version : " + _get_version_structure_string(this._version_structure) + "\n";
                 s_description = s_description + "System UID : " + this._s_uid + "\n";
 
                 if( this._b_is_hid_boot ){
@@ -9615,13 +10172,13 @@
                 }
 
                 var b_device_version_greater_then_5_18 = false;
-                if( _first_version_greater_then_second_version( this._version,[5,18,0,0]) ){
-                    if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                if( _first_version_greater_then_second_version( false,this._version,[5,18,0,0]) ){
+                    if( _first_version_greater_then_second_version( false,[6,0,0,0],this._version) ){
                         b_device_version_greater_then_5_18 = true;
                     }
                 }
-                if( _first_version_greater_then_second_version( this._version,[5,15,0,0]) ){
-                    if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                if( _first_version_greater_then_second_version( false,this._version,[5,15,0,0]) ){
+                    if( _first_version_greater_then_second_version( false,[6,0,0,0],this._version) ){
                         s_description = s_description + "mmd1100 reset interval : " + _get_mmd1100_reset_interval_string(this._c_blank[1]&0xF0,b_device_version_greater_then_5_18) + "\n";
                     }
                 }
@@ -9631,6 +10188,14 @@
 
                 s_description = s_description + "i-button prefixs : " + this._s_prefix_ibutton + "\n";
                 s_description = s_description + "i-button postfixs : " + this._s_postfix_ibutton + "\n";
+
+                if( _first_version_greater_then_second_version( true,this._version_structure,[4,0,0,0]) ){
+                    
+                    s_description = s_description + "i-button  remove : " + this._s_ibutton_remove + "\n";
+
+                    s_description = s_description + "i-button prefixs remove : " + this._s_prefix_ibutton_remove + "\n";
+                    s_description = s_description + "i-button postfixs remove : " + this._s_postfix_ibutton_remove + "\n";
+                }
 
                 s_description = s_description + "Uart prefixs : " + this._s_prefix_uart + "\n";
                 s_description = s_description + "Uart postfixs : " + this._s_postfix_uart + "\n";
@@ -9735,6 +10300,10 @@
                     ++n_count;
                     as_name[n_count] = "System version";
                     as_value[n_count] = _get_version_string(this._version);
+                    //
+                    ++n_count;
+                    as_name[n_count] = "Structure version";
+                    as_value[n_count] = _get_version_structure_string(this._version_structure);
                     //
                     ++n_count;
                     as_name[n_count] = "System UID";
@@ -9848,13 +10417,13 @@
                     }
                     //
                     var b_device_version_greater_then_5_18 = false;
-                    if( _first_version_greater_then_second_version( this._version,[5,18,0,0]) ){
-                        if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                    if( _first_version_greater_then_second_version( false,this._version,[5,18,0,0]) ){
+                        if( _first_version_greater_then_second_version( false,[6,0,0,0],this._version) ){
                             b_device_version_greater_then_5_18 = true;
                         }
                     }
-                    if( _first_version_greater_then_second_version( this._version,[5,15,0,0]) ){
-                        if( _first_version_greater_then_second_version( [6,0,0,0],this._version) ){
+                    if( _first_version_greater_then_second_version( false,this._version,[5,15,0,0]) ){
+                        if( _first_version_greater_then_second_version( false,[6,0,0,0],this._version) ){
                             ++n_count;
                             as_name[n_count] = "mmd1100 reset interval";
                             as_value[n_count] = _get_mmd1100_reset_interval_string(this._c_blank[1]&0xF0,b_device_version_greater_then_5_18);
@@ -9884,6 +10453,27 @@
                     as_value[n_count] = this._s_postfix_ibutton;
                     as_value[n_count] += "<br/>";
                     as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_ibutton);
+
+                    if( _first_version_greater_then_second_version( true,this._version_structure,[4,0,0,0]) ){
+                        //
+                        ++n_count;
+                        as_name[n_count] = "i-button remove";
+                        as_value[n_count] = this._s_ibutton_remove;
+                        as_value[n_count] += "<br/>";
+                        as_value[n_count] += _get_tag_remove_by_symbol(this._n_language_index,this._s_ibutton_remove);
+                        //
+                        ++n_count;
+                        as_name[n_count] = "i-button prefixs remove";
+                        as_value[n_count] = this._s_prefix_ibutton_remove;
+                        as_value[n_count] += "<br/>";
+                        as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_prefix_ibutton_remove);
+                        //
+                        ++n_count;
+                        as_name[n_count] = "i-button postfixs remove";
+                        as_value[n_count] = this._s_postfix_ibutton_remove;
+                        as_value[n_count] += "<br/>";
+                        as_value[n_count] += _get_tag_by_symbol(this._n_language_index,this._s_postfix_ibutton_remove);
+                    }
                     //
                     ++n_count;
                     as_name[n_count] = "Uart prefixs";
