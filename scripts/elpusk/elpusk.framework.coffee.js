@@ -1,5 +1,5 @@
 /**
- * 2021.07.01
+ * 2025.08.04
  * @license MIT
  * Copyright (c) 2022 Elpusk.Co.,Ltd.
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  * 
  * @author developer 00000006
- * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.12.2
+ * @copyright Elpusk.Co.,Ltd 2025
+ * @version 2.0.0
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -76,6 +76,9 @@
  * 
  * <br />  2021.08.17 - release 1.12.2
  * <br />  : remove -  _elpusk.framework.coffee.get_session_number().
+ * 
+ * <br />  2025.08.04 - release 2.0.0
+ * <br />  : add -  supporting coffee framework second edition.
  *
  * @namespace
  */
@@ -4137,7 +4140,8 @@
     _elpusk.framework.coffee.get_this_library_version = function () {
         //return "1.12.0";
         //return "1.12.1";//at advance_send_data_to_all(), the first parameter is removed.
-        return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
+        //return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
+        return "2.0.0";//supports coffee framework second edition.
     }
 
     /**

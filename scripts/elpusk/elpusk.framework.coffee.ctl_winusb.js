@@ -1,7 +1,7 @@
 /**
- * 2020.10.8
+ * 2023.04.27
  * @license MIT
- * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ * Copyright (c) 2023 Elpusk.Co.,Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,18 @@
  * SOFTWARE.
  * 
  * @author developer 00000006
- * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.3.0
- * @description lpu237 controller of elpusk framework coffee javascript library .
+ * @copyright Elpusk.Co.,Ltd 2023
+ * @version 0.1.0
+ * @description winusb controller of elpusk framework coffee javascript library .
  * <br /> error rules
  * <br /> * coffee framework error : generates promise reject or calls error callback function.
- * <br /> * protocol error(lpu237 device protocol ) : generates promise reject or calls error callback function.
- * <br /> * card reading error : generates promise resolve or calls complete callback function.
- * <br /> * card reading success : generates promise resolve or calls complete callback function.
+ * <br /> * protocol error(winusb device protocol ) : generates promise reject or calls error callback function.
+ * <br /> * rx error : generates promise resolve or calls complete callback function.
+ * <br /> * rx success : generates promise resolve or calls complete callback function.
  * <br /> 
- * <br />  2020.5.14 - release 1.0.
- * <br />  2020.6.01 - release 1.1.
- * <br />            - add : get, set parameters progress callback function.
- * <br />  2020.6.11 - release 1.2
- * <br />            - add : read_card_from_device_with_callback function.
- * <br />            - add : cancel before enable/disable reading.
- * <br />  2020.6.12 - release 1.3
- * <br />            - add : run_bootloader_of_device_with_promise().
- * <br />  2020.10.08 -release 1.4
- *                    - support lpu237 hid bootloader.
- * <br />  2025.08.04 - release 1.5
- *                    - fix missing code.(close_with_promise() - s_rx is array )
+ * <br />  2023.4.27 - starts
  * 
- * @namespace elpusk.framework.coffee.ctl_lpu237
+ * @namespace elpusk.framework.coffee.ctl_winusb
  */
 
 'use strict';
@@ -66,7 +55,7 @@
         console.log("error : use elpusk.framework.coffee before this");
         return;
     }
-    if(_elpusk.framework.coffee.ctl_lpu237){
+    if(_elpusk.framework.coffee.ctl_winusb){
         return;
     }
 
@@ -77,8 +66,7 @@
         ST_UNDEFINED : -1,
         ST_IDLE : 0,
         ST_WAIT_RSP : 1,
-        ST_WAIT_CARD : 2,
-        ST_WAIT_CANCEL : 3
+        ST_WAIT_CANCEL : 2
     };
 
     /**
@@ -145,7 +133,6 @@
             switch(new_status){
                 case _type_status.ST_IDLE :
                 case _type_status.ST_WAIT_RSP :
-                case _type_status.ST_WAIT_CARD :
                 case _type_status.ST_WAIT_CANCEL :
                     break;
                 default:
@@ -154,49 +141,6 @@
 
             _map_status.set(n_device_index,new_status);
         }while(false);
-    }
-
-    /**
-     * @private
-     * @function _gen_get_sysinfo_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target devuce object.
-     * @param {function} cb_complete_sys_info It is called "callback function" when "get system information" is completed successfually. 
-     * @param {function} cb_error_sys_info It is called "callback function" when error is occured.
-     * @return {number} greater then zero - request is delivered to server successfully.
-     * <br /> zero or negative - It is failed that request is delivered.
-     * @description requests "get system information" to server by callback method.
-     */
-    function _gen_get_sysinfo_start_io(server, device,cb_complete_sys_info,cb_error_sys_info) {
-        var n_req = 0;
-        var s_request = null;
-
-        do{
-            device.clear_transaction();
-
-            n_req = device.generate_get_system_information();
-            if( n_req <= 0 ){
-                continue;
-            }
-            s_request = device.get_tx_transaction();
-            if( s_request === null ){
-                n_req = 0;
-                continue;
-            }
-
-            var b_result = server.device_transmit_with_callback(
-                device.get_device_index(),0,0, s_request,
-                cb_complete_sys_info,
-                cb_error_sys_info,
-                true
-                );
-            if( !b_result ){
-                n_req = 0;
-                device.clear_transaction();
-                continue;
-            }
-        }while(false);
-        return n_req;
     }
 
     /**
@@ -371,7 +315,7 @@
      * @param {function} cb_error_run_bootloader It is called "callback function" when error is occured.
      * @return {boolean} true - request is delivered to server successfully.
      * <br /> false - It is failed that request is delivered.
-     * @description requests execute the bootloader of lpu237 device.
+     * @description requests execute the bootloader of winusb device.
      */
     function _gen_run_bootloader_start_io(server, device,cb_complete_run_bootloader,cb_error_run_bootloader){
         var b_result = false;
@@ -505,7 +449,7 @@
     /**
      * @private
      * @function _is_event_rsp_good
-     * @param {object} device lpu237 protocol object.
+     * @param {object} device winusb protocol object.
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description check whether the response of coffee framework is success or not.
      */
@@ -589,7 +533,7 @@
                 if( !b_result ){
                     continue;
                 }
-                _set_status(n_device_index,_type_status.ST_WAIT_CARD);
+                _set_status(n_device_index,_type_status.ST_IDLE);
             }
             else{
                 _notifiy_received(para);
@@ -603,57 +547,7 @@
         elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
         _set_status(n_device_index,_type_status.ST_IDLE);
     }
-    /**
-     * @private
-     * @function _process_event_in_wait_card
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description the sub function of _cb_complete_rsp() in waiting-card-data status.
-     * <br /> process the ocurred event in waiting-card-data status.(card reading case)
-     */
-    function _process_event_in_wait_card(n_device_index,s_rx){
 
-        do{
-            if( _is_event_rsp_cancel(s_rx) ){
-                //event e_rsp_cancel
-                _notifiy_error(elpusk.util.map_of_queue_front(_map_q_para,n_device_index));
-                _set_status(n_device_index,_type_status.ST_WAIT_CANCEL);
-                return;
-            }
-
-            var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
-            if( !para ){
-                continue;
-            }
-            if( !para.device.set_msr_data_from_rx(s_rx) ){
-                continue;
-            }
-            //event e_rsp_card
-            if( para.resolve ){
-                //the end of waiting for promise type
-                para = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);//remove requesst from queue.
-                _set_status(n_device_index,_type_status.ST_IDLE);
-                _notifiy_received(para);
-                return;
-            }
-            _notifiy_received(para);
-            //re-waiting card data for callback type
-            var b_result = para.server.device_receive_with_callback(
-                n_device_index,0,
-                _cb_complete_rsp,
-                _cb_error_frame,
-                true
-            );
-            if( !b_result ){
-                continue;
-            }
-            return;
-        }while(false);
-
-        _notifiy_error_all(n_device_index);
-        elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
-        _set_status(n_device_index,_type_status.ST_IDLE);
-    }
     /**
      * @private
      * @function _process_event_in_wait_cancel
@@ -712,9 +606,6 @@
                     continue;
                 case _type_status.ST_WAIT_RSP :
                     _process_event_in_wait_rsp(n_device_index,s_rx);
-                    continue;
-                case _type_status.ST_WAIT_CARD :
-                    _process_event_in_wait_card(n_device_index,s_rx);
                     continue;
                 case _type_status.ST_WAIT_CANCEL :
                     _process_event_in_wait_cancel(n_device_index,s_rx);
@@ -1001,7 +892,7 @@
      * @private
      * @function _check_server_and_device
      * @param {object} server coffee manager server object
-     * @param {object} device lpu237 protocol object.
+     * @param {object} device winusb protocol object.
      * @returns {boolean} true - server & device object is available.
      * <br /> false - server is invalied or device object is not openned.
      */
@@ -1023,12 +914,12 @@
     };
 
     /**
-     * @constructs elpusk.framework.coffee.ctl_lpu237
+     * @constructs elpusk.framework.coffee.ctl_winusb
      * @param {object} server coffee manager server object.
      * @param {object} device target devuce object.
-     * @description constucture of lpu237 control class.
+     * @description constucture of winusb control class.
     */
-    _elpusk.framework.coffee.ctl_lpu237 = function(server,device,undefined){
+    _elpusk.framework.coffee.ctl_winusb = function(server,device,undefined){
         //private variables
         this._server = server;
         this._device = device;
@@ -1041,8 +932,8 @@
      * @return {string} format - class name( server session number, device path ).
      * @description return the information of instance by string format.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.toString = function(){
-        var s_message = "ctl_lpu237";
+    _elpusk.framework.coffee.ctl_winusb.prototype.toString = function(){
+        var s_message = "ctl_winusb";
         var s_server = "none";
         var s_device = "none";
 
@@ -1061,16 +952,16 @@
      * @function get_server
      * @return {object} return server obejct of this controller.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.get_server = function(){
+    _elpusk.framework.coffee.ctl_winusb.prototype.get_server = function(){
         return this._server;
     };
 
     /**
      * @public
      * @function get_device
-     * @return {object} return lpu237 object of  this controller.
+     * @return {object} return winusb object of  this controller.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.get_device = function(){
+    _elpusk.framework.coffee.ctl_winusb.prototype.get_device = function(){
         return this._device;
     };
 
@@ -1078,12 +969,12 @@
      * @public
      * @function open_with_promise
      * @return {object} return promise object.
-     * @description execute "open device" with server and lpu237 object by construcutor.
+     * @description execute "open device" with server and winusb object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.open_with_promise = function(){
+    _elpusk.framework.coffee.ctl_winusb.prototype.open_with_promise = function(){
         var _server = this._server;
         var _device = this._device;
 
@@ -1134,12 +1025,12 @@
      * @public
      * @function close_with_promise
      * @return {object} return promise object.
-     * @description execute "close device" with server and lpu237 object by construcutor.
+     * @description execute "close device" with server and winusb object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.close_with_promise = function(){
+    _elpusk.framework.coffee.ctl_winusb.prototype.close_with_promise = function(){
         var _server = this._server;
         var _device = this._device;
 
@@ -1160,25 +1051,13 @@
                 }
     
                 _server.device_close(_device.get_device_index()).then(function (s_rx) {
-                    if (Array.isArray(s_rx)){
-                        if( s_rx[0] === "success"){
-                            elpusk.util.map_of_queue_delete(_map_q_para,_device.get_device_index());
-                            _device.closed();
-                            resolve("success");
-                        }
-                        else{
-                            reject(new Error("error"));
-                        }
+                    if( s_rx === "success "){
+                        elpusk.util.map_of_queue_delete(_map_q_para,_device.get_device_index());
+                        _device.closed();
+                        resolve("success");
                     }
                     else{
-                        if( s_rx === "success "){
-                            elpusk.util.map_of_queue_delete(_map_q_para,_device.get_device_index());
-                            _device.closed();
-                            resolve("success");
-                        }
-                        else{
-                            reject(new Error("error"));
-                        }
+                        reject(new Error("error"));
                     }
 
                 }).catch(function (event_error) {
@@ -1196,18 +1075,18 @@
 
     /**
      * @public
-     * @function load_parameter_from_device_with_promise
-     * @param {function} cb_progress this function will be called each stage of "get system information" and "get parameters".
-     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
+     * @function read_from_device_with_promise
+     * @param {function} cb_progress this function will be called rx success or error
+     * <br /> cb_progress prototype is cb_progress( n_device_index, b_result )
      * @return {object} return promise object.
-     * @description execute "get system information" and "get parameters" with server and lpu237 object by construcutor.
+     * @description execute "rx" with server and winusb object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br /> the parameter of promise's reject is Error object.( this object message is "error" string ).
      * <br /> this function process "get system parameters" and "get parameters" requests.
      * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(cb_progress){
+    _elpusk.framework.coffee.ctl_winusb.prototype.read_from_device_with_promise = function(cb_progress){
         var b_error = true;
         var server = this._server;
         var device = this._device;
@@ -1241,7 +1120,7 @@
                 var n_request = 0;
 
                 do{
-                    n_request = _gen_get_sysinfo_start_io( server, device,_cb_complete_sys_info, _cb_error_common);
+                    n_request = _gen_rx_start_io( server, device,_cb_complete_sys_info, _cb_error_common);
                     if( n_request <= 0 ){
                         continue;
                     }
@@ -1267,16 +1146,16 @@
     
     /**
      * @public
-     * @function save_parameter_to_device_with_promise
-     * @param {function} cb_progress this function will be called each stage of "set parameters".
+     * @function write_to_device_with_promise
+     * @param {function} cb_progress this function will be called a writing data.
      * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
      * @return {object} return promise object.
-     * @description execute "set parameters" with server and lpu237 object by construcutor.
+     * @description execute "write" with server and winusb object by construcutor.
      * <br /> the result of proccess will be given promise object type.
      * <br /> Always the parameter of promise's resolve is "success" string.
      * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(cb_progress){
+    _elpusk.framework.coffee.ctl_winusb.prototype.write_to_device_with_promise = function(cb_progress){
         var b_error = true;
         var server = this._server;
         var device = this._device;
@@ -1311,7 +1190,7 @@
                 var n_request = 0;
 
                 do{
-                    n_request = _gen_set_para_start_io( server, device,_cb_complete_set_parameter, _cb_error_common);
+                    n_request = _gen_write_start_io( server, device,_cb_complete_set_parameter, _cb_error_common);
                     if( n_request<=0){
                         continue;
                     }
@@ -1337,88 +1216,20 @@
 
     /**
      * @public
-     * @function run_bootloader_of_device_with_promise
-     * @return {object} return promise object.
-     * @description run bootload of lpu237 device with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-     */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.run_bootloader_of_device_with_promise = function(){
-        var b_error = true;
-        var server = this._server;
-        var device = this._device;
-
-        do{
-            if( !_check_server_and_device(server,device)){
-                continue;
-            }
-
-            if( !elpusk.util.map_of_queue_is_empty(_map_q_para,device.get_device_index()) ){
-                continue;
-            }
-
-            b_error = false;
-        }while(false);
-
-        if( b_error ){
-            return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
-        else{
-            return new Promise(function (resolve, reject) {
-                var n_request = 0;
-
-                do{
-                    n_request = _gen_run_bootloader_start_io( server, device,_cb_complete_run_bootloader, _cb_error_common);
-                    if( n_request<=0){
-                        continue;
-                    }
-
-                    var parameter = {
-                        "server" : server,
-                        "device" : device,
-                        "resolve" : resolve,
-                        "reject" : reject
-                    };
-                    elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
-
-                }while(false);
-                if( n_request<= 0 ){
-                    reject(new Error("error"));
-                }
-            });//the end promise
-        }        
-    };
-
-    /**
-     * @public
-     * @function read_card_from_device_with_callback
-     * @param {boolean} b_read true - reading card.
-     * <br /> false - ignore reading card.
-     * @param {function} cb_read_done called when a card reading is done. or canceled ready for reading.
+     * @function read_from_device_with_callback
+     * @param {function} cb_read_done called when a rx is done. or canceled ready for waiting.
      * @param {function} cb_read_error called when a error is ocurred.
      * @returns {boolean}   true - success processing.
      * <br /> false - error.
-     * @description lpu237's status is changed to "reading card" or "ignore reading card."
-     * If this function is executed with "b_read is true", 
-     * <br /> lpu237 call cb_read_done whenever a card is reading done,
-     * <br /> until error(communincation error or protcol error) is ocurred 
-     * <br /> this function is executed with "b_read is false".
-     * 
+     * @description winusb's status is changed to "waits rx" or "ignore rx."
      * <br /> the result of proccess will be given by callback function.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
+    _elpusk.framework.coffee.ctl_winusb.prototype.read_from_device_with_callback = function(cb_read_done,cb_read_error){
 
         var b_result = false;
         var server = this._server;
         var device = this._device;
         do{
-            if( typeof b_read !== 'boolean' ){
-                continue;
-            }
 
             device.reset_msr_data();
 
@@ -1432,11 +1243,54 @@
                         _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     }
                     break;
-                case _type_status.ST_WAIT_CARD:
-                    if( b_read ){
+                default:
+                    break;
+            }//end switch
+        }while(false);
+
+
+        if( b_result ){
+            var parameter = {
+                "server" : server,
+                "device" : device,
+                "resolve" : null,
+                "reject" : null,
+                "cb_received" : cb_read_done,
+                "cb_error" : cb_read_error
+            };
+            elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+        }
+
+        return b_result;
+    };
+
+    /**
+     * @public
+     * @function write_from_device_with_callback
+     * @param {function} cb_read_done called when tx is done. or canceled ready for tx.
+     * @param {function} cb_read_error called when a error is ocurred.
+     * @returns {boolean}   true - success processing.
+     * <br /> false - error.
+     * @description
+     * <br /> the result of proccess will be given by callback function.
+     */
+    _elpusk.framework.coffee.ctl_winusb.prototype.write_from_device_with_callback = function(cb_read_done,cb_read_error){
+
+        var b_result = false;
+        var server = this._server;
+        var device = this._device;
+        do{
+            device.reset_msr_data();
+
+            switch(_get_status(device.get_device_index())){
+                case _type_status.ST_IDLE:
+                    if( !_check_server_and_device(server,device)){
                         break;
                     }
-                     b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                    b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                    if( b_result ){
+                        _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
+                    }
                     break;
                 default:
                     break;
@@ -1450,7 +1304,6 @@
                 "device" : device,
                 "resolve" : null,
                 "reject" : null,
-                "b_read" : b_read,
                 "cb_received" : cb_read_done,
                 "cb_error" : cb_read_error
             };
@@ -1458,53 +1311,7 @@
         }
 
         return b_result;
-    };
-
-    /**
-     * @public
-     * @function disable_read_card_from_device_with_promise
-     * @return {object} return promise object.
-     * @description disable the waiting read a card.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-     */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.disable_read_card_from_device_with_promise = function(){
-
-        var b_error = true;
-        var server = this._server;
-        var device = this._device;
-
-        do{
-            device.reset_msr_data();
-
-            switch(_get_status(device.get_device_index())){
-                case _type_status.ST_IDLE:
-                    if( !_check_server_and_device(server,device)){
-                        continue;
-                    }
-                    _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
-                    break;
-                case _type_status.ST_WAIT_CARD:
-                    break;
-                default:
-                    continue;
-            }//end switch
-
-            b_error = false;
-        }while(false);
-
-        if( b_error ){
-            return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
-        else{
-            return server.device_cancel(device.get_device_index(),0,0,);
-        } 
     };    
-
     ////////////////////////////////////////////////////////////////////////////
     // the end of function
     window.elpusk = _elpusk;

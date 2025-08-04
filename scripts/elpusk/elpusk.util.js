@@ -512,8 +512,42 @@
             return s_symbol;
         }
 
-        ////////////////////////////////
-        ////////////////////////////////
+        /** 
+         * @public 
+         * @function elpusk.util.is_a_greater_than_equal_b
+         * @param {string} s_a version string.
+         * @param {string} s_b version string.
+         * @returns {boolean} version s_a is greater then equal version s_b.
+         * @description compare version string
+        */                
+        _elpusk.util.is_a_greater_than_equal_b = function(s_a,s_b){
+            // input version format(x.y.z)
+            if (!/^\d+\.\d+\.\d+$/.test(s_a)) {
+                throw new Error("Invalid s_a input version format. Expected format: x.y.z");
+            }
+            if (!/^\d+\.\d+\.\d+$/.test(s_b)) {
+                throw new Error("Invalid s_b input version format. Expected format: x.y.z");
+            }
+
+            // convert string version to intergal version
+            const currentParts = s_b.split('.').map(Number);
+            const inputParts = s_a.split('.').map(Number);
+
+            // compare version
+            for (let i = 0; i < Math.max(currentParts.length, inputParts.length); i++) {
+                const current = currentParts[i] || 0;
+                const input = inputParts[i] || 0;
+                
+                if (current < input) {
+                    return false;
+                } else if (current > input) {
+                    return true;
+                }
+            }//end for
+
+            // case : currentVersion >= inputVersion
+            return true;
+        }
     }//the end of _elpusk.util
 
     // the end of function

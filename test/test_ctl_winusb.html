@@ -1,0 +1,395 @@
+<!--
+/**
+ * @license MIT
+ * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+-->
+
+<!DOCTYPE html>
+
+
+<HTML>
+<HEAD>
+    <meta charset="utf-8" />
+
+    <TITLE>Test of winusb controller class</TITLE>
+    <script src="./include_winusb.js"></script>
+</HEAD>
+<BODY>
+    <script type="text/javascript">
+        //load this project js files
+        document.write('<script src="../scripts/this/gui.js"><\/script>');
+    </script>    
+
+    <!-- fixed message area -->
+    this page supports that winusb controller class.
+    <br />
+    <br />
+
+    <!-- control area -->
+    <input type="button" id="button_clear_message" onclick="_clear_message();" value="clear message" />
+
+    <br />
+    <input type="button" id="button_promise_disconnect_server" onclick="on_button_promise_disconnect_server();" value="disconnect server by promise" />
+    <br />
+    <input type="button" id="button_promise_get_device_list" onclick="on_button_promise_get_device_list();" value="get device list by promise" />
+    <br />
+    <select id="drop_get_device_list">
+    </select>
+    <br />
+    <input type="button" id="button_promise_device_close" onclick="on_button_promise_device_close();" value="close device by promise" />
+    <br />
+
+    <input type="button" id="button_write_with_callback" onclick="on_button_write_with_callback();" value="write with callback." />
+    <br />
+    <input type="button" id="button_read_with_callback" onclick="on_button_read_with_callback();" value="read with callback." />
+    <br />
+
+
+    <p id="p_pre_main">
+        <!-- pre main print area -->
+    </p>
+
+    <p id="p_main">
+        <!-- main print area -->
+    </p>
+
+
+    <script type="text/javascript">
+        /////////////////////////////////////////////////
+        // global variables
+        var n_cnt_write = 0;
+        var n_system_event = 0;
+        var ctl_winusb = null;
+        var array_device_list = [];
+
+        /**
+         * @function _test
+         * @description for debuging, Don't use this.
+         */
+        function _test(){
+            _add_message("p_main"," : test : ");
+            console.log("_test()");
+        }
+
+        /**
+         * @function init
+         * @description load event handler.
+         */
+        function init() {
+            if( typeof Promise === 'undefined'){
+                _add_message("p_main","none promise");
+            }
+            else{
+                _add_message("p_main","ok promise");
+            }
+
+            fun_init();
+            // 
+            console.log("the end of init");
+            _test();          
+        }
+
+        window.addEventListener("load", init, false);
+
+        ///////////////////////////////////////////////////////////
+        // GUI functions
+        function _clear_message() {
+            var parag_main = document.getElementById("p_main");
+            parag_main.style.wordWrap = "break-word";
+            parag_main.style.fontSize = "12px";
+            parag_main.innerHTML ="";
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // callback functions
+
+        /**
+         *  
+         * @function cb_system_event
+         * @description system callback function of coffee framework.
+         */
+        function cb_system_event( s_action_code,s_data_field ){
+            do{
+                if( typeof s_action_code === 'undefined'){
+                    continue;
+                }
+
+                if( s_action_code === "c"){
+                    //removed event
+                    ++n_system_event;
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : removed." + s_data_field );
+                }
+                if( s_action_code === "P"){
+                    //plugged in event
+                    ++n_system_event;
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : plugged in : " + s_data_field );
+                    continue;
+                }
+                if( s_action_code === "C"){
+                    //server is closed by hibernation mode.
+                    ++n_system_event;
+                    _add_message( "p_pre_main","system event [" + n_system_event.toString() + "] : server " + s_data_field );
+                }
+                //
+
+            }while(false);
+        }
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // initial functions
+
+        /**
+         * @function _fun_init_coffee_framework
+         * @description initialize
+         * <br /> initialize coffee framework.
+         * <br /> connects server.
+         * <br /> get device(winusb) list.
+         * <br /> create winusb protocol object.
+         * <br /> create winusb controller.
+         * <br /> server & winusb protocol object connect to controller.
+         * <br /> open winusb device with controller.
+         */
+        function _fun_init_coffee_framework() {
+
+            // initial coffeeframework system callback function.
+            elpusk.framework.coffee.set_system_event_handler(cb_system_event);
+
+            //
+            array_device_list.length = 0;
+
+            var server = elpusk.framework.coffee.get_instance();
+
+            //connect to server
+            server.connect("wss","443").then(
+                //connect success
+                function(s_session_number){
+                    console.log("session : " + s_session_number);
+                    //get device list. filtering winusb, vid 0x134b, pid 0x0214, all winusb interface.
+                    return elpusk.framework.coffee.get_instance().get_device_list("usb#vid_134b&pid_0214");
+                }
+            )
+            .catch(
+                //connect error
+                function(event_error){
+                    console.log("connect : " + event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                //get device list success
+                function(s_rx){
+                    console.log(s_rx);
+                    if( s_rx == null ){
+                        console.log("none device");
+                    }
+                    else if (Array.isArray(s_rx)) {
+                        for (var i = 0; i < s_rx.length; i++) {
+                            array_device_list.push( s_rx[i] );
+                        }
+
+                        if( array_device_list.length > 0 ){
+                            //create protocol object.
+                            //create controller.
+                            //connect server & protocol to controller.
+                            ctl_winusb = new elpusk.framework.coffee.ctl_winusb(
+                                elpusk.framework.coffee.get_instance()
+                                ,new elpusk.device.usb.winusb(array_device_list[0]) 
+                                );
+                            console.log("create device controller : "+ctl_winusb.toString());
+                            return ctl_winusb.open_with_promise();
+                        }
+                    }
+                }
+            )
+            .catch(
+                //get device list error
+                function(event_error){
+                    console.log("get device list : "+event_error);
+                    throw(event_error);
+                }
+            )
+            .then(
+                // device open success
+                function( s_message ){
+                    //s_message is always "success"
+                    var select_dev = document.getElementById("drop_get_device_list");
+                    var option = document.createElement('option');
+                    option.value = ctl_winusb.get_device().get_device_index();
+                    option.text = ctl_winusb.get_device().get_path();
+                    select_dev.add(option, 0);
+
+                    console.log("opened : "+ctl_winusb.get_device().get_device_index());
+                }
+            )
+            .catch(
+                //device open error
+                function(event_error){
+                    console.log("open device : "+event_error);
+                }
+            );
+        }
+
+        /**
+         * @function fun_init
+         * @description initialize system
+         */
+        function fun_init() {
+
+            _fun_init_coffee_framework();
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // button handler
+
+        /**
+         * @function on_button_promise_disconnect_server
+         * @description button handler of id = button_promise_disconnect_server.
+         */
+        function on_button_promise_disconnect_server() {
+            var server = elpusk.framework.coffee.get_instance();
+
+            server.disconnect().then(function (s_session_number) {
+                // server is disconnect here
+                _add_message("p_main","disconnected : session number = " + s_session_number);
+            }).catch(function (event_error) {
+                // error here
+                _add_message("p_main","fail : disconnection : "+ server.get_error_message(event_error));
+            });
+        }
+        /**
+         * @function on_button_promise_device_close
+         * @description button handler of id = button_promise_device_close.
+         */
+        function on_button_promise_device_close() {
+            ctl_winusb.close_with_promise().then(function (s_message) {
+                //s_message always "success".
+                _add_message("p_main","success : close_with_promise");
+            }).catch(function (event_error) {
+                // error here
+                _add_message("p_main","fail : close_with_promise : "+ event_error.message);
+            });            
+        }
+
+        
+        /////////////////////////////////////////////////////////////////////
+        // callback function for write data.
+
+        /**
+         * @function cb_write_done
+         * @parameter {number} n_device_index the index value of device on coffee framework.
+         * <br /> this value is equal to ctl_winusb.get_device().get_device_index()
+         * @parameter {string} s_msg always "success". therefore, you can ignore this.
+         * @description callback function of ctl_winusb.write_to_device_with_callback().
+         * <br /> this function announce that data has been written.
+         * <br /> called by controller.(ctl_winusb)
+         */
+        function cb_write_done( n_device_index, s_msg ){
+            //s_msg always "success"
+            _add_message("p_main","CB : write : "+s_msg);
+        }
+
+        /**
+         * @function cb_write_error
+         * @parameter {number} n_device_index the index value of device on coffee framework.
+         * <br /> this value is equal to ctl_winusb.get_device().get_device_index()
+         * @parameter {object} event_error Event object.
+         * @description error callback function of ctl_winusb.read_card_from_device_with_callback().
+         * <br /> this function announce that a error is occured.
+         * <br /> this error is coffee framework error or protocol error.
+         * <br /> called by controller.(ctl_winusb)
+         */        
+        function cb_write_error( n_device_index,event_error){
+            _add_message("p_main","CB : Error : write : "+ event_error.message);
+        }
+
+        /**
+         * @function on_button_write_with_callback
+         * @description button handler of id = button_write_with_callback.
+         * <br /> write a data to device by callback style.
+         */
+        function on_button_write_with_callback(){
+            if( ctl_winusb.write_to_device_with_callback(true,cb_write_done,cb_write_error) ){
+                _print_message("p_main","write : success.");
+            }
+            else{
+                _print_message("p_main","write : failure.");
+            }
+        }
+
+        /**
+         * @function cb_stop_done
+         * @parameter {number} n_device_index the index value of device on coffee framework.
+         * <br /> this value is equal to ctl_winusb.get_device().get_device_index()
+         * @parameter {string} s_msg always "success". therefore, you can ignore this.
+         * @description callback function of ctl_winusb.read_from_device_with_callback().
+         * <br /> this function announce that device(winusb) send to server a data
+         * <br /> called by controller.(ctl_winusb)
+         */
+        function cb_stop_done( n_device_index,s_msg ){
+            //s_msg always "success"
+            n_cnt_write++;
+            _print_message("p_main",n_cnt_write + " CB : write data");
+
+            //get a track data.
+            var s_data = ctl_winusb.get_device().get_rx_data();
+            if( s_data.length == 0 ){
+                _add_message("p_main","none data");
+            }
+            else{
+                _add_message("p_main",ctl_winusb.get_device().get_rx_data());
+            }
+
+
+            //clear card data of contoller.
+            ctl_winusb.get_device().reset_rx_data();
+        }
+        /**
+         * @function cb_stop_error
+         * @parameter {number} n_device_index the index value of device on coffee framework.
+         * <br /> this value is equal to ctl_winusb.get_device().get_device_index()
+         * @parameter {object} event_error Event object.
+         * @description error callback function of ctl_winusb.read_from_device_with_callback().
+         * <br /> this error is coffee framework error or protocol error.
+         * <br /> called by controller.(ctl_winusb)
+         */        
+        function cb_stop_error(n_device_index,event_error){
+            _add_message("p_main","CB : rx : error : "+ event_error.message);
+        }
+
+        /**
+         * @function on_button_read_with_callback
+         * @description button handler of id = button_read_with_callback.
+         * <br /> get rx data from winusb by callback style
+         */
+        function on_button_read_with_callback(){
+            if( ctl_winusb.read_from_device_with_callback(false,cb_stop_done,cb_stop_error) ){
+                _print_message("p_main","ok : rx.");
+            }
+            else{
+                _print_message("p_main","error : rx.");
+            }
+        }
+
+
+    </script>
+</BODY>
+</HTML>

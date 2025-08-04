@@ -172,6 +172,25 @@
             n_cur++;
             prog.value = n_cur;
         }
+        function _select_test_option() {
+            const promptMessage = "Please select an option:\n1. test - system parameter\n2. test - reading msr";
+            const userInput = window.prompt(promptMessage);
+            
+            if (userInput === null) {
+                return null; // user select cancel.
+            }
+            
+            const normalizedInput = userInput.trim().toLowerCase();
+            if (normalizedInput === "1" || normalizedInput.toLowerCase() === "test - system parameter") {
+                return 1;//"test - system parameter";
+            } else if (normalizedInput === "2" || normalizedInput.toLowerCase() === "test - reading msr") {
+                return 2;//"test - reading msr";
+            } else {
+                alert("Invalid selection. Please choose either '1' or '2'.");
+                return selectOption(); // recursive call
+            }
+        }
+
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,12 +280,28 @@
                         }
 
                         if( array_device_list.length > 0 ){
+                            var n_index_path  = 0; 
+                            lib_cur = elpusk.framework.coffee.get_this_library_version();
+                            if(elpusk.util.is_a_greater_than_equal_b(lib_cur,"2.0.0") ){
+                                //second edition
+                                const sel_test = _select_test_option();
+                                if(sel_test){
+                                    if(sel_test == 2){
+                                        for( var d=0; d<array_device_list.length; d++ ){
+                                            if(array_device_list[d].endsWith("msr")){
+                                                n_index_path = d;
+                                                break;
+                                            }
+                                        }//end for
+                                    }
+                                }
+                            }
                             //create protocol object.
                             //create controller.
                             //connect server & protocol to controller.
                             ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(
                                 elpusk.framework.coffee.get_instance()
-                                ,new elpusk.device.usb.hid.lpu237(array_device_list[0]) 
+                                ,new elpusk.device.usb.hid.lpu237(array_device_list[n_index_path]) 
                                 );
                             console.log("create device controller : "+ctl_lpu237.toString());
                             return ctl_lpu237.open_with_promise();
