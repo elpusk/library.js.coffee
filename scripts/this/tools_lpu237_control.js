@@ -411,9 +411,14 @@ function fun_load_system_parameters(){
 
     tools_dom_remove_connected_device_page();
 
+    const startTime = performance.now(); // Capture start time
+
     g_ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+        const endTime = performance.now(); // Capture end time
+        const duration = (endTime - startTime).toFixed(2); // Calculate duration in milliseconds
+
         tools_dom_add_connected_device_page(g_ctl_lpu237);
-        document.getElementById("id_lable_progress_page_device").textContent = "complete loading system parameters : ";
+        document.getElementById("id_lable_progress_page_device").textContent = `complete loading system parameters (${duration}mmsec) : `;
     }).catch(
         function (event_error) {
         // error here
