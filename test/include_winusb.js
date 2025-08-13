@@ -24,16 +24,37 @@
 /**
  * If this browser do not support future, load future library.
  */
+(function () {
+    function loadScript(src, callback) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = callback || function () {};
+        document.head.appendChild(script);
+    }
 
-if (typeof Promise === "undefined") {
-    document.write('<script src="../scripts/bluebirdjs/bluebird.core.min.js"><\/script>');
-}
-//load elpusk js library
-document.write('<script src="../scripts/elpusk/elpusk.util.js"><\/script>');
+    function loadElpuskScripts() {
+        var scripts = [
+            "../scripts/elpusk/elpusk.util.js", // additional from include.js
+            "../scripts/elpusk/elpusk.framework.coffee.js",
+            "../scripts/elpusk/elpusk.device.js",
+            "../scripts/elpusk/elpusk.device.usb.js",
+            //"../scripts/elpusk/elpusk.device.usb.hid.js",
+            "../scripts/elpusk/elpusk.device.usb.winusb.js", // additional from include.js
+            "../scripts/elpusk/elpusk.framework.coffee.ctl_winusb.js" // additional from include.js
+        ];
 
-document.write('<script src="../scripts/elpusk/elpusk.framework.coffee.js"><\/script>');
-document.write('<script src="../scripts/elpusk/elpusk.device.js"><\/script>');
-document.write('<script src="../scripts/elpusk/elpusk.device.usb.js"><\/script>');
-document.write('<script src="../scripts/elpusk/elpusk.device.usb.winusb.js"><\/script>');
-document.write('<script src="../scripts/elpusk/elpusk.framework.coffee.ctl_winusb.js"><\/script>');
+        // loading by order.
+        (function loadNext(index) {
+            if (index >= scripts.length) return;
+            loadScript(scripts[index], function () {
+                loadNext(index + 1);
+            });
+        })(0);
+    }
 
+    if (typeof Promise === "undefined") {
+        loadScript("../scripts/bluebirdjs/bluebird.core.min.js", loadElpuskScripts);
+    } else {
+        loadElpuskScripts();
+    }
+})();

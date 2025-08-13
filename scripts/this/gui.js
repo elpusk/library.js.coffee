@@ -1,13 +1,15 @@
 function _print_message(s_id,Message)
 {
     var parag_main = document.getElementById(s_id);
-    parag_main.style.wordWrap = "break-word";
+    parag_main.style.overflowWrap = "break-word"; // standard
+    parag_main.style.wordWrap = "break-word"; // old 
     parag_main.style.fontSize = "12px";
     parag_main.innerHTML = Message + "<br />";
 }
 function _add_message(s_id,Message) {
     var parag_main = document.getElementById(s_id);
-    parag_main.style.wordWrap = "break-word";
+    parag_main.style.overflowWrap = "break-word"; // standard
+    parag_main.style.wordWrap = "break-word"; //old
     parag_main.style.fontSize = "12px";
     parag_main.innerHTML += (Message + "<br />");
 }

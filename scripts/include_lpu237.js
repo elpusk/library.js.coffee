@@ -25,34 +25,40 @@
  * If this browser do not support future, load future library.
  */
 
-(function() {
+(function () {
     function loadScript(src, callback) {
         var script = document.createElement('script');
         script.src = src;
-        script.onload = callback || function() {};
+        script.onload = callback || function () {};
         document.head.appendChild(script);
     }
 
+    function loadElpuskScripts() {
+        var scripts = [
+            "../scripts/elpusk/elpusk.util.js", // additional from include.js
+            "../scripts/elpusk/elpusk.util.keyboard.const.js", // additional from include.js
+            "../scripts/elpusk/elpusk.util.keyboard.map.js", // additional from include.js
+            "../scripts/elpusk/elpusk.framework.coffee.js",
+            "../scripts/elpusk/elpusk.device.js",
+            "../scripts/elpusk/elpusk.device.usb.js",
+            "../scripts/elpusk/elpusk.device.usb.hid.js",
+            "../scripts/elpusk/elpusk.device.usb.hid.lpu237.js", // additional from include.js
+            "../scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js" // additional from include.js
+        ];
+
+        // loading by order.
+        (function loadNext(index) {
+            if (index >= scripts.length) return;
+            loadScript(scripts[index], function () {
+                loadNext(index + 1);
+            });
+        })(0);
+    }
+
     if (typeof Promise === "undefined") {
-        // load Promise polyfill
-        loadScript("../scripts/bluebirdjs/bluebird.core.min.js", function() {
-            // load elpusk script
-            loadScript("../scripts/elpusk/elpusk.framework.coffee.js", function() {
-                loadScript("../scripts/elpusk/elpusk.device.js", function() {
-                    loadScript("../scripts/elpusk/elpusk.device.usb.js", function() {
-                        loadScript("../scripts/elpusk/elpusk.device.usb.hid.js");
-                    });
-                });
-            });
-        });
+        loadScript("../scripts/bluebirdjs/bluebird.core.min.js", loadElpuskScripts);
     } else {
-        // Supported Promise. ignore polyfill
-        loadScript("../scripts/elpusk/elpusk.framework.coffee.js", function() {
-            loadScript("../scripts/elpusk/elpusk.device.js", function() {
-                loadScript("../scripts/elpusk/elpusk.device.usb.js", function() {
-                    loadScript("../scripts/elpusk/elpusk.device.usb.hid.js");
-                });
-            });
-        });
+        loadElpuskScripts();
     }
 })();
+
