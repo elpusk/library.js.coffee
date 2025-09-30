@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- lpu237 magnetic card reader default setting values -->
+
+<!-- the defined values of attribute
+=====================================================================================================================================================
+tag	:	attribute	:	values
+=====================================================================================================================================================
+common	:	interface	: "usb_kb" , "usb_hid" or "rs232"
+common	:	buzzer		: "on" , "off" or frequency number 1000 ~ 30000( unit Hz )
+common	:	language	: "usa_english" , "spanish", "danish", "french", "german", "italian", "norwegian", "swedish", "hebrew" or "turkey"
+common	:	iso1		: "enable" or "disable"
+common	:	iso2		: "enable" or "disable"	
+common	:	iso3		: "enable" or "disable"
+common	:	condition	: "and" or "or"( and - if all track are not error,global pro/postfix will be sent. )
+common	:	indication	: "and" or "or"( and - When all track are not a error, reader indicate success-processing.)=
+common :	direction:  : "bidirectional","forward" or "backward"
+common	:	ibutton		: "zeros", "f12", "zeros7" or "addimat"
+common	:	mmd1100_reset_interval : "default", "disable", "0"(default), "10, "20, ... "240"(disable), 0~240, multiple of 16
+common	:	track_order	: "123", "132", "213", "231", "312", "321" ( MSR track order , ex : "123" - the first data is 1 track, the second data is 2 track, the third data is 3 track)
+=====================================================================================================================================================
+global	:	prefix		: pair[][], the first [] - modifier, the second [] - keycode of USB HID keybaord or the symbol of keycode.
+global	:	postfix		: the available modifier [] - none, [s] - press left-shift key, [a] - press left-alt key, [c] - press left-ctrl key
+=====================================================================================================================================================
+iso2	:	prefix		: the available symbol of key code.
+iso2	:	postfix		: [f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[esc],[space],[tab],[q],[w],[e],[r],[t],[y],[u]
+=====================================================================================================================================================
+iso3	:	prefix		: [i],[o],[p],[[],[]],[\],[del],[z],[x],[c],[v],[b],[n],[m],[,],[.],[/],[`],[1],[2],[3],[4],[5],[6],[7],[8],[9],[0]
+iso3	:	postfix		: [-],[=],[bs],[a],[s],[d],[f],[g],[h],[j],[k],[l],[;],['],[enter]
+=======
+iso1	:	combination	: the number of combination.(1~3)
+
+iso1	:	max_size0		: the maximun size of combination index 0 for iso1 track.
+iso1	:	max_size1		: the maximun size of combination index 1 for iso1 track.
+iso1	:	max_size2		: the maximun size of combination index 2 for iso1 track.
+
+iso1	:	bit_size0		: the data bit size of combination index 0 for iso1 track.(1~8)
+iso1	:	bit_size1		: the data bit size of combination index 1 for iso1 track.(1~8)
+iso1	:	bit_size2		: the data bit size of combination index 2 for iso1 track.(1~8)
+
+iso1	:	data_mask0	: the data mask of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	data_mask1	: the data mask of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	data_mask2	: the data mask of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	use_parity0	: wether or not use parity bit of combination index 0 for iso1 track.( "enable" or "disable" )
+iso1	:	use_parity1	: wether or not use parity bit of combination index 1 for iso1 track.
+iso1	:	use_parity2	: wether or not use parity bit of combination index 2 for iso1 track.
+
+iso1	:	parity_type0	: the parity type of combination index 0 for iso1 track.( "odd" or "even" )
+iso1	:	parity_type1	: the parity type of combination index 1 for iso1 track.
+iso1	:	parity_type2	: the parity type of combination index 2 for iso1 track.
+
+iso1	:	stxl0		: the start sentinel pattern of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	stxl1		: the start sentinel pattern of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	stxl2		: the start sentinel pattern of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	etxl0		: the end sentinel pattern of combination index 0 for iso1 track.( 1 bytes hex-format : use lower case. )
+iso1	:	etxl1		: the end sentinel pattern of combination index 1 for iso1 track.( ex : 0xfe )
+iso1	:	etxl2		: the end sentinel pattern of combination index 2 for iso1 track.( left(high) arrangement )
+
+iso1	:	use_error_correct0	:  wether or not use error correction method of combination index 0 for iso1 track.( "enable" or "disable" )
+iso1	:	use_error_correct1	:  wether or not use error correction method of combination index 1 for iso1 track.
+iso1	:	use_error_correct2	:  wether or not use error correction method of combination index 2 for iso1 track.
+
+iso1	:	error_correct_type0	:  the used error correction method of combination index 0 for iso1 track.( "lrc" - LRC method or )
+iso1	:	error_correct_type1	:  the used error correction method of combination index 1 for iso1 track.( "invlrc" - inversion LRC method or )
+iso1	:	error_correct_type2	:  the used error correction method of combination index 2 for iso1 track.( "crc" - CRC method)
+
+iso1	:	add_value0	:  For converting to ASCII code, the value of combination index 0 for iso1 track.( number 0~255 )
+iso1	:	add_value1	:  For converting to ASCII code, the value of combination index 1 for iso1 track.
+iso1	:	add_value2	:  For converting to ASCII code, the value of combination index 2 for iso1 track.
+
+// attribute "prefix" & "postfix" are old style. Don't use in new project.
+iso1	:	prefix		: [sa] - press left-shift & alt key, [sc] - press left-shift & ctrl key, [ac] - press left-alt & ctrl key
+iso1	:	postfix		: [sac] - press left-shift & alt & ctrl key.
+
+iso1	:	prefix0		: the combination index 0 for iso1 track. equal to "prefix" attribute. "prefix0" will override "prefix" attribute.
+iso1	:	prefix1		: the combination index 1 for iso1 track. format is equal to "prefix" attribute.
+iso1	:	prefix2		: the combination index 2 for iso1 track. format is equal to "prefix" attribute.
+
+iso1	:	postfix0	: the combination index 0 for iso1 track. equal to "postfix" attribute. "postfix0" will override "postfix" attribute.
+iso1	:	postfix1	: the combination index 1 for iso1 track. format is equal to "postfix" attribute.
+iso1	:	postfix2	: the combination index 2 for iso1 track. format is equal to "postfix" attribute.
+
+=====================================================================================================================================================
+iso2	:	combination	: the number of combination.(1~3)
+
+iso2	:	max_size0		: the maximun size of combination index 0 for iso2 track.
+iso2	:	max_size1		: the maximun size of combination index 1 for iso2 track.
+iso2	:	max_size2		: the maximun size of combination index 2 for iso2 track.
+
+iso2	:	bit_size0		: the data bit size of combination index 0 for iso2 track.(1~8)
+iso2	:	bit_size1		: the data bit size of combination index 1 for iso2 track.(1~8)
+iso2	:	bit_size2		: the data bit size of combination index 2 for iso2 track.(1~8)
+
+iso2	:	data_mask0	: the data mask of combination index 0 for iso2 track.( 1 bytes hex-format : use lower case. )
+iso2	:	data_mask1	: the data mask of combination index 1 for iso2 track.( ex : 0xfe )
+iso2	:	data_mask2	: the data mask of combination index 2 for iso2 track.( left(high) arrangement )
+
+iso2	:	use_parity0	: wether or not use parity bit of combination index 0 for iso2 track.( "enable" or "disable" )
+iso2	:	use_parity1	: wether or not use parity bit of combination index 1 for iso2 track.
+iso2	:	use_parity2	: wether or not use parity bit of combination index 2 for iso2 track.
+
+iso2	:	parity_type0	: the parity type of combination index 0 for iso2 track.( "odd" or "even" )
+iso2	:	parity_type1	: the parity type of combination index 1 for iso2 track.
+iso2	:	parity_type2	: the parity type of combination index 2 for iso2 track.
+
+iso2	:	stxl0		: the start sentinel pattern of combination index 0 for iso2 track.( 1 bytes hex-format : use lower case. )
+iso2	:	stxl1		: the start sentinel pattern of combination index 1 for iso2 track.( ex : 0xfe )
+iso2	:	stxl2		: the start sentinel pattern of combination index 2 for iso2 track.( left(high) arrangement )
+
+iso2	:	etxl0		: the end sentinel pattern of combination index 0 for iso2 track.( 1 bytes hex-format : use lower case. )
+iso2	:	etxl1		: the end sentinel pattern of combination index 1 for iso2 track.( ex : 0xfe )
+iso2	:	etxl2		: the end sentinel pattern of combination index 2 for iso2 track.( left(high) arrangement )
+
+iso2	:	use_error_correct0	:  wether or not use error correction method of combination index 0 for iso2 track.( "enable" or "disable" )
+iso2	:	use_error_correct1	:  wether or not use error correction method of combination index 1 for iso2 track.
+iso2	:	use_error_correct2	:  wether or not use error correction method of combination index 2 for iso2 track.
+
+iso2	:	error_correct_type0	:  the used error correction method of combination index 0 for iso2 track.( "lrc" - LRC method or )
+iso2	:	error_correct_type1	:  the used error correction method of combination index 1 for iso2 track.( "invlrc" - inversion LRC method or )
+iso2	:	error_correct_type2	:  the used error correction method of combination index 2 for iso2 track.( "crc" - CRC method)
+
+iso2	:	add_value0	:  For converting to ASCII code, the value of combination index 0 for iso2 track.( number 0~255 )
+iso2	:	add_value1	:  For converting to ASCII code, the value of combination index 1 for iso2 track.
+iso2	:	add_value2	:  For converting to ASCII code, the value of combination index 2 for iso2 track.
+
+// attribute "prefix" & "postfix" are old style. Don't use in new project.
+iso2	:	prefix		: the available symbol of key code.
+iso2	:	postfix		: [f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[esc],[space],[tab],[q],[w],[e],[r],[t],[y],[u]
+
+iso2	:	prefix0		: the combination index 0 for iso2 track. equal to "prefix" attribute. "prefix0" will override "prefix" attribute.
+iso2	:	prefix1		: the combination index 1 for iso2 track. format is equal to "prefix" attribute.
+iso2	:	prefix2		: the combination index 2 for iso2 track. format is equal to "prefix" attribute.
+
+iso2	:	postfix0	: the combination index 0 for iso2 track. equal to "postfix" attribute. "postfix0" will override "postfix" attribute.
+iso2	:	postfix1	: the combination index 1 for iso2 track. format is equal to "postfix" attribute.
+iso2	:	postfix2	: the combination index 2 for iso2 track. format is equal to "postfix" attribute.
+
+=====================================================================================================================================================
+iso3	:	combination	: the number of combination.(1~3)
+
+iso3	:	max_size0		: the maximun size of combination index 0 for iso3 track.
+iso3	:	max_size1		: the maximun size of combination index 1 for iso3 track.
+iso3	:	max_size2		: the maximun size of combination index 2 for iso3 track.
+
+iso3	:	bit_size0		: the data bit size of combination index 0 for iso3 track.(1~8)
+iso3	:	bit_size1		: the data bit size of combination index 1 for iso3 track.(1~8)
+iso3	:	bit_size2		: the data bit size of combination index 2 for iso3 track.(1~8)
+
+iso3	:	data_mask0	: the data mask of combination index 0 for iso3 track.( 1 bytes hex-format : use lower case. )
+iso3	:	data_mask1	: the data mask of combination index 1 for iso3 track.( ex : 0xfe )
+iso3	:	data_mask2	: the data mask of combination index 2 for iso3 track.( left(high) arrangement )
+
+iso3	:	use_parity0	: wether or not use parity bit of combination index 0 for iso3 track.( "enable" or "disable" )
+iso3	:	use_parity1	: wether or not use parity bit of combination index 1 for iso3 track.
+iso3	:	use_parity2	: wether or not use parity bit of combination index 2 for iso3 track.
+
+iso3	:	parity_type0	: the parity type of combination index 0 for iso3 track.( "odd" or "even" )
+iso3	:	parity_type1	: the parity type of combination index 1 for iso3 track.
+iso3	:	parity_type2	: the parity type of combination index 2 for iso3 track.
+
+iso3	:	stxl0		: the start sentinel pattern of combination index 0 for iso3 track.( 1 bytes hex-format : use lower case. )
+iso3	:	stxl1		: the start sentinel pattern of combination index 1 for iso3 track.( ex : 0xfe )
+iso3	:	stxl2		: the start sentinel pattern of combination index 2 for iso3 track.( left(high) arrangement )
+
+iso3	:	etxl0		: the end sentinel pattern of combination index 0 for iso3 track.( 1 bytes hex-format : use lower case. )
+iso3	:	etxl1		: the end sentinel pattern of combination index 1 for iso3 track.( ex : 0xfe )
+iso3	:	etxl2		: the end sentinel pattern of combination index 2 for iso3 track.( left(high) arrangement )
+
+iso3	:	use_error_correct0	:  wether or not use error correction method of combination index 0 for iso3 track.( "enable" or "disable" )
+iso3	:	use_error_correct1	:  wether or not use error correction method of combination index 1 for iso3 track.
+iso3	:	use_error_correct2	:  wether or not use error correction method of combination index 2 for iso3 track.
+
+iso3	:	error_correct_type0	:  the used error correction method of combination index 0 for iso3 track.( "lrc" - LRC method or )
+iso3	:	error_correct_type1	:  the used error correction method of combination index 1 for iso3 track.( "invlrc" - inversion LRC method or )
+iso3	:	error_correct_type2	:  the used error correction method of combination index 2 for iso3 track.( "crc" - CRC method)
+
+iso3	:	add_value0	:  For converting to ASCII code, the value of combination index 0 for iso3 track.( number 0~255 )
+iso3	:	add_value1	:  For converting to ASCII code, the value of combination index 1 for iso3 track.
+iso3	:	add_value2	:  For converting to ASCII code, the value of combination index 2 for iso3 track.
+
+// attribute "prefix" & "postfix" are old style. Don't use in new project.
+iso3	:	prefix		: [i],[o],[p],[[],[]],[\],[del],[z],[x],[c],[v],[b],[n],[m],[,],[.],[/],[`],[1],[2],[3],[4],[5],[6],[7],[8],[9],[0]
+iso3	:	postfix		: [-],[=],[bs],[a],[s],[d],[f],[g],[h],[j],[k],[l],[;],['],[enter]
+
+iso3	:	prefix0		: the combination index 0 for iso3 track. equal to "prefix" attribute. "prefix0" will override "prefix" attribute.
+iso3	:	prefix1		: the combination index 1 for iso3 track. format is equal to "prefix" attribute.
+iso3	:	prefix2		: the combination index 2 for iso3 track. format is equal to "prefix" attribute.
+
+iso3	:	postfix0	: the combination index 0 for iso3 track. equal to "postfix" attribute. "postfix0" will override "postfix" attribute.
+iso3	:	postfix1	: the combination index 1 for iso3 track. format is equal to "postfix" attribute.
+iso3	:	postfix2	: the combination index 2 for iso3 track. format is equal to "postfix" attribute.
+
+=====================================================================================================================================================
+ibutton	:	prefix		: the keycode of USB HID keybaord must be formed to hex.( 0x..)  ex) [][0x2c] - press & release space key.
+ibutton	:	postfix		: hex-format : use lower case.
+=====================================================================================================================================================
+ -->
+
+
+<lpu237>
+	<common
+		interface	="usb_kb"
+	/>
+</lpu237>	
