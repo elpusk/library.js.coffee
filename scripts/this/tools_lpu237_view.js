@@ -65,12 +65,14 @@ function tools_dom_add_connected_device_page(_ctl_lpu237){
     _print_message("id_iso3",_ctl_lpu237.get_device().get_string_html_table("iso3"));
 
     _tools_dom_adjust_page_size(true);
-    _tools_dom_button_status(true);
+
+    var s_type = _ctl_lpu237.get_device().get_type_string();
+    _tools_dom_button_status(true,s_type);
 }
 
 function tools_dom_remove_connected_device_page(){
 
-    _tools_dom_button_status(false);
+    _tools_dom_button_status(false,'');
 
     _print_message("id_system","Please connects a device.");
     _print_message("id_iso1","Please connects a device.");
@@ -211,28 +213,41 @@ function tools_dom_update_device_list_with_promise( _array_device_list ){
     );
 }
 
-function _tools_dom_button_status( b_connected ){
+function _tools_dom_button_status( b_connected, s_connected_device_type ){
     do{
+        s_connected_device_type = s_connected_device_type || '';
+
         if( typeof b_connected !== "boolean"){
             continue;
         }
 
         if( b_connected ){
-            document.getElementById("id_file_fw_select_updating").disabled = false;
-            document.getElementById("id_file_select_setting").disabled = false;
-            document.getElementById("id_button_reload_parameters").disabled = false;
-            //document.getElementById("id_button_enable_read").disabled = false;
-            //document.getElementById("id_button_disable_read").disabled = false;
             document.getElementById("id_button_connect").disabled = true;
+
+            if(s_connected_device_type === "compositive_msr"){
+                document.getElementById("id_file_fw_select_updating").disabled = true;
+                document.getElementById("id_file_select_setting").disabled = true;
+                document.getElementById("id_button_reload_parameters").disabled = true;
+                document.getElementById("id_button_enable_read").disabled = false;
+                document.getElementById("id_button_disable_read").disabled = false;
+            }
+            else if(s_connected_device_type === "primitive"){
+                document.getElementById("id_file_fw_select_updating").disabled = false;
+                document.getElementById("id_file_select_setting").disabled = false;
+                document.getElementById("id_button_reload_parameters").disabled = false;
+                document.getElementById("id_button_enable_read").disabled = true;
+                document.getElementById("id_button_disable_read").disabled = true;
+            }
             continue;
         }
         //disconnected
         document.getElementById("id_file_fw_select_updating").disabled = true;
         document.getElementById("id_file_select_setting").disabled = true;
         document.getElementById("id_button_reload_parameters").disabled = true;
-        //document.getElementById("id_button_enable_read").disabled = true;
-        //document.getElementById("id_button_disable_read").disabled = true;
         document.getElementById("id_button_connect").disabled = false;
+        document.getElementById("id_button_enable_read").disabled = true;
+        document.getElementById("id_button_disable_read").disabled = true;
+        
 
     }while(false);
 }

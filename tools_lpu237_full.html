@@ -129,7 +129,7 @@ body {font-family: "Lato", sans-serif;}
 
   <br />
   <br />
-  <b>* Only lpu-207 and lpu208</b>
+  <b>* Only lpu-207 ,lpu208 and lpu237</b>
   <br />
   <label id = "id_lable_progress_fw_update" for="id_progress_fw_update">updating firmware of system : </label>
   <progress id="id_progress_fw_update" value="0" max="100"></progress>
@@ -137,6 +137,10 @@ body {font-family: "Lato", sans-serif;}
   <label for="id_file_fw_select_updating">the rom file : </label>
   <input type="file" id="id_file_fw_select_updating" value="select" accept=".rom" disabled placeholder="select a rom file"/>
   <br>
+  
+  <input type="checkbox" id="id_checkbox_display_updater_ui" unchecked>
+  <label for="id_checkbox_display_updater_ui">If this is checked, display fw-updater program independently. </label>
+  <br />
   <input type="checkbox" id="id_checkbox_auto_remove_fw" unchecked>
   <label for="id_checkbox_auto_remove_fw">If the temp-rom file of session is existed, remove it. </label>
 

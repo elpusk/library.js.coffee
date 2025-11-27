@@ -113,7 +113,13 @@ function _cb_progress_fw_copy( b_result , n_progress , n_fw_size, s_message){
         //
         if( n_progress > 0 && n_progress === n_fw_size ){
             //the end of fw copy.
-            _fun_firmware_set_parameter_with_native_dialog();
+            var checkbox_display_updater_ui = document.getElementById("id_checkbox_display_updater_ui");
+            if( checkbox_display_updater_ui.checked ){
+                _fun_firmware_set_parameter_with_native_dialog();
+            }
+            else{
+                _fun_firmware_set_parameter_without_native_dialog();
+            }
         } 
     }while(false);
 }   
@@ -491,12 +497,33 @@ function _fun_firmware_set_parameter_without_native_dialog(){
                 continue;
             }
             _add_message("id_p_page_device","device_update_set_parameter success : _cf_bl_progress_");
-
-            _fun_firmware_update();//start update.
+            return elpusk.framework.coffee.get_instance().device_update_set_parameter( g_n_opened_device_index,"_cf_bl_window_","false");
         }while(false);
     }).catch(function (event_error) {
         // error here
         _add_message("id_p_page_device","fail : device_update_set_parameter _cf_bl_progress_ : "+ server.get_error_message(event_error));
+        throw(event_error);
+    })
+    .then(function (s_rx) {
+        do{
+            if (!Array.isArray(s_rx)) {
+                _add_message("id_p_page_device","error reponse : " + s_rx);
+                continue;
+            }
+            if (s_rx === null) {
+                _add_message("id_p_page_device","invalied response");
+                continue;
+            }
+            else if( s_rx != "success" ){
+                _add_message("id_p_page_device","device_update_set_parameter failure");
+                continue;
+            }
+            _add_message("id_p_page_device","device_update_set_parameter success : _cf_bl_window_");
+            _fun_firmware_update();//start update.
+        }while(false);
+    }).catch(function (event_error) {
+        // error here
+        _add_message("id_p_page_device","fail : device_update_set_parameter _cf_bl_window_ : "+ server.get_error_message(event_error));
     })
     ;
 }

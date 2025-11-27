@@ -61,6 +61,8 @@
  *                     - fix LPU-208D function string MSR & i-button -> MSR & SCR
  * <br />   2022.11.04 - release 1.13
  *                     - add ibutton remove tag and remove pre/posfix. expanded structure to version 4.0 
+ * <br />   2025.11.26 - release 1.14
+ *                     - add get_type_string() public method.
  * 
  * @namespace
  */
@@ -10685,6 +10687,29 @@
         _elpusk.device.usb.hid.lpu237.prototype.get_error_message = function(s_error_name){
            return _get_error_message(s_error_name);
         }
+
+        /**
+         * Classify device type
+         * - Ends with "&msr"              => "compositive_msr"
+         * - Ends with "&scr" + digits     => "compositive_scr"
+         * - Ends with "&ibutton"          => "compositive_ibutton"
+         * - Ends with "&switch" + digits  => "compositive_switch"
+         * - Otherwise                     => "primitive"
+         * - not string                    => ""
+         *
+         * @returns {string}
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_type_string = function() 
+        {
+            if (typeof this._s_path !== 'string') return '';
+            const t = this._s_path.trim();
+
+            if (/&msr$/.test(t)) return 'compositive_msr';
+            if (/&scr\d+$/.test(t)) return 'compositive_scr';
+            if (/&ibutton$/.test(t)) return 'compositive_ibutton';
+            if (/&switch\d+$/.test(t)) return 'compositive_switch';
+            return 'primitive';
+        }        
 
     }//the end of _elpusk.device.usb.hid.lpu237
 
