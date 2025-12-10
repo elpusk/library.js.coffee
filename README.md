@@ -1,3 +1,7 @@
+
+* For stable use, Chrome 109+, Edge 109+, and Firefox 102+ environments are recommended. Some features may be limited or not function in older browsers.
+
+
 # elpusk.framework.coffee
 coffee manager interface JavaScript  library( = cmi-js )
 
@@ -12,3 +16,4 @@ v1.13
 lpu237 device control JavaScript  library for cmi-js.
 
 v1.5
+

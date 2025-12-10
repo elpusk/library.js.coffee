@@ -10,6 +10,7 @@
 
 # 사용 언어
 - java scriptor
+- 모든 코드는 Chrome 109+, Edge 109+, and Firefox 102+  환경 기준으로 코딩.
 
 
 # Directory 와 file 설명

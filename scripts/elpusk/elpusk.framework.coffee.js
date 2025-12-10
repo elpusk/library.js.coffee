@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2025
- * @version 2.0.0
+ * @version 2.1.0
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -79,6 +79,9 @@
  * 
  * <br />  2025.08.04 - release 2.0.0
  * <br />  : add -  supporting coffee framework second edition.
+ *
+ * <br />  2025.12.10 - release 2.1.0
+ * <br />  : add -  change the current browser detect code.
  *
  * @namespace
  */
@@ -372,26 +375,29 @@
 
                 /** 
                  * @private 
-                 * @function _is_chrome_or_firfox_or_opera
+                 * @function _is_supported_browser
                  * @returns {boolean}
-                 * @description check whether or not current brower is firfox or opera.
-                 * Warning replace the usage of navigator.userAgent, navigator.appVersion, and navigator.platform with feature detection, progressive enhancement, or migrate to navigator.userAgentData.
+                 * @description check whether or not current brower is supported brower.
                 */                
-                function _is_chrome_or_firfox_or_opera() {
-                    var isChrome = !!window.chrome && !!window.chrome.webstore,
-                        isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
-                        isFirefox = typeof InstallTrigger !== 'undefined',
-                        isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification)),
-                        isIE = /*@cc_on!@*/false || !!document.documentMode,
-                        isEdge = !isIE && !!window.StyleMedia,
-                        isBlink = (isChrome || isOpera) && !!window.CSS;
-            
-                    if (isChrome || isOpera || isFirefox) {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
+                function _is_supported_browser() {
+                    const ua = navigator.userAgent.toLowerCase();
+
+                    // 네이버 웨일
+                    if (ua.includes('whale')) return true;
+
+                    // 크롬 (단, 엣지/오페라/웨일은 위에서 걸렀음)
+                    if (ua.includes('chrome')) return true;
+
+                    // 파이어폭스
+                    if (ua.includes('firefox')) return true;
+
+                    // 오페라 (구버전은 OPR, 신버전은 opr)
+                    if (ua.includes('opr/') || ua.includes('opera')) return true;
+
+                    // 크롬 기반 마이크로소프트 엣지
+                    if (ua.includes('edg/')) return true;
+
+                    return false;
                 }
 
                 /** 
@@ -416,7 +422,7 @@
                     if (typeof s_port !== 'undefined') {
                         s_used_port = s_port;
                     }
-                    if (_is_chrome_or_firfox_or_opera()) {
+                    if (_is_supported_browser()) {
                         s_used_domain = "localhost";
                     }
             
@@ -4141,7 +4147,8 @@
         //return "1.12.0";
         //return "1.12.1";//at advance_send_data_to_all(), the first parameter is removed.
         //return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
-        return "2.0.0";//supports coffee framework second edition.
+        //return "2.0.0";//supports coffee framework second edition.
+        return "2.1.0"; // change browser detect code.
     }
 
     /**
