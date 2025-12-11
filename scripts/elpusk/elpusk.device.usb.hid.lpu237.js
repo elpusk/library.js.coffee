@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2022
- * @version 1.13
+ * @version 1.14
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
  * <br />   2020.5.12 - release 1.1. 
@@ -5853,6 +5853,7 @@
             //ibutton reading operation
             this._s_ibutton_data = ""; //ibutton key or removed indicator data ascii code string.
             this._n_ibutton_error_code = 0; //ibutton error code. 0 is none error. <NOW> - if error is occured, ibutton reader dosen't sent a data.
+            this._b_ignore_ibutton_data = true; // ignore the recevied ibutton data.
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
@@ -5964,6 +5965,18 @@
             var n_data = null;
             n_data = this._n_ibutton_error_code;
             return n_data;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.is_ignore_ibutton_data
+         * @returns {boolean} true - ignore the recevied ibutton data.
+         * <br /> null - abused function.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.is_ignore_ibutton_data = function(){
+            var b_data = true;
+            b_data = this._b_ignore_ibutton_data;
+            return b_data;
         }
 
         /**
@@ -10063,6 +10076,18 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.set_ignore_ibutton_data
+         * @description consider(false) ir ignore(true) a ibutton data.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.set_ignore_ibutton_data = function(b_ignore){
+            if( typeof b_ignore === 'boolean'){
+                this._b_ignore_ibutton_data = b_ignore;
+            }
+        }
+
+        
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.set_msr_data_from_rx
          * @param {string} s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
          * @return {boolean} processing result
@@ -10126,6 +10151,61 @@
                     }//end for j
                 }//end for i
                 
+                b_result = true;
+            }while(false);
+            return b_result;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.set_ibutton_data_from_rx
+         * @param {string} s_rx - lpu237 protocol packet.( = websocket's protocol's data field)
+         * @return {boolean} processing result
+         * @description analysis and save from response.
+        */
+        _elpusk.device.usb.hid.lpu237.prototype.set_ibutton_data_from_rx = function(s_rx){
+            var b_result  =false;
+            do{
+                if( typeof s_rx !== 'string'){
+                    continue;
+                }
+                if( s_rx.length%2 !== 0 ){
+                    continue;
+                }
+                if( s_rx.length < 2*(3+8+20) ){
+                    continue;
+                }
+
+                var s_hexs = s_rx;
+                var s_char = "";
+
+                var ar_byte = new Uint8Array(s_hexs.length / 2);
+                for (let i = 0; i < s_hexs.length; i += 2) {
+                    ar_byte[i / 2] = parseInt(s_hexs.substr(i, 2), 16);
+                } 
+
+                var start = 3 + 8;          // 11
+                var len   = 20;
+
+                var s_pattern = '';
+                for (let i = 0; i < len; i++) {
+                    s_pattern += String.fromCharCode(ar_byte[start + i]);
+                }
+                // check pattern
+                var IBUTTON_MAKER = "this_is_ibutton_data";
+                if (s_pattern !== IBUTTON_MAKER){
+                    continue;
+                }
+                
+                // s_hexs[3*2] ~ s_hexs[(3+8)*2 - 1] 까지의 문자열 추출
+                // 3번째 바이트부터 (3+8)=11번째 바이트 직전까지 → 8바이트 = 16자리
+                var hexStart = 3 * 2;        // 6
+                var hexEnd   = (3 + 8) * 2;  // 22 (22번째 문자는 포함 안 됨)
+                var s_ibutton = s_hexs.slice(hexStart, hexEnd);
+
+                this._n_ibutton_error_code = 0;
+                this._s_ibutton_data = s_ibutton;
+               
                 b_result = true;
             }while(false);
             return b_result;

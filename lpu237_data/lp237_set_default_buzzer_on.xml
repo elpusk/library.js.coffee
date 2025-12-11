@@ -198,6 +198,6 @@ ibutton	:	postfix		: hex-format : use lower case.
 
 <lpu237>
 	<common
-		buzzer		="off"
+		buzzer		="on"
 	/>
 </lpu237>	

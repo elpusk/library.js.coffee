@@ -22,8 +22,8 @@
  * SOFTWARE.
  * 
  * @author developer 00000006
- * @copyright Elpusk.Co.,Ltd 2020
- * @version 1.3.0
+ * @copyright Elpusk.Co.,Ltd 2025
+ * @version 1.6.0
  * @description lpu237 controller of elpusk framework coffee javascript library .
  * <br /> error rules
  * <br /> * coffee framework error : generates promise reject or calls error callback function.
@@ -82,7 +82,7 @@
         ST_UNDEFINED : -1,
         ST_IDLE : 0,
         ST_WAIT_RSP : 1,
-        ST_WAIT_CARD : 2,
+        ST_WAIT_READ_DATA : 2, // waits msr or ibutton data as opened device.
         ST_WAIT_CANCEL : 3
     };
 
@@ -150,7 +150,7 @@
             switch(new_status){
                 case _type_status.ST_IDLE :
                 case _type_status.ST_WAIT_RSP :
-                case _type_status.ST_WAIT_CARD :
+                case _type_status.ST_WAIT_READ_DATA :
                 case _type_status.ST_WAIT_CANCEL :
                     break;
                 default:
@@ -412,6 +412,52 @@
         return b_result;
     }    
 
+/**
+     * @private
+     * @function _gen_ibutton_start_io
+     * @param {object} server coffee manager server object.
+     * @param {object} device target device object.
+     * @param {function} cb_complete_ibutton It is called "callback function" when device accepts your request successfully. 
+     * @param {function} cb_error_ibutton It is called "callback function" when error is occured.
+     * @return {boolean} true - request is delivered to server successfully.
+     * <br /> false - It is failed that request is delivered.
+     * @description requests execute the bootloader of lpu237 device.
+     */
+    function _gen_ibutton_start_io(server, device,cb_complete_ibutton,cb_error_ibutton){
+        var b_result = false;
+        var s_request = null;
+        var n_req = 0;
+
+        do{
+            device.clear_transaction();
+
+            n_req = device.generate_run_bootloader();
+            if( n_req <= 0 ){
+                continue;
+            }
+
+            s_request = device.get_tx_transaction();
+            if( s_request === null ){
+                continue;
+            }
+
+            b_result = server.device_receive_with_callback(
+                device.get_device_index(),
+                0,
+                cb_complete_ibutton,
+                cb_error_ibutton,
+                true
+            );
+            if( !b_result ){
+                device.clear_transaction();
+                continue;
+            }
+
+            b_result = true;
+        }while(false);
+        return b_result;
+    }  
+
     /**
      * @private
      * @function _notifiy_error
@@ -556,25 +602,25 @@
 
     /**
      * @private
-     * @function _process_event_in_idle
+     * @function _process_rsp_event_in_idle
      * @param {number} n_device_index the device index
      * @description the sub function of _cb_complete_rsp() in idle status.
      * <br /> process the ocurred event in idle status.(card reading case)
      */
-    function _process_event_in_idle(n_device_index){
+    function _process_rsp_event_in_idle(n_device_index){
         _notifiy_error_all(n_device_index);
         elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
     }
 
     /**
      * @private
-     * @function _process_event_in_wait_rsp
+     * @function _process_rsp_event_in_wait_rsp
      * @param {number} n_device_index the device index
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description the sub function of _cb_complete_rsp() in waiting-response status.
      * <br /> process the ocurred event in waiting-response status.(card reading case)
      */
-    function _process_event_in_wait_rsp(n_device_index,s_rx){
+    function _process_rsp_event_in_wait_rsp(n_device_index,s_rx){
         do{
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
             if( !para ){
@@ -594,7 +640,7 @@
                 if( !b_result ){
                     continue;
                 }
-                _set_status(n_device_index,_type_status.ST_WAIT_CARD);
+                _set_status(n_device_index,_type_status.ST_WAIT_READ_DATA);
             }
             else{
                 _notifiy_received(para);
@@ -610,13 +656,13 @@
     }
     /**
      * @private
-     * @function _process_event_in_wait_card
+     * @function _process_rsp_event_in_wait_card
      * @param {number} n_device_index the device index
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description the sub function of _cb_complete_rsp() in waiting-card-data status.
      * <br /> process the ocurred event in waiting-card-data status.(card reading case)
      */
-    function _process_event_in_wait_card(n_device_index,s_rx){
+    function _process_rsp_event_in_wait_card(n_device_index,s_rx){
 
         do{
             if( _is_event_rsp_cancel(s_rx) ){
@@ -630,9 +676,21 @@
             if( !para ){
                 continue;
             }
-            if( !para.device.set_msr_data_from_rx(s_rx) ){
+            if (para.device.get_type_string() == "compositive_msr") {
+                if( !para.device.set_msr_data_from_rx(s_rx) ){
+                    continue;
+                }
+            }
+            else if (para.device.get_type_string() == "compositive_ibutton") {
+                if( !para.device.set_ibutton_data_from_rx(s_rx) ){
+                    continue;
+                }
+            }
+            else{
+                // error. not supported device type
                 continue;
             }
+
             //event e_rsp_card
             if( para.resolve ){
                 //the end of waiting for promise type
@@ -661,13 +719,13 @@
     }
     /**
      * @private
-     * @function _process_event_in_wait_cancel
+     * @function _process_rsp_event_in_wait_cancel
      * @param {number} n_device_index the device index
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description the sub function of _cb_complete_rsp() in waiting-cancel-response status.
      * <br /> process the ocurred event in waiting-cancel-response status.(card reading case)
      */
-    function _process_event_in_wait_cancel(n_device_index,s_rx){
+    function _process_rsp_event_in_wait_cancel(n_device_index,s_rx){
         do{
             var para = elpusk.util.map_of_queue_get(_map_q_para,n_device_index);
             if( !para ){
@@ -678,12 +736,28 @@
             }
 
             //e_rsp_good
-            var b_result = _gen_opos_start_io( para.server, para.device,_cb_complete_rsp, _cb_error_frame,para.b_read);
-            if( !b_result ){
-                continue;
+            var b_result = false;
+
+            if (para.device.get_type_string() == "compositive_msr") {
+                //to OPOS mode
+                b_result = _gen_opos_start_io(para.server, para.device, _cb_complete_rsp, _cb_error_frame, para.b_read);
+                if (!b_result) {
+                    continue;
+                }
+                _set_status(para.device.get_device_index(), _type_status.ST_WAIT_RSP);
+                return;
             }
-            _set_status(para.device.get_device_index(),_type_status.ST_WAIT_RSP);
-            return;
+            if (para.device.get_type_string() == "compositive_ibutton") {
+                //already i-button reading status
+                b_result = _gen_ibutton_start_io(para.server, para.device, _cb_complete_rsp, _cb_error_frame, para.b_read);
+                if (!b_result) {
+                    continue;
+                }
+                _set_status(para.device.get_device_index(), _type_status.ST_WAIT_READ_DATA);
+                return;
+            }
+
+            // error
         }while(false);
 
         _notifiy_error_all(n_device_index);
@@ -713,16 +787,16 @@
             var st = _get_status(n_device_index);
             switch(st){
                 case _type_status.ST_IDLE :
-                    _process_event_in_idle(n_device_index);
+                    _process_rsp_event_in_idle(n_device_index);
                     continue;
                 case _type_status.ST_WAIT_RSP :
-                    _process_event_in_wait_rsp(n_device_index,s_rx);
+                    _process_rsp_event_in_wait_rsp(n_device_index,s_rx);
                     continue;
-                case _type_status.ST_WAIT_CARD :
-                    _process_event_in_wait_card(n_device_index,s_rx);
+                case _type_status.ST_WAIT_READ_DATA :
+                    _process_rsp_event_in_wait_card(n_device_index,s_rx);
                     continue;
                 case _type_status.ST_WAIT_CANCEL :
-                    _process_event_in_wait_cancel(n_device_index,s_rx);
+                    _process_rsp_event_in_wait_cancel(n_device_index,s_rx);
                     continue;
                 default:
                     break;
@@ -1572,7 +1646,7 @@
                         _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     }
                     break;
-                case _type_status.ST_WAIT_CARD:
+                case _type_status.ST_WAIT_READ_DATA:
                     if( b_read ){
                         break;
                     }
@@ -1630,6 +1704,13 @@
 
             device.reset_ibutton_data();
 
+            if(b_read){
+                device.set_ignore_ibutton_data(false);
+            }
+            else{
+                device.set_ignore_ibutton_data(true);
+            }
+
             switch(_get_status(device.get_device_index())){
                 case _type_status.ST_IDLE:
                     if( !_check_server_and_device(server,device)){
@@ -1640,11 +1721,12 @@
                         _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     }
                     break;
-                case _type_status.ST_WAIT_CARD:
+                case _type_status.ST_WAIT_READ_DATA:
                     if( b_read ){
                         break;
                     }
                      b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                     return true;
                     break;
                 default:
                     break;
@@ -1663,6 +1745,9 @@
                 "cb_error" : cb_read_error
             };
             elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+        }
+        else{
+            device.set_ignore_ibutton_data(true);
         }
 
         return b_result;
@@ -1693,7 +1778,7 @@
                     }
                     _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     break;
-                case _type_status.ST_WAIT_CARD:
+                case _type_status.ST_WAIT_READ_DATA:
                     break;
                 default:
                     continue;
@@ -1738,7 +1823,7 @@
                     }
                     _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
                     break;
-                case _type_status.ST_WAIT_CARD:
+                case _type_status.ST_WAIT_READ_DATA:
                     break;
                 default:
                     continue;
