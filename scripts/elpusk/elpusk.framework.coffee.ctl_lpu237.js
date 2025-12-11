@@ -30,6 +30,8 @@
  * <br /> * protocol error(lpu237 device protocol ) : generates promise reject or calls error callback function.
  * <br /> * card reading error : generates promise resolve or calls complete callback function.
  * <br /> * card reading success : generates promise resolve or calls complete callback function.
+ * <br /> * ibutton reading error : generates promise resolve or calls complete callback function.
+ * <br /> * ibutton reading success : generates promise resolve or calls complete callback function.
  * <br /> 
  * <br />  2020.5.14 - release 1.0.
  * <br />  2020.6.01 - release 1.1.
@@ -43,6 +45,9 @@
  *                    - support lpu237 hid bootloader.
  * <br />  2025.08.04 - release 1.5
  *                    - fix missing code.(close_with_promise() - s_rx is array )
+ * 
+ * <br />  2025.12.11 - relase 1.6
+ *                    - support ibutton reading.
  * 
  * @namespace elpusk.framework.coffee.ctl_lpu237
  */
@@ -817,6 +822,7 @@
      * @param {number} n_device_index the device index
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description this callback function will be called when "get system parameters" request is done.
+     * <br /> this function is processed the getting all parameters after done system info.
      */
     function _cb_complete_sys_info( n_device_index,s_rx  ){
         var b_result = false;
@@ -876,9 +882,71 @@
             }
         }
     };
+
     /**
      * @private
-     * @function _cb_complete_sys_info
+     * @function _cb_complete_sys_info_only
+     * @param {number} n_device_index the device index
+     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
+     * @description this callback function will be called when "get system parameters" request is done.
+     * <br /> this function is not processed the getting all parameters after done system info.
+     */
+    function _cb_complete_sys_info_only( n_device_index,s_rx  ){
+        var b_result = false;
+        var n_request = 0;
+        var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
+        do{
+            if( parameter === null ){
+                continue;
+            }
+            if( !parameter.device.set_rx_transaction(s_rx) ){
+                continue;
+            }
+            if( !parameter.device.set_from_rx() ){
+                continue;
+            }
+
+            if( typeof parameter.cb_progress === 'function'){
+                parameter.stage_cur++;
+                parameter.cb_progress(n_device_index,parameter.stage_max,parameter.stage_cur );
+            }
+
+            var s_request = parameter.device.get_tx_transaction();
+            if( s_request === null ){
+                //compete all response
+                parameter.device.clear_transaction();
+                _notifiy_received(parameter);
+                parameter = null;
+                b_result = true;
+                continue;
+            }
+            
+            b_result = parameter.server.device_transmit_with_callback(
+                parameter.device.get_device_index(),0,0, s_request,
+                _cb_complete_sys_info_only,
+                _cb_error_common,
+                true
+                );
+            if( !b_result ){
+                continue;
+            }
+            b_result = true;
+        }while(false);
+
+        if( parameter ){
+            if( b_result ){
+                elpusk.util.map_of_queue_push(_map_q_para,n_device_index,parameter);
+            }
+            else{
+                parameter.device.clear_transaction();
+                _notifiy_error(parameter);
+            }
+        }
+    };
+
+    /**
+     * @private
+     * @function _cb_complete_set_parameter
      * @param {number} n_device_index the device index
      * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
      * @description this callback function will be called when "set parameters" request is done.
@@ -1196,7 +1264,7 @@
 
     /**
      * @public
-     * @function load_parameter_from_device_with_promise
+     * @function load_all_parameter_from_device_with_promise
      * @param {function} cb_progress this function will be called each stage of "get system information" and "get parameters".
      * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
      * @return {object} return promise object.
@@ -1207,7 +1275,7 @@
      * <br /> this function process "get system parameters" and "get parameters" requests.
      * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
      */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.load_parameter_from_device_with_promise = function(cb_progress){
+    _elpusk.framework.coffee.ctl_lpu237.prototype.load_all_parameter_from_device_with_promise = function(cb_progress){
         var b_error = true;
         var server = this._server;
         var device = this._device;
@@ -1242,6 +1310,78 @@
 
                 do{
                     n_request = _gen_get_sysinfo_start_io( server, device,_cb_complete_sys_info, _cb_error_common);
+                    if( n_request <= 0 ){
+                        continue;
+                    }
+
+                    var parameter = {
+                        "server" : server,
+                        "device" : device,
+                        "resolve" : resolve,
+                        "reject" : reject,
+                        "cb_progress" : cb_progress_value,
+                        "stage_max" : n_request,
+                        "stage_cur" : 0
+                    };
+                    elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+
+                }while(false);
+                if( n_request <= 0 ){
+                    reject(new Error("error"));
+                }
+            });//the end promise
+        }
+    };
+
+    /**
+     * @public
+     * @function load_min_parameter_from_device_with_promise
+     * @param {function} cb_progress this function will be called each stage of "get system information".
+     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
+     * @return {object} return promise object.
+     * @description execute "get system information" with server and lpu237 object by construcutor.
+     * <br /> this function will be used in reading msr or ibutton.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br /> the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * <br /> this function process "get system parameters" and "get parameters" requests.
+     * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.load_min_parameter_from_device_with_promise = function(cb_progress){
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+        var cb_progress_value = null;
+
+        do{
+            if( !_check_server_and_device(server,device)){
+                continue;
+            }
+
+            if( !elpusk.util.map_of_queue_is_empty(_map_q_para,device.get_device_index()) ){
+                continue;
+            }
+
+            if( typeof cb_progress === 'function'){
+                cb_progress_value = cb_progress;
+            }
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        else{
+            var b_read = true;
+
+            return new Promise(function (resolve, reject) {
+                var n_request = 0;
+
+                do{
+                    n_request = _gen_get_sysinfo_start_io( server, device,_cb_complete_sys_info_only, _cb_error_common);
                     if( n_request <= 0 ){
                         continue;
                     }
@@ -1460,6 +1600,74 @@
         return b_result;
     };
 
+
+    /**
+     * @public
+     * @function read_ibutton_from_device_with_callback
+     * @param {boolean} b_read true - reading ibutton.
+     * <br /> false - ignore reading ibutton.
+     * @param {function} cb_read_done called when a ibutton reading is done. or canceled ready for reading.
+     * @param {function} cb_read_error called when a error is ocurred.
+     * @returns {boolean}   true - success processing.
+     * <br /> false - error.
+     * @description lpu237's status is changed to "reading ibutton" or "ignore reading ibutton."
+     * If this function is executed with "b_read is true", 
+     * <br /> lpu237 call cb_read_done whenever a ibutton is reading done,
+     * <br /> until error(communincation error or protcol error) is ocurred 
+     * <br /> this function is executed with "b_read is false".
+     * 
+     * <br /> the result of proccess will be given by callback function.
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.read_ibutton_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
+
+        var b_result = false;
+        var server = this._server;
+        var device = this._device;
+        do{
+            if( typeof b_read !== 'boolean' ){
+                continue;
+            }
+
+            device.reset_ibutton_data();
+
+            switch(_get_status(device.get_device_index())){
+                case _type_status.ST_IDLE:
+                    if( !_check_server_and_device(server,device)){
+                        break;
+                    }
+                    b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                    if( b_result ){
+                        _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
+                    }
+                    break;
+                case _type_status.ST_WAIT_CARD:
+                    if( b_read ){
+                        break;
+                    }
+                     b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                    break;
+                default:
+                    break;
+            }//end switch
+        }while(false);
+
+
+        if( b_result ){
+            var parameter = {
+                "server" : server,
+                "device" : device,
+                "resolve" : null,
+                "reject" : null,
+                "b_read" : b_read,
+                "cb_received" : cb_read_done,
+                "cb_error" : cb_read_error
+            };
+            elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
+        }
+
+        return b_result;
+    };
+
     /**
      * @public
      * @function disable_read_card_from_device_with_promise
@@ -1505,6 +1713,51 @@
         } 
     };    
 
+    /**
+     * @public
+     * @function disable_read_ibutton_from_device_with_promise
+     * @return {object} return promise object.
+     * @description disable the waiting read a ibutton.
+     * <br /> the result of proccess will be given promise object type.
+     * <br /> Always the parameter of promise's resolve is "success" string.
+     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     */
+    _elpusk.framework.coffee.ctl_lpu237.prototype.disable_read_ibutton_from_device_with_promise = function(){
+
+        var b_error = true;
+        var server = this._server;
+        var device = this._device;
+
+        do{
+            device.reset_ibutton_data();
+
+            switch(_get_status(device.get_device_index())){
+                case _type_status.ST_IDLE:
+                    if( !_check_server_and_device(server,device)){
+                        continue;
+                    }
+                    _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
+                    break;
+                case _type_status.ST_WAIT_CARD:
+                    break;
+                default:
+                    continue;
+            }//end switch
+
+            b_error = false;
+        }while(false);
+
+        if( b_error ){
+            return new Promise(function (resolve, reject) {
+                reject(new Error("error"));//another is running.
+                }
+            );//the end promise            
+        }
+        else{
+            return server.device_cancel(device.get_device_index(),0,0,);
+        } 
+    };    
+    
     ////////////////////////////////////////////////////////////////////////////
     // the end of function
     window.elpusk = _elpusk;

@@ -5846,9 +5846,13 @@
             this._token_format = _type_format.ef_decimal;
             this._s_name = null;    
             
-            // reading operation
+            // msr reading operation
             this._array_s_card_data = ["","",""];//iso123 card data ascii code string.
-            this._array_n_card_error_code = [0,0,0];//iso123 rtrack error code. 0 is none zeeor
+            this._array_n_card_error_code = [0,0,0];//iso123 track error code. 0 is none error
+
+            //ibutton reading operation
+            this._s_ibutton_data = ""; //ibutton key or removed indicator data ascii code string.
+            this._n_ibutton_error_code = 0; //ibutton error code. 0 is none error. <NOW> - if error is occured, ibutton reader dosen't sent a data.
         };
 
         _elpusk.device.usb.hid.lpu237.prototype = Object.create(elpusk.device.usb.hid.prototype);
@@ -5907,6 +5911,26 @@
 
         /**
          * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ibutton_data
+         * @returns {null|string} card data.
+         * <br /> null - error.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_ibutton_data = function(){
+            var s_data = null;
+
+            do{
+                if(this._n_ibutton_error_code !== 0 ){
+                    continue;//data has error.
+                }
+                //
+                s_data = "";
+                s_data = this._s_ibutton_data;
+            }while(false);
+            return s_data;
+        }
+
+        /**
+         * @public
          * @function elpusk.device.usb.hid.lpu237.get_msr_error_code
          * @param {number} n_track iso track number 0~2.
          * @returns {number|null} error code, 0 - none error.
@@ -5927,6 +5951,18 @@
                 }
                 n_data = this._array_n_card_error_code[n_track];
             }while(false);
+            return n_data;
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.get_ibutton_error_code
+         * @returns {number|null} error code, 0 - none error.
+         * <br /> null - abused function.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.get_ibutton_error_code = function(){
+            var n_data = null;
+            n_data = this._n_ibutton_error_code;
             return n_data;
         }
 
@@ -7522,6 +7558,9 @@
                 
                 if( !_generate_get_device_type(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_type_device );
+
+                if( !_generate_get_name(this._dequeu_s_tx) ){continue;}
+                this._deque_generated_tx.push( _type_generated_tx_type.gt_get_name );
 
                 if( !_generate_leave_config_mode(this._dequeu_s_tx) ){continue;}
                 this._deque_generated_tx.push( _type_generated_tx_type.gt_leave_config );
@@ -10010,6 +10049,16 @@
                 this._array_s_card_data[n_track] = "";
                 this._array_n_card_error_code[n_track] = 0;
             }while(false);
+        }
+
+        /**
+         * @public
+         * @function elpusk.device.usb.hid.lpu237.reset_ibutton_data
+         * @description reset buffer that contains a ibutton data.
+         */
+        _elpusk.device.usb.hid.lpu237.prototype.reset_ibutton_data = function(){
+            this._s_ibutton_data = "";
+            this._n_ibutton_error_code = 0;
         }
 
         /**

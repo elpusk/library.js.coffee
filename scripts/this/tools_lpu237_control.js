@@ -390,7 +390,7 @@ function fun_connect(){
             _print_message('id_p_page_device'," the connected : "+g_ctl_lpu237.get_device().get_path());
             _add_message('id_p_page_device'," device index : "+g_ctl_lpu237.get_device().get_device_index());
 
-            return g_ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters);
+            return g_ctl_lpu237.load_all_parameter_from_device_with_promise(_cb_progress_get_parameters);
         }
     )
     .catch(
@@ -406,7 +406,7 @@ function fun_connect(){
     }).catch(
         function (event_error) {
         // error here
-        _print_message('id_p_page_device', "failure : load_parameter_from_device_with_promise : "+ event_error.message);
+        _print_message('id_p_page_device', "failure : load_all_parameter_from_device_with_promise : "+ event_error.message);
     });    
     ;
 }
@@ -419,7 +419,7 @@ function fun_load_system_parameters(){
 
     const startTime = performance.now(); // Capture start time
 
-    g_ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+    g_ctl_lpu237.load_all_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
         const endTime = performance.now(); // Capture end time
         const duration = (endTime - startTime).toFixed(2); // Calculate duration in milliseconds
 
@@ -428,7 +428,7 @@ function fun_load_system_parameters(){
     }).catch(
         function (event_error) {
         // error here
-        _print_message('id_p_page_device', "failure : load_parameter_from_device_with_promise : "+ event_error.message);
+        _print_message('id_p_page_device', "failure : load_all_parameter_from_device_with_promise : "+ event_error.message);
     });    
 }
 

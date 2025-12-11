@@ -1,0 +1,35 @@
+# coffee manager interface java scriptor library(이하 cmi-js)
+
+
+# 지원 platform
+* => https://github.com/elpusk/publish.framework.coffee/wiki coffee manager - Discontinued
+* => https://github.com/elpusk/publish.framework.coffee.2nd/wiki coffee manager 2nd - Developing.
+
+# 기능
+* 이 cmi-js 는 coffee manager(이하 cf) 와 coffee manager 2nd(이하 cf2) 의 local secure websocket server(이하 wss)를 통해 web application(이하 webapp) 에서 현재 PC에 연결된 lpu237, lpu238, lpu207 과 lpu208 장비(이하 지원 장비)를 사용 할 수 있도록 지원한다.
+
+# 사용 언어
+* java scriptor
+* 모든 코드는 Chrome 109+, Edge 109+, and Firefox 102+  환경 기준으로 코딩.
+
+
+# Directory 와 file 설명
+* => /index.html index.html - 이 프로젝트의 주요 정보와 webapp 에 대한 시작 page.
+* => /tools_lpu237_full.html tools_lpu237_full.html - 이 cmi-js 를 사용하여 지원 장비의 설정 변경, fw 업데이트 그리고 각 기능 테스트 지원을 위한 webapp.
+* => /README.md README.md - 현재 이 프로젝트의 버전 및 진행되는 정보를 기록하는 파일.
+* => /conf_coffee.json conf_coffee.json - => /scripts/elpusk/elpusk.framework.coffee.js cmi-js base library 에 관한 jdoc 설명서를 생성하기 위한 설정 파일.(jsdoc  -c conf_coffee.json 로 생성)
+* => /conf_lpu237.json conf_lpu237.json - 지원 장비의 protocol 를 지원하는 => /scripts/elpusk/elpusk.device.usb.hid.lpu237.js lpu237 protocol js library 에 관한 jdoc 설명서를 생성하기 위한 설정 파일.(jsdoc  -c conf_lpu237.json 로 생성)
+* => /conf_ctl_lpu237.json conf_ctl_lpu237.json - webapp 에서 cmi-js base library 와 lpu237 protocol js library 를 사용하기 편하도록 지원하는 => /scripts/elpusk/elpusk.framework.coffee.ctl_lpu237.js control js library 에 관한 jdoc 설명서를 생성하기 위한 설정 파일.(jsdoc  -c conf_ctl_lpu237.json 로 생성)
+
+* => /LICENSE LICENSE - 이 프로제특 결과물을 사용하기 위한 라이센스 파일.
+* css directory - webapp 에서 사용하는 css file 저장 위치.
+* docs directory - jsdoc 에 의해 생성되는 문서 저장 위치.
+* html directory - webapp 에서 사용하는 html 문서 저장 위치.
+* lpu237_data directory - webapp 에서 사용 가능한 지원 장비 설정 파일 예시 저장 위치.
+* scripts directory - 이 프로젝트에서 사용하는 라비브러리 js 파일 저장 위치.
+* scripts\bluebirdjs - promise 미지원 브라우저를 위한 3'th part js 라이브러리.
+* scripts\dll_service - 지금은 사용 안함.
+* scripts\elpusk - 이 js 라이브러리 root
+* test directory - js 라이브러이 test 를 위한 webapp 저장 위치.
+* test directory - js 라이브러에 대한 test case webapp 저장 위치.
+

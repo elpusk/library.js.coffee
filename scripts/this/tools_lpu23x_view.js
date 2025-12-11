@@ -14,11 +14,16 @@ function tools_dom_buld_inital_page(){
     _body.appendChild(_div_for_ini);
 }
 
-function tools_dom_add_connected_device_page(_ctl_lpu237){
+function tools_dom_add_connected_device_page(_ctl_lpu237,_b_device_is_composite){
     if(typeof _ctl_lpu237==='undefined'){
         return;
     }
     if( _ctl_lpu237===null){
+        return;
+    }
+    if(_b_device_is_composite){
+        var s_type = _ctl_lpu237.get_device().get_type_string();
+        _tools_dom_button_status(true,s_type);
         return;
     }
     var _div_for_tab = document.getElementsByClassName('tab');
@@ -31,26 +36,26 @@ function tools_dom_add_connected_device_page(_ctl_lpu237){
 
     var i = 0;
     var _bt_for_iso = [];
-    _bt_for_iso.push( document.createElement('button'));
-    _bt_for_iso.push( document.createElement('button'));
-    _bt_for_iso.push( document.createElement('button'));
+    _bt_for_iso.push(document.createElement('button'));
+    _bt_for_iso.push(document.createElement('button'));
+    _bt_for_iso.push(document.createElement('button'));
 
-    _bt_for_iso[i].setAttribute('id','id_tab_iso1');
-    _bt_for_iso[i].setAttribute('class','tablinks');
-    _bt_for_iso[i].setAttribute('onclick','_tools_dom_open_tab_page(event, "id_iso1")');
-    _bt_for_iso[i].innerHTML='ISO1 track';
+    _bt_for_iso[i].setAttribute('id', 'id_tab_iso1');
+    _bt_for_iso[i].setAttribute('class', 'tablinks');
+    _bt_for_iso[i].setAttribute('onclick', '_tools_dom_open_tab_page(event, "id_iso1")');
+    _bt_for_iso[i].innerHTML = 'ISO1 track';
     i++;
 
-    _bt_for_iso[i].setAttribute('id','id_tab_iso2');
-    _bt_for_iso[i].setAttribute('class','tablinks');
-    _bt_for_iso[i].setAttribute('onclick','_tools_dom_open_tab_page(event, "id_iso2")');
-    _bt_for_iso[i].innerHTML='ISO2 track';
+    _bt_for_iso[i].setAttribute('id', 'id_tab_iso2');
+    _bt_for_iso[i].setAttribute('class', 'tablinks');
+    _bt_for_iso[i].setAttribute('onclick', '_tools_dom_open_tab_page(event, "id_iso2")');
+    _bt_for_iso[i].innerHTML = 'ISO2 track';
     i++;
 
-    _bt_for_iso[i].setAttribute('id','id_tab_iso3');
-    _bt_for_iso[i].setAttribute('class','tablinks');
-    _bt_for_iso[i].setAttribute('onclick','_tools_dom_open_tab_page(event, "id_iso3")');
-    _bt_for_iso[i].innerHTML='ISO3 track';
+    _bt_for_iso[i].setAttribute('id', 'id_tab_iso3');
+    _bt_for_iso[i].setAttribute('class', 'tablinks');
+    _bt_for_iso[i].setAttribute('onclick', '_tools_dom_open_tab_page(event, "id_iso3")');
+    _bt_for_iso[i].innerHTML = 'ISO3 track';
 
     for( i=0; i<_div_for_tab.length; i++){
         _div_for_tab[i].appendChild(_bt_for_system);
@@ -122,7 +127,9 @@ function _tools_dom_adjust_page_size( b_connected ){
         }
 
         var tables = document.getElementsByTagName("table");
-        var page_id = ['id_system','id_iso1','id_iso2','id_iso3'];
+
+        var page_id = ['id_system'];
+        page_id.push('id_iso1','id_iso2','id_iso3');
 
         if( b_connected ){
             //expand page for displaying information.
@@ -228,15 +235,28 @@ function _tools_dom_button_status( b_connected, s_connected_device_type ){
                 document.getElementById("id_file_fw_select_updating").disabled = true;
                 document.getElementById("id_file_select_setting").disabled = true;
                 document.getElementById("id_button_reload_parameters").disabled = true;
-                document.getElementById("id_button_enable_read").disabled = false;
-                document.getElementById("id_button_disable_read").disabled = false;
+                document.getElementById("id_button_enable_msr_read").disabled = false;
+                document.getElementById("id_button_disable_msr_read").disabled = false;
+                document.getElementById("id_button_enable_ibutton_read").disabled = true;
+                document.getElementById("id_button_disable_ibutton_read").disabled = true;
+            }
+            else if(s_connected_device_type === "compositive_ibutton"){
+                document.getElementById("id_file_fw_select_updating").disabled = true;
+                document.getElementById("id_file_select_setting").disabled = true;
+                document.getElementById("id_button_reload_parameters").disabled = true;
+                document.getElementById("id_button_enable_msr_read").disabled = true;
+                document.getElementById("id_button_disable_msr_read").disabled = true;
+                document.getElementById("id_button_enable_ibutton_read").disabled = false;
+                document.getElementById("id_button_disable_ibutton_read").disabled = false;
             }
             else if(s_connected_device_type === "primitive"){
                 document.getElementById("id_file_fw_select_updating").disabled = false;
                 document.getElementById("id_file_select_setting").disabled = false;
                 document.getElementById("id_button_reload_parameters").disabled = false;
-                document.getElementById("id_button_enable_read").disabled = true;
-                document.getElementById("id_button_disable_read").disabled = true;
+                document.getElementById("id_button_enable_msr_read").disabled = true;
+                document.getElementById("id_button_disable_msr_read").disabled = true;
+                document.getElementById("id_button_enable_ibutton_read").disabled = true;
+                document.getElementById("id_button_disable_ibutton_read").disabled = true;
             }
             continue;
         }
@@ -245,9 +265,9 @@ function _tools_dom_button_status( b_connected, s_connected_device_type ){
         document.getElementById("id_file_select_setting").disabled = true;
         document.getElementById("id_button_reload_parameters").disabled = true;
         document.getElementById("id_button_connect").disabled = false;
-        document.getElementById("id_button_enable_read").disabled = true;
-        document.getElementById("id_button_disable_read").disabled = true;
-        
-
+        document.getElementById("id_button_enable_msr_read").disabled = true;
+        document.getElementById("id_button_disable_msr_read").disabled = true;
+        document.getElementById("id_button_enable_ibutton_read").disabled = true;
+        document.getElementById("id_button_disable_ibutton_read").disabled = true;
     }while(false);
 }

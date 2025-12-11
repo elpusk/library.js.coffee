@@ -5,7 +5,8 @@ var g_array_device_list = [];
 var g_time_start, g_time_end;
 var g_b_updating = false;//fw updating .......
 var g_file_rom = null;
-var g_n_cnt_read = 0;
+var g_n_cnt_read_msr = 0;
+var g_n_cnt_read_ibutton = 0;
 
 function _cb_system_event( s_action_code,s_data_field ){
     do{
@@ -161,7 +162,7 @@ function _cb_update_firmware( b_result , n_current_step , n_total_step, s_messag
 // callback function for reading card.
 
 /**
- * @function _cb_read_done
+ * @function _cb_read_msr_done
  * @parameter {number} n_device_index the index value of device on coffee framework.
  * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
  * @parameter {string} s_msg always "success". therefore, you can ignore this.
@@ -169,27 +170,27 @@ function _cb_update_firmware( b_result , n_current_step , n_total_step, s_messag
  * <br /> this function announce that a card is reading done.
  * <br /> called by controller.(g_ctl_lpu237)
  */
-function _cb_read_done( n_device_index, s_msg ){
+function _cb_read_msr_done( n_device_index, s_msg ){
     //s_msg always "success"
-    g_n_cnt_read++;
-    _print_message("id_p_page_device_ms_data",g_n_cnt_read + " CB : card data");
+    g_n_cnt_read_msr++;
+    _print_message("id_p_page_device_ms_ibutton_data",g_n_cnt_read_msr + " CB : card data");
 
     //all card track reading
     for( var i = 0; i<3; i++ ){
         //check whether or not each track is error. 
         if( g_ctl_lpu237.get_device().get_msr_error_code(i) !== 0 ){
             //track is error. dispaly error code.
-            _add_message("id_p_page_device_ms_data","error : " + String(g_ctl_lpu237.get_device().get_msr_error_code(i)));
+            _add_message("id_p_page_device_ms_ibutton_data","error : " + String(g_ctl_lpu237.get_device().get_msr_error_code(i)));
             continue;
         }
 
         //get a track data.
         var s_card = g_ctl_lpu237.get_device().get_msr_data(i);
         if( s_card.length == 0 ){
-            _add_message("id_p_page_device_ms_data","none data");
+            _add_message("id_p_page_device_ms_ibutton_data","none data");
         }
         else{
-            _add_message("id_p_page_device_ms_data",g_ctl_lpu237.get_device().get_msr_data(i));
+            _add_message("id_p_page_device_ms_ibutton_data",g_ctl_lpu237.get_device().get_msr_data(i));
         }
     }
 
@@ -197,8 +198,42 @@ function _cb_read_done( n_device_index, s_msg ){
     g_ctl_lpu237.get_device().reset_msr_data();
 }
 
+
 /**
- * @function _cb_read_error
+ * @function _cb_read_ibutton_done
+ * @parameter {number} n_device_index the index value of device on coffee framework.
+ * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
+ * @parameter {string} s_msg always "success". therefore, you can ignore this.
+ * @description callback function of g_ctl_lpu237.read_ibutton_from_device_with_callback().
+ * <br /> this function announce that a ibutton is reading done.
+ * <br /> called by controller.(g_ctl_lpu237)
+ */
+function _cb_read_ibutton_done( n_device_index, s_msg ){
+    //s_msg always "success"
+    g_n_cnt_read_ibutton++;
+    _print_message("id_p_page_device_ms_ibutton_data",g_n_cnt_read_ibutton + " CB : ibutton data");
+
+    //check whether or not ibutton is error. 
+    if( g_ctl_lpu237.get_device().get_ibutton_error_code() !== 0 ){
+        //ibutton is error. dispaly error code.
+        _add_message("id_p_page_device_ms_ibutton_data","error : " + String(g_ctl_lpu237.get_device().get_ibutton_error_code()));
+    }
+
+    //get a ibutton data.
+    var s_card = g_ctl_lpu237.get_device().get_ibutton_data();
+    if( s_card.length == 0 ){
+        _add_message("id_p_page_device_ms_ibutton_data","none data");
+    }
+    else{
+        _add_message("id_p_page_device_ms_ibutton_data",g_ctl_lpu237.get_device().get_ibutton_data());
+    }
+
+    //clear card data of contoller.
+    g_ctl_lpu237.get_device().reset_ibutton_data();
+}
+
+/**
+ * @function _cb_msr_read_error
  * @parameter {number} n_device_index the index value of device on coffee framework.
  * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
  * @parameter {object} event_error Event object.
@@ -207,12 +242,26 @@ function _cb_read_done( n_device_index, s_msg ){
  * <br /> this error is coffee framework error or protocol error.
  * <br /> called by controller.(g_ctl_lpu237)
  */        
-function _cb_read_error( n_device_index,event_error){
-    _add_message("id_p_page_device_ms_data","CB : Error : read : "+ event_error.message);
+function _cb_msr_read_error( n_device_index,event_error){
+    _add_message("id_p_page_device_ms_ibutton_data","CB : Error : read msr : "+ event_error.message);
 }
 
 /**
- * @function _cb_stop_done
+ * @function _cb_ibutton_read_error
+ * @parameter {number} n_device_index the index value of device on coffee framework.
+ * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
+ * @parameter {object} event_error Event object.
+ * @description error callback function of g_ctl_lpu237.read_ibutton_from_device_with_callback().
+ * <br /> this function announce that a error is occured.
+ * <br /> this error is coffee framework error or protocol error.
+ * <br /> called by controller.(g_ctl_lpu237)
+ */        
+function _cb_ibutton_read_error( n_device_index,event_error){
+    _add_message("id_p_page_device_ms_ibutton_data","CB : Error : read ibutton : "+ event_error.message);
+}
+
+/**
+ * @function _cb_stop_msr_done
  * @parameter {number} n_device_index the index value of device on coffee framework.
  * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
  * @parameter {string} s_msg always "success". therefore, you can ignore this.
@@ -220,12 +269,27 @@ function _cb_read_error( n_device_index,event_error){
  * <br /> this function announce that device(lpu237) will ignore a card data.
  * <br /> called by controller.(g_ctl_lpu237)
  */
-function _cb_stop_done( n_device_index,s_msg ){
+function _cb_stop_msr_done( n_device_index,s_msg ){
     //s_msg always "success"
-    _add_message("id_p_page_device_ms_data","CB : cancel : "+s_msg);
+    _add_message("id_p_page_device_ms_ibutton_data","CB : cancel msr : "+s_msg);
 }
+
 /**
- * @function _cb_stop_error
+ * @function _cb_stop_ibutton_done
+ * @parameter {number} n_device_index the index value of device on coffee framework.
+ * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
+ * @parameter {string} s_msg always "success". therefore, you can ignore this.
+ * @description callback function of g_ctl_lpu237.read_ibutton_from_device_with_callback().
+ * <br /> this function announce that device(lpu237) will ignore a card data.
+ * <br /> called by controller.(g_ctl_lpu237)
+ */
+function _cb_stop_ibutton_done( n_device_index,s_msg ){
+    //s_msg always "success"
+    _add_message("id_p_page_device_ms_ibutton_data","CB : cancel ibutton : "+s_msg);
+}
+
+/**
+ * @function _cb_stop_msr_error
  * @parameter {number} n_device_index the index value of device on coffee framework.
  * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
  * @parameter {object} event_error Event object.
@@ -233,8 +297,21 @@ function _cb_stop_done( n_device_index,s_msg ){
  * <br /> this error is coffee framework error or protocol error.
  * <br /> called by controller.(g_ctl_lpu237)
  */        
-function _cb_stop_error(n_device_index,event_error){
-    _add_message("id_p_page_device_ms_data","CB : cancel : error : "+ event_error.message);
+function _cb_stop_msr_error(n_device_index,event_error){
+    _add_message("id_p_page_device_ms_ibutton_data","CB : cancel : error msr : "+ event_error.message);
+}
+
+/**
+ * @function _cb_stop_ibutton_error
+ * @parameter {number} n_device_index the index value of device on coffee framework.
+ * <br /> this value is equal to g_ctl_lpu237.get_device().get_device_index()
+ * @parameter {object} event_error Event object.
+ * @description error callback function of g_ctl_lpu237.read_ibutton_from_device_with_callback().
+ * <br /> this error is coffee framework error or protocol error.
+ * <br /> called by controller.(g_ctl_lpu237)
+ */        
+function _cb_stop_ibutton_error(n_device_index,event_error){
+    _add_message("id_p_page_device_ms_ibutton_data","CB : cancel : error ibutton : "+ event_error.message);
 }
 
 function init() {
@@ -377,6 +454,11 @@ function fun_connect(){
         
     var s_device_path = select_dev.options[select_dev.selectedIndex].text;
 
+    var b_device_is_composite = false;
+    if(/^(switch|scr)\d+$|msr$|ibutton$/.test(s_device_path)){
+        b_device_is_composite = true;
+    }
+
     g_ctl_lpu237 = new elpusk.framework.coffee.ctl_lpu237(
         elpusk.framework.coffee.get_instance()
         ,new elpusk.device.usb.hid.lpu237(s_device_path) 
@@ -390,7 +472,12 @@ function fun_connect(){
             _print_message('id_p_page_device'," the connected : "+g_ctl_lpu237.get_device().get_path());
             _add_message('id_p_page_device'," device index : "+g_ctl_lpu237.get_device().get_device_index());
 
-            return g_ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters);
+            if(b_device_is_composite){
+                return g_ctl_lpu237.load_min_parameter_from_device_with_promise(_cb_progress_get_parameters)
+            }
+            else{
+                return g_ctl_lpu237.load_all_parameter_from_device_with_promise(_cb_progress_get_parameters);
+            }
         }
     )
     .catch(
@@ -400,13 +487,13 @@ function fun_connect(){
         }
     )
     .then(function (s_message) {
-        tools_dom_add_connected_device_page(g_ctl_lpu237);
+        tools_dom_add_connected_device_page(g_ctl_lpu237,b_device_is_composite);
         g_n_opened_device_index = g_ctl_lpu237.get_device().get_device_index();
         document.getElementById("id_lable_progress_page_device").textContent = "complete loading system parameters : ";
     }).catch(
         function (event_error) {
         // error here
-        _print_message('id_p_page_device', "failure : load_parameter_from_device_with_promise : "+ event_error.message);
+        _print_message('id_p_page_device', "failure : load_all_parameter_from_device_with_promise : "+ event_error.message);
     });    
     ;
 }
@@ -419,16 +506,16 @@ function fun_load_system_parameters(){
 
     const startTime = performance.now(); // Capture start time
 
-    g_ctl_lpu237.load_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
+    g_ctl_lpu237.load_all_parameter_from_device_with_promise(_cb_progress_get_parameters).then(function (s_message) {
         const endTime = performance.now(); // Capture end time
         const duration = (endTime - startTime).toFixed(2); // Calculate duration in milliseconds
 
-        tools_dom_add_connected_device_page(g_ctl_lpu237);
+        tools_dom_add_connected_device_page(g_ctl_lpu237,false); // for primitive device.
         document.getElementById("id_lable_progress_page_device").textContent = `complete loading system parameters (${duration}mmsec) : `;
     }).catch(
         function (event_error) {
         // error here
-        _print_message('id_p_page_device', "failure : load_parameter_from_device_with_promise : "+ event_error.message);
+        _print_message('id_p_page_device', "failure : load_all_parameter_from_device_with_promise : "+ event_error.message);
     });    
 }
 
@@ -703,33 +790,60 @@ function _fun_set_parameter_by_setting_file(){
 }
 
 /**
- * @function fun_enable_read_with_callback
- * @description button handler of id = button_enable_read_with_callback.
+ * @function fun_enable_msr_read_with_callback
+ * @description button handler of id = button_enable_msr_read_with_callback.
  * <br /> th status of lpu237 device change to "reading card" mode.
  */
-function fun_enable_read_with_callback(){
-    if( g_ctl_lpu237.read_card_from_device_with_callback(true,_cb_read_done,_cb_read_error) ){
-        _print_message("id_p_page_device_ms_data","ready : waits reading.");
+function fun_enable_msr_read_with_callback(){
+    if( g_ctl_lpu237.read_card_from_device_with_callback(true,_cb_read_msr_done,_cb_msr_read_error) ){
+        _print_message("id_p_page_device_ms_ibutton_data","ready : waits reading.");
     }
     else{
-        _print_message("id_p_page_device_ms_data","not ready : failure.");
+        _print_message("id_p_page_device_ms_ibutton_data","not ready : failure.");
     }
 }
 
 /**
- * @function fun_disable_read_with_callback
- * @description button handler of id = button_disable_read_with_callback.
+ * @function fun_disable_msr_read_with_callback
+ * @description button handler of id = button_disable_msr_read_with_callback.
  * <br /> th status of lpu237 device change to "ignoring card" mode.
  */
-function fun_disable_read_with_callback(){
-    if( g_ctl_lpu237.read_card_from_device_with_callback(false,_cb_stop_done,_cb_stop_error) ){
-        _print_message("id_p_page_device_ms_data","ok : cancel.");
+function fun_disable_msr_read_with_callback(){
+    if( g_ctl_lpu237.read_card_from_device_with_callback(false,_cb_stop_msr_done,_cb_stop_msr_error) ){
+        _print_message("id_p_page_device_ms_ibutton_data","ok : cancel.");
     }
     else{
-        _print_message("id_p_page_device_ms_data","error : cancel.");
+        _print_message("id_p_page_device_ms_ibutton_data","error : cancel.");
     }
 }
 
+/**
+ * @function fun_enable_ibutton_read_with_callback
+ * @description button handler of id = button_enable_ibutton_read_with_callback.
+ * <br /> th status of lpu237 device change to "reading card" mode.
+ */
+function fun_enable_ibutton_read_with_callback(){
+    if( g_ctl_lpu237.read_ibutton_from_device_with_callback(true,_cb_read_ibutton_done,_cb_ibutton_read_error) ){
+        _print_message("id_p_page_device_ms_ibutton_data","ready : waits reading.");
+    }
+    else{
+        _print_message("id_p_page_device_ms_ibutton_data","not ready : failure.");
+    }
+}
+
+/**
+ * @function fun_disable_ibutton_read_with_callback
+ * @description button handler of id = button_disable_ibutton_read_with_callback.
+ * <br /> th status of lpu237 device change to "ignoring card" mode.
+ */
+function fun_disable_ibutton_read_with_callback(){
+    if( g_ctl_lpu237.read_ibutton_from_device_with_callback(false,_cb_stop_ibutton_done,_cb_stop_ibutton_error) ){
+        _print_message("id_p_page_device_ms_ibutton_data","ok : cancel.");
+    }
+    else{
+        _print_message("id_p_page_device_ms_ibutton_data","error : cancel.");
+    }
+}
 function fun_save_to_sessionStorage(){
     g_ctl_lpu237.get_device().save_to_sessionStorage();
 }
