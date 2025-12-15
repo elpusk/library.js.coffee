@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2025
- * @version 2.1.0
+ * @version 2.2.0
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
