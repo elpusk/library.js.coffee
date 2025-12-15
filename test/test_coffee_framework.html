@@ -1044,7 +1044,7 @@
             var s_device_path = select_dev.options[select_dev.selectedIndex].text;
 
             var server = elpusk.framework.coffee.get_instance();
-            server.device_open(s_device_path).then(function (n_device_index) {
+            server.device_open(s_device_path,false).then(function (n_device_index) {
                 if( typeof n_device_index === 'undefined'){
                     //error
                     addMessage("error : open.");

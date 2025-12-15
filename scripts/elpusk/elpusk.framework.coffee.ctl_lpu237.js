@@ -49,6 +49,9 @@
  * <br />  2025.12.11 - relase 1.6
  *                    - support ibutton reading.
  * 
+ * <br />  2025.12.15 - relase 1.7
+ *                    - support shared open mode.
+ * 
  * @namespace elpusk.framework.coffee.ctl_lpu237
  */
 
@@ -1241,7 +1244,11 @@
                     continue;//already open
                 }
 
-                _server.device_open(_device.get_path()).then(function (n_device_index) {
+                var b_shared = false;
+                if( _device.get_type_string() == "compositive_ibutton" ){
+                    b_shared = true;
+                }
+                _server.device_open(_device.get_path(),b_shared).then(function (n_device_index) {
                     if( typeof n_device_index === 'undefined'){
                         reject(new Error("error"));
                     }

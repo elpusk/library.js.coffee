@@ -83,6 +83,9 @@
  * <br />  2025.12.10 - release 2.1.0
  * <br />  : add -  change the current browser detect code.
  *
+ * <br />  2025.12.15 - release 2.2.0
+ * <br />  : add shared open mode to device_open() method.
+ * 
  * @namespace
  */
 
@@ -3200,6 +3203,8 @@
                      * @function device_open
                      * @param {string} s_path device path string
                      * 
+                     * @param {boolean} b_shared the shared open mode is enable(true) or not
+                     * 
                      * @returns {Promise} if success, resolve with device index number.
                      * <br /> else reject with Error object or resolve with zero number.
                      * 
@@ -3207,7 +3212,7 @@
                      * <br /> the device index number cannot be zero.
                      * <br /> if this function resolve with zero device index, this case also have to be process as error.
                     */                
-                    device_open : function (s_path) {
+                    device_open : function (s_path,b_shared) {
                         return new Promise(function (resolve, reject) {
                 
                             do {
@@ -3240,17 +3245,32 @@
                                 _push_promise_parameter(0,parameter);
                 
                                 //send request
-                                var json_packet = _generate_request_packet(
-                                    _type_packet_owner.DEVICE
-                                    , const_n_undefined_device_index
-                                    , action_code
-                                    , 0
-                                    , 0
-                                    , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                    , String(s_path)
-                                );
-                
-                                var s_json_packet = JSON.stringify(json_packet);
+                                var s_json_packet = "";
+
+                                if(b_shared){
+                                    var json_packet = _generate_request_packet(
+                                        _type_packet_owner.DEVICE
+                                        , const_n_undefined_device_index
+                                        , action_code
+                                        , 0
+                                        , 0
+                                        , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                        , [String(s_path),"share"]
+                                    );
+                                    s_json_packet = JSON.stringify(json_packet);
+                                }
+                                else{
+                                    var json_packet = _generate_request_packet(
+                                        _type_packet_owner.DEVICE
+                                        , const_n_undefined_device_index
+                                        , action_code
+                                        , 0
+                                        , 0
+                                        , _type_data_field_type.STRING_OR_STRING_ARRAY
+                                        , String(s_path)
+                                    );
+                                    s_json_packet = JSON.stringify(json_packet);
+                                }
                                 _websocket.send(s_json_packet);
                 
                             } while (false);
@@ -4148,7 +4168,8 @@
         //return "1.12.1";//at advance_send_data_to_all(), the first parameter is removed.
         //return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
         //return "2.0.0";//supports coffee framework second edition.
-        return "2.1.0"; // change browser detect code.
+        //return "2.1.0"; // change browser detect code.
+        return "2.2.0"; // add shared open mode.
     }
 
     /**
