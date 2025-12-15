@@ -2,17 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
-      "request": "launch",
-      "name": "start from index.html",
-      "program": "${workspaceFolder}/index.html",
-      "cwd": "${workspaceFolder}"
-    },
-    {
       "type": "chrome",
-      "name": "http://C:\\Program Files\\nodejs\\node.exe --experimental-network-inspection .\\index.htmlUncaught SyntaxError C:\\job\\library.js.coffee\\index.html:1<!DOCTYPE html>^SyntaxError: Unexpected token '<'    at wrapSafe (<node_internals>/internal/modules/cjs/loader:1620:18)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1662:20)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1820:10)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1423:32)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1246:12)    at traceSync (<node_internals>/diagnostics_channel:322:14)    at wrapModuleLoad (<node_internals>/internal/modules/cjs/loader:235:24)    at executeUserEntryPoint (<node_internals>/internal/modules/run_main:171:5)    at <anonymous> (<node_internals>/internal/main/run_main_module:36:49)No debugger available, can not send 'variables'Process exited with code 1",
       "request": "launch",
-      "url": "http://C:\\Program Files\\nodejs\\node.exe --experimental-network-inspection .\\index.htmlUncaught SyntaxError C:\\job\\library.js.coffee\\index.html:1<!DOCTYPE html>^SyntaxError: Unexpected token '<'    at wrapSafe (<node_internals>/internal/modules/cjs/loader:1620:18)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1662:20)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1820:10)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1423:32)    at <anonymous> (<node_internals>/internal/modules/cjs/loader:1246:12)    at traceSync (<node_internals>/diagnostics_channel:322:14)    at wrapModuleLoad (<node_internals>/internal/modules/cjs/loader:235:24)    at executeUserEntryPoint (<node_internals>/internal/modules/run_main:171:5)    at <anonymous> (<node_internals>/internal/main/run_main_module:36:49)No debugger available, can not send 'variables'Process exited with code 1"
+      "name": "Launch index.html",
+      "file": "${workspaceFolder}/tools_lpu23x.html"
     }
   ]
 }

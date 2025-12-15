@@ -431,16 +431,6 @@
         do{
             device.clear_transaction();
 
-            n_req = device.generate_run_bootloader();
-            if( n_req <= 0 ){
-                continue;
-            }
-
-            s_request = device.get_tx_transaction();
-            if( s_request === null ){
-                continue;
-            }
-
             b_result = server.device_receive_with_callback(
                 device.get_device_index(),
                 0,
@@ -748,12 +738,18 @@
                 return;
             }
             if (para.device.get_type_string() == "compositive_ibutton") {
-                //already i-button reading status
-                b_result = _gen_ibutton_start_io(para.server, para.device, _cb_complete_rsp, _cb_error_frame, para.b_read);
-                if (!b_result) {
-                    continue;
+                if(para.b_read){
+                    b_result = _gen_ibutton_start_io(para.server, para.device, _cb_complete_rsp, _cb_error_frame, para.b_read);
+                    if (!b_result) {
+                        continue;
+                    }
+                    _set_status(para.device.get_device_index(), _type_status.ST_WAIT_READ_DATA);
                 }
-                _set_status(para.device.get_device_index(), _type_status.ST_WAIT_READ_DATA);
+                else{
+                    _notifiy_received(para);
+                    elpusk.util.map_of_queue_delete(_map_q_para,n_device_index);
+                    _set_status(para.device.get_device_index(), _type_status.ST_IDLE);
+                }
                 return;
             }
 
@@ -1650,7 +1646,7 @@
                     if( b_read ){
                         break;
                     }
-                     b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
+                    b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
                     break;
                 default:
                     break;
@@ -1704,13 +1700,6 @@
 
             device.reset_ibutton_data();
 
-            if(b_read){
-                device.set_ignore_ibutton_data(false);
-            }
-            else{
-                device.set_ignore_ibutton_data(true);
-            }
-
             switch(_get_status(device.get_device_index())){
                 case _type_status.ST_IDLE:
                     if( !_check_server_and_device(server,device)){
@@ -1726,7 +1715,6 @@
                         break;
                     }
                      b_result = _cancel_start_io(server,device,_cb_complete_rsp,_cb_error_frame );
-                     return true;
                     break;
                 default:
                     break;
@@ -1735,6 +1723,13 @@
 
 
         if( b_result ){
+            if(b_read){
+                device.set_ignore_ibutton_data(false);
+            }
+            else{
+                device.set_ignore_ibutton_data(true);
+            }
+
             var parameter = {
                 "server" : server,
                 "device" : device,
@@ -1746,102 +1741,9 @@
             };
             elpusk.util.map_of_queue_push(_map_q_para,device.get_device_index(),parameter);
         }
-        else{
-            device.set_ignore_ibutton_data(true);
-        }
 
         return b_result;
     };
-
-    /**
-     * @public
-     * @function disable_read_card_from_device_with_promise
-     * @return {object} return promise object.
-     * @description disable the waiting read a card.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-     */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.disable_read_card_from_device_with_promise = function(){
-
-        var b_error = true;
-        var server = this._server;
-        var device = this._device;
-
-        do{
-            device.reset_msr_data();
-
-            switch(_get_status(device.get_device_index())){
-                case _type_status.ST_IDLE:
-                    if( !_check_server_and_device(server,device)){
-                        continue;
-                    }
-                    _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
-                    break;
-                case _type_status.ST_WAIT_READ_DATA:
-                    break;
-                default:
-                    continue;
-            }//end switch
-
-            b_error = false;
-        }while(false);
-
-        if( b_error ){
-            return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
-        else{
-            return server.device_cancel(device.get_device_index(),0,0,);
-        } 
-    };    
-
-    /**
-     * @public
-     * @function disable_read_ibutton_from_device_with_promise
-     * @return {object} return promise object.
-     * @description disable the waiting read a ibutton.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
-     */
-    _elpusk.framework.coffee.ctl_lpu237.prototype.disable_read_ibutton_from_device_with_promise = function(){
-
-        var b_error = true;
-        var server = this._server;
-        var device = this._device;
-
-        do{
-            device.reset_ibutton_data();
-
-            switch(_get_status(device.get_device_index())){
-                case _type_status.ST_IDLE:
-                    if( !_check_server_and_device(server,device)){
-                        continue;
-                    }
-                    _set_status(device.get_device_index(),_type_status.ST_WAIT_CANCEL);
-                    break;
-                case _type_status.ST_WAIT_READ_DATA:
-                    break;
-                default:
-                    continue;
-            }//end switch
-
-            b_error = false;
-        }while(false);
-
-        if( b_error ){
-            return new Promise(function (resolve, reject) {
-                reject(new Error("error"));//another is running.
-                }
-            );//the end promise            
-        }
-        else{
-            return server.device_cancel(device.get_device_index(),0,0,);
-        } 
-    };    
     
     ////////////////////////////////////////////////////////////////////////////
     // the end of function
