@@ -5,7 +5,7 @@
 # elpusk.framework.coffee
 coffee manager interface JavaScript  library( = cmi-js )
 
-v2.2.0 - supports coffee framework second edition.
+v2.2.1 - supports coffee framework second edition.
 
 # elpusk.device.usb.hid.lpu237
 lpu237 device protocol JavaScript  library for cmi-js.

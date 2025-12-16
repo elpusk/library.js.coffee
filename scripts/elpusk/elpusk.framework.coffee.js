@@ -23,7 +23,7 @@
  * 
  * @author developer 00000006
  * @copyright Elpusk.Co.,Ltd 2025
- * @version 2.2.0
+ * @version 2.2.1
  * @description elpusk framework coffee javascript library.
  * <br />  2020.3.5 - release 1.0.
  * <br />  2020.3.25 - release 1.1. 
@@ -85,6 +85,9 @@
  *
  * <br />  2025.12.15 - release 2.2.0
  * <br />  : add shared open mode to device_open() method.
+ *
+ * <br />  2025.12.16 - release 2.2.1
+ * <br />  : fix device_open() share mode dregon code.
  * 
  * @namespace
  */
@@ -3248,6 +3251,8 @@
                                 var s_json_packet = "";
 
                                 if(b_shared){
+                                    //this is dregon!
+                                    var _s_removed_doublecolron = String(s_path).replace(/::/g,':'); //replace all "::" -> ':'
                                     var json_packet = _generate_request_packet(
                                         _type_packet_owner.DEVICE
                                         , const_n_undefined_device_index
@@ -3255,7 +3260,7 @@
                                         , 0
                                         , 0
                                         , _type_data_field_type.STRING_OR_STRING_ARRAY
-                                        , [String(s_path),"share"]
+                                        , [_s_removed_doublecolron,"share"]
                                     );
                                     s_json_packet = JSON.stringify(json_packet);
                                 }
@@ -4169,7 +4174,8 @@
         //return "1.12.2";//remove _elpusk.framework.coffee.get_session_number().
         //return "2.0.0";//supports coffee framework second edition.
         //return "2.1.0"; // change browser detect code.
-        return "2.2.0"; // add shared open mode.
+        //return "2.2.0"; // add shared open mode.
+        return "2.2.1";//fix device_open() share mode dregon code.
     }
 
     /**
