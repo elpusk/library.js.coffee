@@ -1,6 +1,6 @@
 /**
  * @license MIT
- * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ * Copyright (c) 2025 Elpusk.Co.,Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,32 +35,31 @@
     if (!_elpusk.device) {
         'use strict';
         /**
-         * @constructs elpusk.device
-         * @param {string} s_path the path of device.
+         * @class elpusk.device
+         * @classdesc Represents a device.
+         * @param {string} s_path The path of the device.
         */
         _elpusk.device = function(s_path)
         {
             /**
+             * The path of the device.
+             * @private
              * @type {string}
              */
-            if( typeof s_path !== 'string' ){
-                this._s_path = "";
-            }
-            else{
-                this._s_path = s_path;
-            }
+            this._s_path = (typeof s_path === 'string') ? s_path : '';
 
             /**
+             * The index of the device. 0 is an undefined index number.
+             * @private
              * @type {number}
              */
-            this._n_device_index = 0;// 0 is undefined index number
+            this._n_device_index = 0;
 
         };
 
         /**
-         * @public
-         * @function get_path
-         * @return {string} device path.
+         * Gets the device path.
+         * @returns {string} The device path.
          */
         _elpusk.device.prototype.get_path = function()
         {
@@ -68,9 +67,8 @@
         }
 
         /**
-         * @public
-         * @function get_device_index
-         * @return {number} the index of device. 0 is unknown index value.
+         * Gets the index of the device.
+         * @returns {number} The index of the device. 0 is an unknown index value.
          */
         _elpusk.device.prototype.get_device_index = function()
         {
@@ -78,9 +76,9 @@
         }
 
         /**
-         * @public
-         * @function opened
-         * @param {number} n_device_index the index of device. 0 is unknown index value.
+         * Sets the device index when the device is opened.
+         * @param {number} n_device_index The index of the device. 0 is an unknown index value.
+         * @returns {void}
          */
         _elpusk.device.prototype.opened = function(n_device_index)
         {
@@ -88,8 +86,8 @@
         }
 
         /**
-         * @public
-         * @function closed
+         * Resets the device index when the device is closed.
+         * @returns {void}
          */
         _elpusk.device.prototype.closed = function()
         {
