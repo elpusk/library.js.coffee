@@ -40,15 +40,14 @@
         _elpusk.device.usb = {};
     }
 
-    /**
-     * @class usb hid base class
-    */
     if (!_elpusk.device.usb.hid) {
 
         'use strict';
         /**
-         * @constructs elpusk.device.usb.hid
-         * @param {string} s_path the path of usb hid device.
+         * @class elpusk.device.usb.hid
+         * @classdesc USB HID base class.
+         * @extends elpusk.device.usb
+         * @param {string} s_path The path of the USB HID device.
         */
         _elpusk.device.usb.hid = function( s_path ){
             elpusk.device.usb.call(this,s_path);
