@@ -1,6 +1,9 @@
 /**
+ * @file elpusk.device.usb.js
+ * @version 1.0
+ * @author Elpusk
  * @license MIT
- * Copyright (c) 2020 Elpusk.Co.,Ltd.
+ * @copyright (c) 2020 Elpusk.Co.,Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +22,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * @namespace elpusk.device
+ * @description USB device manager.
  */
 
 'use strict';
@@ -36,14 +41,12 @@
         _elpusk.device = {};
     }
 
-    /**
-     * @class usb device manager
-    */
     if (!_elpusk.device.usb) {
         /**
-         * @constructs elpusk.device.usb
-         * @param {string} s_path the path of usb device.
-        */
+         * @class
+         * @classdesc USB device manager.
+         * @param {string} s_path The path of the USB device.
+         */
         _elpusk.device.usb = function(s_path){
             elpusk.device.call(this,s_path);
         };
@@ -51,7 +54,6 @@
         _elpusk.device.usb.prototype = Object.create(elpusk.device.prototype);
         _elpusk.device.usb.prototype.constructor = _elpusk.device.usb;
     }
-
 
     // the end of function
     window.elpusk = _elpusk;
