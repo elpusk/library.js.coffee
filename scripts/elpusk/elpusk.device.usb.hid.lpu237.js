@@ -1,8 +1,6 @@
 /**
- * 2022.03.29
+ * @file elpusk.device.usb.hid.lpu237.js
  * @license MIT
- * Copyright (c) 2022 Elpusk.Co.,Ltd.
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,7 +20,7 @@
  * SOFTWARE.
  * 
  * @author developer 00000006
- * @copyright Elpusk.Co.,Ltd 2022
+ * @copyright (c) 2022 Elpusk.Co.,Ltd.
  * @version 1.14
  * @description elpusk lpu237 device protocol layer library.
  * <br />   2020.4.10 - release 1.0. 
@@ -63,9 +61,8 @@
  *                     - add ibutton remove tag and remove pre/posfix. expanded structure to version 4.0 
  * <br />   2025.11.26 - release 1.14
  *                     - add get_type_string() public method.
- * 
- * @namespace
  */
+
 'use strict';
 
 (function (window, undefined) {
@@ -1415,7 +1412,7 @@
         /**
          * @private
          * @function _get_freqency_from_timer_count
-         * @param {number} the count number of HW timer
+         * @param {number} n_count the count number of HW timer
          * @returns {number} frequency(unit : Hz)
          */
         function _get_freqency_from_timer_count( n_count ){
@@ -4908,7 +4905,7 @@
          * @private
          * @function _generate_set_track_order
          * @param {string[]} queue_s_tx  generated request will be saved in this queue( array type ).
-         * @param {array number} array_n_order 3 item array of number
+         * @param {number[]} array_n_order 3 item array of number
          * @returns {boolean} true(success) or false(failure).
          */
          function _generate_set_track_order(queue_s_tx, array_n_order){
@@ -5732,9 +5729,8 @@
 
         /**
          * @class lpu237
-         * @classdesc this class support protocol layer for lpu237 magnetic card reader.
-         * @constructs elpusk.device.usb.hid.lpu237
-         * @param {string} s_path the path of usb hid lpu237 device.
+         * @classdesc Protocol layer for the LPU237 magnetic card reader.
+         * @param {string} s_path The path of the USB HID LPU237 device.
         */
         _elpusk.device.usb.hid.lpu237 = function( s_path ){
 
@@ -10384,13 +10380,12 @@
         }
 
         /**
+         * Returns a string containing the system parameters in an HTML table format.
+         *
          * @public
-         * @function elpusk.device.usb.hid.lpu237.get_string_html_table
-         * @param {string} s_section can be null , "system", "iso1", "iso2" or "iso3". another value is null
-         * @return {string} the system parameters
-         * @description return the string of system parameters. 
-         * <br /> this string is html-table format."\n".
-        */
+         * @param {string} [s_section=null] - The section to retrieve. Can be "system", "iso1", "iso2", or "iso3". If null, all sections are retrieved.
+         * @returns {string} The system parameters as an HTML table.
+         */
        _elpusk.device.usb.hid.lpu237.prototype.get_string_html_table = function(s_section){
             var s_description = "";
             var as_name = [];
@@ -10744,89 +10739,87 @@
         }
 
         /**
+         * Converts a tag string from the device (in hex format) to an array of ASCII hex strings.
+         *
          * @public
-         * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_hex_string
-         * @param {string} s_tag this string is received from device by hex string format.
-         * @returns {string[]} hex string format array of ASCII code of tag.
-        */
+         * @param {string} s_tag - The tag string received from the device, in hex format.
+         * @returns {string[]} An array of ASCII codes as hex strings.
+         */
         _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_hex_string = function(s_tag){
             return _get_tag_by_ascii_hex_string( this._n_language_index, s_tag );
         }
 
         /**
+         * Checks if the response indicates a successful entry into OPOS mode.
+         *
          * @public
-         * @function is_success_enter_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
+         * @param {string} s_response - The response packet from the LPU237 device.
+         * @returns {boolean} `true` if the response indicates success (good or negative good), `false` otherwise.
          */
         _elpusk.device.usb.hid.lpu237.prototype.is_success_enter_opos_mode = function(s_response){
             return _is_success_response(s_response);
         }
 
         /**
+         * Checks if the response indicates a successful exit from OPOS mode.
+         *
          * @public
-         * @function is_success_leave_opos_mode
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        _elpusk.device.usb.hid.lpu237.prototype.is_success_leave_opos_mode= function(s_response){
-            return _is_success_response(s_response);
-        }
+         * @param {string} s_response - The response packet from the LPU237 device.
+         * @returns {boolean} `true` if the response indicates success (good or negative good), `false` otherwise.
+         */
 
         /**
+         * Checks if the response indicates a successful bootloader run.
+         *
          * @public
-         * @function is_success_run_boot_loader
-         * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {boolean} true - response contains good or negative good.
-         * <br /> false - else case.
-         */        
-        _elpusk.device.usb.hid.lpu237.prototype.is_success_run_boot_loader = function(s_response){
-            return _is_success_response(s_response);
-        }
+         * @param {string} s_response - The response packet from the LPU237 device.
+         * @returns {boolean} `true` if the response indicates success (good or negative good), `false` otherwise.
+         */
 
         /**
+         * Converts a tag string from the device to an array of ASCII codes.
+         *
          * @public
-         * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_code
-         * @param {string} s_len_tag_hex this string is received from device by hex string format.
-         * @returns {number[]} ASCII code array of tag.
+         * @param {string} s_len_tag_hex - The tag string received from the device, in hex format, with length prepended.
+         * @returns {number[]} An array of ASCII codes representing the tag.
          */
         _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_code = function(s_tag){
             return _get_tag_by_ascii_code(this._n_language_index, s_tag );
         }
 
         /**
+         * Converts a tag string from the device to a string of ASCII characters.
+         *
          * @public
-         * @function elpusk.device.usb.hid.lpu237.get_tag_by_ascii_string
-         * @param {string} s_len_tag_hex this string is received from device by hex string format.
-         * @returns {string[]} string format of ASCII code of tag.
+         * @param {string} s_len_tag_hex - The tag string received from the device, in hex format, with length prepended.
+         * @returns {string[]} An array of strings representing the tag's ASCII characters.
          */
         _elpusk.device.usb.hid.lpu237.prototype.get_tag_by_ascii_string = function(s_tag){
             return _get_tag_by_ascii_string(this._n_language_index, s_tag );
         }
 
-        /** 
-         * @public 
-         * @function get_error_message
-         * @param {string} s_error_name
-         * @returns {string}
-         * @description get error message with error name
-        */                
+        /**
+         * Retrieves the error message associated with a given error name.
+         *
+         * @public
+         * @param {string} s_error_name - The name of the error.
+         * @returns {string} The corresponding error message.
+         */                
         _elpusk.device.usb.hid.lpu237.prototype.get_error_message = function(s_error_name){
            return _get_error_message(s_error_name);
         }
 
         /**
-         * Classify device type
-         * - Ends with "&msr"              => "compositive_msr"
-         * - Ends with "&scr" + digits     => "compositive_scr"
-         * - Ends with "&ibutton"          => "compositive_ibutton"
-         * - Ends with "&switch" + digits  => "compositive_switch"
-         * - Otherwise                     => "primitive"
-         * - not string                    => ""
+         * Classifies the device type based on its path.
          *
-         * @returns {string}
+         * @public
+         * @returns {string} The device type, which can be one of the following:
+         * - "compositive_msr": For MSR devices.
+         * - "compositive_scr": For SCR devices.
+         * - "compositive_ibutton": For iButton devices.
+         * - "compositive_switch": For switch devices.
+         * - "primitive": For other device types.
+         * - "": If the path is not a string.
          */
         _elpusk.device.usb.hid.lpu237.prototype.get_type_string = function() 
         {
