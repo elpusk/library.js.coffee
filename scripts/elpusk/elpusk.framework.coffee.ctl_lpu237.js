@@ -58,7 +58,7 @@
 'use strict';
 
 
-(function (window, undefined) {
+(function (window) {
     /**@private */
     var _elpusk = window.elpusk;
 
@@ -81,6 +81,15 @@
 
     //////////////////////////////////////////////////////////////////////////
     //
+    /**
+     * @readonly
+     * @enum {number}
+     * @property {number} ST_UNDEFINED - Represents an undefined state, typically an initial or error state.
+     * @property {number} ST_IDLE - Represents an idle state where no specific operation is in progress.
+     * @property {number} ST_WAIT_RSP - Represents a state where the system is waiting for a response from the device.
+     * @property {number} ST_WAIT_READ_DATA - Represents a state where the system is waiting for MSR or iButton data from an opened device.
+     * @property {number} ST_WAIT_CANCEL - Represents a state where the system is waiting for a cancellation confirmation.
+     */
     var _type_status = {
         ST_UNDEFINED : -1,
         ST_IDLE : 0,
@@ -92,12 +101,14 @@
     /**
      * map of queue of promise resolve & reject.
      * @private
+     * @type {Map<number, object>}
      */
     var _map_q_para = new Map();
 
     /**
      * map of device status
      * @private
+     * @type {Map<number, number>}
      */
     var _map_status = new Map();
 
@@ -167,10 +178,10 @@
     /**
      * @private
      * @function _gen_get_sysinfo_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target devuce object.
-     * @param {function} cb_complete_sys_info It is called "callback function" when "get system information" is completed successfually. 
-     * @param {function} cb_error_sys_info It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_sys_info It is called "callback function" when "get system information" is completed successfully.
+     * @param {function(number, Error)} cb_error_sys_info It is called "callback function" when error is occurred.
      * @return {number} greater then zero - request is delivered to server successfully.
      * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "get system information" to server by callback method.
@@ -210,10 +221,10 @@
     /**
      * @private
      * @function _gen_get_para_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target devuce object.
-     * @param {function} cb_complete_get_parameter It is called "callback function" when "get parameters" is completed successfually. 
-     * @param {function} cb_error_get_parameter It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_get_parameter It is called "callback function" when "get parameters" is completed successfully.
+     * @param {function(number, Error)} cb_error_get_parameter It is called "callback function" when error is occurred.
      * @return {number} greater then zero - request is delivered to server successfully.
      * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "get parameters" to server by callback method.
@@ -255,10 +266,10 @@
     /**
      * @private
      * @function _gen_set_para_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target devuce object.
-     * @param {function} cb_complete_set_parameter It is called "callback function" when "set parameters" is completed successfually. 
-     * @param {function} cb_error_set_parameter It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_set_parameter It is called "callback function" when "set parameters" is completed successfully.
+     * @param {function(number, Error)} cb_error_set_parameter It is called "callback function" when error is occurred.
      * @return {number} greater then zero - request is delivered to server successfully.
      * <br /> zero or negative - It is failed that request is delivered.
      * @description requests "set parameters" to server by callback method.
@@ -299,11 +310,11 @@
     /**
      * @private
      * @function _gen_opos_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target device object.
-     * @param {function} cb_complete_changed_opos If b_read parameter is true, It is called "callback function" when "card reading" is completed successfully. 
-     * <br /> If b_read parameter is false, It is called "callback function" when device accepts your request successfully. 
-     * @param {function} cb_error_changed_opos It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_changed_opos If b_read parameter is true, It is called "callback function" when "card reading" is completed successfully.
+     * <br /> If b_read parameter is false, It is called "callback function" when device accepts your request successfully.
+     * @param {function(number, Error)} cb_error_changed_opos It is called "callback function" when error is occurred.
      * @param {boolean} b_read true - device waits a card reading.
      * <br /> false - device ignore a card reading.
      * @return {boolean} true - request is delivered to server successfully.
@@ -348,13 +359,13 @@
     /**
      * @private
      * @function _cancel_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target device object.
-     * @param {function} cb_complete_cancel It is called "callback function" when device accepts your request successfully. 
-     * @param {function} cb_error_cancel It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_cancel It is called "callback function" when device accepts your request successfully.
+     * @param {function(number, Error)} cb_error_cancel It is called "callback function" when error is occurred.
      * @return {boolean} true - request is delivered to server successfully.
      * <br /> false - It is failed that request is delivered.
-     * @description requests "canel" to server by callback method.
+     * @description requests "cancel" to server by callback method.
      */
     function _cancel_start_io(server,device,cb_complete_cancel,cb_error_cancel ){
         var b_result = false;
@@ -373,10 +384,10 @@
     /**
      * @private
      * @function _gen_run_bootloader_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target device object.
-     * @param {function} cb_complete_run_bootloader It is called "callback function" when device accepts your request successfully. 
-     * @param {function} cb_error_run_bootloader It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_run_bootloader It is called "callback function" when device accepts your request successfully.
+     * @param {function(number, Error)} cb_error_run_bootloader It is called "callback function" when error is occurred.
      * @return {boolean} true - request is delivered to server successfully.
      * <br /> false - It is failed that request is delivered.
      * @description requests execute the bootloader of lpu237 device.
@@ -415,13 +426,13 @@
         return b_result;
     }    
 
-/**
+    /**
      * @private
      * @function _gen_ibutton_start_io
-     * @param {object} server coffee manager server object.
-     * @param {object} device target device object.
-     * @param {function} cb_complete_ibutton It is called "callback function" when device accepts your request successfully. 
-     * @param {function} cb_error_ibutton It is called "callback function" when error is occured.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @param {function(number, (Array<string>|string))} cb_complete_ibutton It is called "callback function" when device accepts your request successfully.
+     * @param {function(number, Error)} cb_error_ibutton It is called "callback function" when error is occurred.
      * @return {boolean} true - request is delivered to server successfully.
      * <br /> false - It is failed that request is delivered.
      * @description requests execute the bootloader of lpu237 device.
@@ -454,9 +465,14 @@
     /**
      * @private
      * @function _notifiy_error
-     * @param {object} parameter object that contains notification information.
-     * @param {object|undefined} event_error option Event object
-     * @description call error callback function or call promise reject.
+     * @param {object} parameter - Object containing notification information. Expected properties:
+     * @param {function(string): void} [parameter.resolve] - The promise resolve function.
+     * @param {function(Error): void} [parameter.reject] - The promise reject function.
+     * @param {function(number, string): void} [parameter.cb_received] - The callback for received data.
+     * @param {function(number, Error): void} [parameter.cb_error] - The callback for error events.
+     * @param {elpusk.device.usb.hid.lpu237} parameter.device - The device object.
+     * @param {Error|undefined} event_error - Optional Error object.
+     * @description Calls the error callback function or rejects the promise with the given error.
      */
     function _notifiy_error( parameter,event_error ){
         do{
@@ -484,9 +500,9 @@
     /**
      * @private
      * @function _notifiy_error_all
-     * @param {number} n_device_index the device index
-     * @param {object|undefined} event_error option Event object
-     * @description call error callback function of the device. or call promise reject of it.
+     * @param {number} n_device_index The device index.
+     * @param {Error|undefined} event_error Optional Error object.
+     * @description Calls the error callback function or rejects the promise for all pending operations associated with the specified device.
      */
     function _notifiy_error_all( n_device_index,event_error ){
         do{
@@ -513,8 +529,8 @@
     /**
      * @private
      * @function _notifiy_error_map
-     * @param {object|undefined} event_error option Event object
-     * @description call error callback function of _map_q_para. or call promise reject of it.
+     * @param {Error|undefined} event_error Optional Error object.
+     * @description Calls the error callback function or rejects the promise for all pending operations across all devices in `_map_q_para`.
      */
     function _notifiy_error_map( event_error ){
         do{
@@ -528,8 +544,11 @@
     /**
      * @private
      * @function _notifiy_received
-     * @param {object} parameter object that contains notification information.
-     * @description call received callback function or call promise resolve.
+     * @param {object} parameter - Object containing notification information. Expected properties:
+     * @param {function(string): void} [parameter.resolve] - The promise resolve function.
+     * @param {function(number, string): void} [parameter.cb_received] - The callback for received data.
+     * @param {elpusk.device.usb.hid.lpu237} parameter.device - The device object.
+     * @description Calls the received callback function or resolves the promise.
      */
     function _notifiy_received( parameter ){
         do{
@@ -549,9 +568,10 @@
     /**
      * @private
      * @function _is_event_rsp_good
-     * @param {object} device lpu237 protocol object.
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description check whether the response of coffee framework is success or not.
+     * @param {elpusk.device.usb.hid.lpu237} device lpu237 protocol object.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework. It can be an array like `["success"]` or a string for device transaction responses.
+     * @returns {boolean} True if the response indicates success or a valid device transaction, false otherwise.
+     * @description Checks whether the response of coffee framework is successful or indicates a valid device transaction.
      */
     function _is_event_rsp_good(device,s_rx) {
         var b_result = false;
@@ -576,8 +596,9 @@
     /**
      * @private
      * @function _is_event_rsp_cancel
-     * @param {Array} s_rx the received data that is the data field of  coffee framework.
-     * @description check whether the response of coffee framework is the string array that it's the first item is "cancel".
+     * @param {Array<string>} s_rx The received data that is the data field of coffee framework. Expected to be an array where the first item is "cancel".
+     * @returns {boolean} True if the response is a cancel event, false otherwise.
+     * @description Checks whether the response of coffee framework is a cancel event, specifically an array whose first item is "cancel".
      */
     function _is_event_rsp_cancel(s_rx) {
         var b_result = false;
@@ -596,9 +617,8 @@
     /**
      * @private
      * @function _process_rsp_event_in_idle
-     * @param {number} n_device_index the device index
-     * @description the sub function of _cb_complete_rsp() in idle status.
-     * <br /> process the ocurred event in idle status.(card reading case)
+     * @param {number} n_device_index The device index.
+     * @description Processes an occurred event in the idle status, typically for card reading scenarios, by notifying all pending operations of an error and clearing the queue.
      */
     function _process_rsp_event_in_idle(n_device_index){
         _notifiy_error_all(n_device_index);
@@ -608,10 +628,9 @@
     /**
      * @private
      * @function _process_rsp_event_in_wait_rsp
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description the sub function of _cb_complete_rsp() in waiting-response status.
-     * <br /> process the ocurred event in waiting-response status.(card reading case)
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description Processes an occurred event in the waiting-response status, typically for card reading scenarios, handling successful responses or errors.
      */
     function _process_rsp_event_in_wait_rsp(n_device_index,s_rx){
         do{
@@ -650,10 +669,9 @@
     /**
      * @private
      * @function _process_rsp_event_in_wait_card
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description the sub function of _cb_complete_rsp() in waiting-card-data status.
-     * <br /> process the ocurred event in waiting-card-data status.(card reading case)
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description Processes an occurred event in the waiting-for-card-data status, typically for card reading scenarios, handling cancel events, successful card data reception, or errors.
      */
     function _process_rsp_event_in_wait_card(n_device_index,s_rx){
 
@@ -713,10 +731,9 @@
     /**
      * @private
      * @function _process_rsp_event_in_wait_cancel
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description the sub function of _cb_complete_rsp() in waiting-cancel-response status.
-     * <br /> process the ocurred event in waiting-cancel-response status.(card reading case)
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description Processes an occurred event in the waiting-for-cancel-response status, typically for card reading scenarios, handling successful cancellation or errors.
      */
     function _process_rsp_event_in_wait_cancel(n_device_index,s_rx){
         do{
@@ -770,10 +787,9 @@
     /**
      * @private
      * @function _cb_complete_rsp
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description the callback function  in waiting a response.(card reading case)
-     * <br /> process the ocurred event in waiting a response status.(card reading case)
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is invoked when a response is received, processing events based on the current device status in card reading scenarios.
      */
     function _cb_complete_rsp(n_device_index,s_rx ){
         //event e_rsp_good		e_rsp_error	e_rsp_cancel	e_rsp_card
@@ -805,11 +821,9 @@
     /**
      * @private
      * @function _cb_error_frame
-     * @param {number} n_device_index the device index
-     * @param {object} event_error Error object.
-     * @description the callback function  of a error event.(card reading case)
-     * <br /> this function is not processed a missing card data event.(card reading case)
-     * <br /> a missing card data event is processed by _cb_complete_rsp().
+     * @param {number} n_device_index The device index.
+     * @param {Error} event_error Error object.
+     * @description This callback function is invoked on a frame error, indicating a communication issue with the device. It notifies all pending operations of the error and resets the device status.
      */
     function _cb_error_frame( n_device_index,event_error ){
         //event e_frame_error
@@ -821,10 +835,9 @@
     /**
      * @private
      * @function _cb_error_common
-     * @param {object} event_error Event object
-     * @description local callback function.
-     * <br /> this is called when error is occured in a  request.
-     * <br /> _cb_error_frame() will be used in card reading case.
+     * @param {number} n_device_index The device index.
+     * @param {Error} event_error Error object.
+     * @description This callback function is called when a common error occurs during a request, notifying the corresponding pending operation of the error.
      */
     function _cb_error_common( n_device_index,event_error ){
         var parameter = elpusk.util.map_of_queue_front(_map_q_para,n_device_index);
@@ -833,9 +846,9 @@
     /**
      * @private
      * @function _cb_complete_get_parameter
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description this callback function will be called when "get parameters" request is done.
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is called when a "get parameters" request is completed, processing the received data and handling subsequent requests if necessary.
      */
     function _cb_complete_get_parameter( n_device_index,s_rx  ){
         var b_result = false;
@@ -892,10 +905,9 @@
     /**
      * @private
      * @function _cb_complete_sys_info
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description this callback function will be called when "get system parameters" request is done.
-     * <br /> this function is processed the getting all parameters after done system info.
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is called when a "get system parameters" request is completed, subsequently triggering the process to get all other parameters.
      */
     function _cb_complete_sys_info( n_device_index,s_rx  ){
         var b_result = false;
@@ -959,10 +971,9 @@
     /**
      * @private
      * @function _cb_complete_sys_info_only
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description this callback function will be called when "get system parameters" request is done.
-     * <br /> this function is not processed the getting all parameters after done system info.
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is called when a "get system parameters" request is completed, but does not proceed to get all other parameters.
      */
     function _cb_complete_sys_info_only( n_device_index,s_rx  ){
         var b_result = false;
@@ -1020,9 +1031,9 @@
     /**
      * @private
      * @function _cb_complete_set_parameter
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description this callback function will be called when "set parameters" request is done.
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is called when a "set parameters" request is completed, processing the received data and handling subsequent requests if necessary.
      */
     function _cb_complete_set_parameter( n_device_index,s_rx  ){
         var b_result = false;
@@ -1082,9 +1093,9 @@
     /**
      * @private
      * @function _cb_complete_run_bootloader
-     * @param {number} n_device_index the device index
-     * @param {Array|String} s_rx the received data that is the data field of  coffee framework.
-     * @description this callback function will be called when "run bootloader" request is done.
+     * @param {number} n_device_index The device index.
+     * @param {Array<string>|string} s_rx The received data that is the data field of coffee framework.
+     * @description This callback function is called when a "run bootloader" request is completed, processing the received data and handling subsequent requests if necessary.
      */
     function _cb_complete_run_bootloader( n_device_index,s_rx  ){
         var b_result = false;
@@ -1141,10 +1152,10 @@
     /**
      * @private
      * @function _check_server_and_device
-     * @param {object} server coffee manager server object
-     * @param {object} device lpu237 protocol object.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device lpu237 protocol object.
      * @returns {boolean} true - server & device object is available.
-     * <br /> false - server is invalied or device object is not openned.
+     * <br /> false - server is invalid or device object is not opened.
      */
     function _check_server_and_device(server,device) {
         var b_check_ok = false;
@@ -1165,11 +1176,11 @@
 
     /**
      * @constructs elpusk.framework.coffee.ctl_lpu237
-     * @param {object} server coffee manager server object.
-     * @param {object} device target devuce object.
-     * @description constucture of lpu237 control class.
+     * @param {elpusk.framework.coffee} server coffee manager server object.
+     * @param {elpusk.device.usb.hid.lpu237} device target device object.
+     * @description Constructor of lpu237 control class.
     */
-    _elpusk.framework.coffee.ctl_lpu237 = function(server,device,undefined){
+    _elpusk.framework.coffee.ctl_lpu237 = function(server,device){
         //private variables
         this._server = server;
         this._device = device;
@@ -1200,7 +1211,7 @@
     /**
      * @public
      * @function get_server
-     * @return {object} return server obejct of this controller.
+     * @return {elpusk.framework.coffee} return server object of this controller.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.get_server = function(){
         return this._server;
@@ -1209,7 +1220,7 @@
     /**
      * @public
      * @function get_device
-     * @return {object} return lpu237 object of  this controller.
+     * @return {elpusk.device.usb.hid.lpu237} return lpu237 object of this controller.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.get_device = function(){
         return this._device;
@@ -1218,11 +1229,10 @@
     /**
      * @public
      * @function open_with_promise
-     * @return {object} return promise object.
-     * @description execute "open device" with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Executes "open device" with the server and lpu237 object provided during construction.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.open_with_promise = function(){
         var _server = this._server;
@@ -1278,11 +1288,10 @@
     /**
      * @public
      * @function close_with_promise
-     * @return {object} return promise object.
-     * @description execute "close device" with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Executes "close device" with the server and lpu237 object provided during construction.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.close_with_promise = function(){
         var _server = this._server;
@@ -1342,15 +1351,13 @@
     /**
      * @public
      * @function load_all_parameter_from_device_with_promise
-     * @param {function} cb_progress this function will be called each stage of "get system information" and "get parameters".
-     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
-     * @return {object} return promise object.
-     * @description execute "get system information" and "get parameters" with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br /> the parameter of promise's reject is Error object.( this object message is "error" string ).
-     * <br /> this function process "get system parameters" and "get parameters" requests.
-     * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
+     * @param {function(number, number, number)} cb_progress This function will be called each stage of "get system information" and "get parameters". `cb_progress` prototype is `cb_progress(n_device_index, n_number_of_stage, n_current_stage)`.
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Executes "get system information" and "get parameters" with the server and lpu237 object provided during construction.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
+     * <br /> This function processes "get system parameters" and "get parameters" requests.
+     * <br /> Therefore, `cb_progress()` will be called multiple times for "get system parameters" and "get parameters" requests.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.load_all_parameter_from_device_with_promise = function(cb_progress){
         var b_error = true;
@@ -1413,16 +1420,12 @@
     /**
      * @public
      * @function load_min_parameter_from_device_with_promise
-     * @param {function} cb_progress this function will be called each stage of "get system information".
-     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
-     * @return {object} return promise object.
-     * @description execute "get system information" with server and lpu237 object by construcutor.
-     * <br /> this function will be used in reading msr or ibutton.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br /> the parameter of promise's reject is Error object.( this object message is "error" string ).
-     * <br /> this function process "get system parameters" and "get parameters" requests.
-     * <br /> therefore cb_progress() will be started twice for "get system parameters" and "get parameters" requests.
+     * @param {function(number, number, number)} cb_progress This function will be called each stage of "get system information". `cb_progress` prototype is `cb_progress(n_device_index, n_number_of_stage, n_current_stage)`.
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Executes "get system information" with the server and lpu237 object provided during construction.
+     * <br /> This function is used when reading MSR or iButton data.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.load_min_parameter_from_device_with_promise = function(cb_progress){
         var b_error = true;
@@ -1485,13 +1488,11 @@
     /**
      * @public
      * @function save_parameter_to_device_with_promise
-     * @param {function} cb_progress this function will be called each stage of "set parameters".
-     * <br /> cb_progress prototype is cb_progress( n_device_index, n_number_of_stage, n_current stage )
-     * @return {object} return promise object.
-     * @description execute "set parameters" with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * @param {function(number, number, number)} cb_progress This function will be called each stage of "set parameters". `cb_progress` prototype is `cb_progress(n_device_index, n_number_of_stage, n_current_stage)`.
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Executes "set parameters" with the server and lpu237 object provided during construction.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.save_parameter_to_device_with_promise = function(cb_progress){
         var b_error = true;
@@ -1555,11 +1556,10 @@
     /**
      * @public
      * @function run_bootloader_of_device_with_promise
-     * @return {object} return promise object.
-     * @description run bootload of lpu237 device with server and lpu237 object by construcutor.
-     * <br /> the result of proccess will be given promise object type.
-     * <br /> Always the parameter of promise's resolve is "success" string.
-     * <br />  the parameter of promise's reject is Error object.( this object message is "error" string ).
+     * @return {Promise<string>} A promise that resolves with "success" or rejects with an `Error` object.
+     * @description Runs the bootloader of the lpu237 device using the server and lpu237 object provided during construction.
+     * <br /> The promise resolves with the string "success".
+     * <br /> The promise rejects with an `Error` object, whose message is typically "error".
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.run_bootloader_of_device_with_promise = function(){
         var b_error = true;
@@ -1615,17 +1615,16 @@
      * @function read_card_from_device_with_callback
      * @param {boolean} b_read true - reading card.
      * <br /> false - ignore reading card.
-     * @param {function} cb_read_done called when a card reading is done. or canceled ready for reading.
-     * @param {function} cb_read_error called when a error is ocurred.
-     * @returns {boolean}   true - success processing.
+     * @param {function(number, string): void} cb_read_done Called when a card reading is done, or when the ready-for-reading state is canceled.
+     * @param {function(number, Error): void} cb_read_error Called when an error occurs.
+     * @returns {boolean} true - success processing.
      * <br /> false - error.
-     * @description lpu237's status is changed to "reading card" or "ignore reading card."
-     * If this function is executed with "b_read is true", 
-     * <br /> lpu237 call cb_read_done whenever a card is reading done,
-     * <br /> until error(communincation error or protcol error) is ocurred 
-     * <br /> this function is executed with "b_read is false".
-     * 
-     * <br /> the result of proccess will be given by callback function.
+     * @description Changes the lpu237's status to "reading card" or "ignore reading card."
+     * If this function is executed with "b_read is true",
+     * <br /> lpu237 calls `cb_read_done` whenever a card reading is completed,
+     * <br /> until an error (communication error or protocol error) occurs
+     * <br /> or this function is executed with "b_read is false".
+     * <br /> The result of the process will be given by the callback function.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_card_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
 
@@ -1681,19 +1680,18 @@
     /**
      * @public
      * @function read_ibutton_from_device_with_callback
-     * @param {boolean} b_read true - reading ibutton.
-     * <br /> false - ignore reading ibutton.
-     * @param {function} cb_read_done called when a ibutton reading is done. or canceled ready for reading.
-     * @param {function} cb_read_error called when a error is ocurred.
-     * @returns {boolean}   true - success processing.
+     * @param {boolean} b_read true - reading iButton.
+     * <br /> false - ignore reading iButton.
+     * @param {function(number, string): void} cb_read_done Called when an iButton reading is done, or when the ready-for-reading state is canceled.
+     * @param {function(number, Error): void} cb_read_error Called when an error occurs.
+     * @returns {boolean} true - success processing.
      * <br /> false - error.
-     * @description lpu237's status is changed to "reading ibutton" or "ignore reading ibutton."
-     * If this function is executed with "b_read is true", 
-     * <br /> lpu237 call cb_read_done whenever a ibutton is reading done,
-     * <br /> until error(communincation error or protcol error) is ocurred 
-     * <br /> this function is executed with "b_read is false".
-     * 
-     * <br /> the result of proccess will be given by callback function.
+     * @description Changes the lpu237's status to "reading iButton" or "ignore reading iButton."
+     * If this function is executed with "b_read is true",
+     * <br /> lpu237 calls `cb_read_done` whenever an iButton reading is completed,
+     * <br /> until an error (communication error or protocol error) occurs
+     * <br /> or this function is executed with "b_read is false".
+     * <br /> The result of the process will be given by the callback function.
      */
     _elpusk.framework.coffee.ctl_lpu237.prototype.read_ibutton_from_device_with_callback = function(b_read,cb_read_done,cb_read_error){
 
