@@ -25,71 +25,26 @@
  * @copyright Elpusk.Co.,Ltd 2025
  * @version 2.2.1
  * @description elpusk framework coffee javascript library.
- * <br />  2020.3.5 - release 1.0.
- * <br />  2020.3.25 - release 1.1. 
- * <br />  : change recover callback positon. from the end of function, to the first of function.
- * <br />  : release device filter limit.
- * 
- * <br />  2020.5.13 - release 1.2. 
- * <br />  : fix - device_receive() function code missing.
- * <br />  : add - device_receive_with_callback() method.
- * 
- * <br />  2020.5.14 - release 1.3.
- * <br />  : add - get_session_number() method.( instance function, class function get_session_number() is already existed.)
- * 
- * <br />  2020.5.20 - release 1.4.
- * <br />  : add - device_cancel_with_callback() method.
- * 
- * <br />  2020.5.26 - release 1.5.
- * <br />  : support - supports multi websocket callback function.
- * 
- * <br />  2020.5.29 - release 1.6.
- * <br />  : add - "b_need_device_index" optional parameter to x_with_callback() functions.
- * 
- * <br />  2020.6.11 - release 1.7.
- * <br />  : add - action code "C" system event when system enters hibernation mode.
  *
- * <br />  2020.8.13 - release 1.8.
- * <br />  : add - action code "F" file operation
- * 
- * <br />  2020.8.20 - release 1.9.
- * <br />  : add - file_Copy_callback() method for supporting big size file copy.
- * 
- * <br />  2020.8.20 - release 1.10. - for supporting bootloader operation.
- * <br />  : add - device_update_set_parameter().
- * <br />  : add - device_update_start_with_callback().
- * <br />  : add - file_Copy_firmware_callback().
- * <br />  : add - file_firmware_create().
- * <br />  : add - file_firmware_delete().
- * 
- * <br />  2021.7.1 - release 1.12
- * <br />  : add - kernel_load(s_category,s_target)
- * <br />  : add - kernel_unload(s_category,s_target)
- * <br />  : add - kernel_execute(n_device_index,n_in_id, n_out_id,s_category,s_target,sa_data)
- * <br />  : add - kernel_cancel(n_device_index,n_in_id,n_out_id,s_category,s_target)
- * <br />  : add - kernel_list(s_category,s_filter)
- * <br />  : add - kernel_open(s_category,s_path)
- * <br />  : add - kernel_close(n_device_index,s_category)
- * 
- * <br />  2021.08.17 - release 1.12.1
- * <br />  : remove - at advance_send_data_to_all(), the first parameter is removed.
- * 
- * <br />  2021.08.17 - release 1.12.2
- * <br />  : remove -  _elpusk.framework.coffee.get_session_number().
- * 
- * <br />  2025.08.04 - release 2.0.0
- * <br />  : add -  supporting coffee framework second edition.
- *
- * <br />  2025.12.10 - release 2.1.0
- * <br />  : add -  change the current browser detect code.
- *
- * <br />  2025.12.15 - release 2.2.0
- * <br />  : add shared open mode to device_open() method.
- *
- * <br />  2025.12.16 - release 2.2.1
- * <br />  : fix device_open() share mode dregon code.
- * 
- * @namespace
+ * @history
+ * 2020.03.05 - 1.0.0 - Release.
+ * 2020.03.25 - 1.1.0 - Change recover callback position and release device filter limit.
+ * 2020.05.13 - 1.2.0 - Fix device_receive() and add device_receive_with_callback().
+ * 2020.05.14 - 1.3.0 - Add get_session_number() instance method.
+ * 2020.05.20 - 1.4.0 - Add device_cancel_with_callback() method.
+ * 2020.05.26 - 1.5.0 - Support multi-websocket callback functions.
+ * 2020.05.29 - 1.6.0 - Add "b_need_device_index" optional parameter to x_with_callback() functions.
+ * 2020.06.11 - 1.7.0 - Add action code "C" for system hibernation event.
+ * 2020.08.13 - 1.8.0 - Add action code "F" for file operation.
+ * 2020.08.20 - 1.9.0 - Add file_Copy_callback() for large file copy support.
+ * 2020.08.20 - 1.10.0 - Add bootloader operation support methods.
+ * 2021.07.01 - 1.12.0 - Add kernel operation methods (load, unload, execute, etc.).
+ * 2021.08.17 - 1.12.1 - Remove the first parameter from advance_send_data_to_all().
+ * 2021.08.17 - 1.12.2 - Remove _elpusk.framework.coffee.get_session_number().
+ * 2025.08.04 - 2.0.0 - Add support for Coffee Framework Second Edition.
+ * 2025.12.10 - 2.1.0 - Change browser detection code.
+ * 2025.12.15 - 2.2.0 - Add shared open mode to device_open() method.
+ * 2025.12.16 - 2.2.1 - Fix device_open() share mode dregon code.
  */
 
 'use strict';
@@ -108,21 +63,20 @@
     }
 
     /**
-     * 
-     * boolean, connected to server or not.
-     * @private 
+     * @private
+     * @type {boolean}
+     * @description Flag indicating if a connection to the server is established.
     */
     var _b_connet = false;
 
     /**
-     * 
-     * @private 
-     * @function _system_handler system event handler callback
-     * @param {string} first  string type, action code.
-     * @param {array} second string array type , device path list.
-     * @returns {undefined} none
+     * @private
+     * @type {function(string, Array<string>)}
+     * @description System event handler callback.
+     * @param {string} action_code The action code for the system event.
+     * @param {Array<string>} device_paths An array of device paths related to the event.
     */
-    var _system_handler;//void(string, array string) type
+    var _system_handler;
 
     if (!_elpusk.framework.coffee) {
          _b_connet = false;
@@ -130,26 +84,27 @@
 
         /**
          * @class coffee
-         * @classdesc this class support the interface to "coffee manager".
-         * <br /> this class must be used by singleton pattern.
-         * <br /> Use get_instance() method.
+         * @classdesc This class provides the interface to the "Coffee Manager" and should be used as a singleton.
+         * Access the instance via the `get_instance()` method.
         */
         _elpusk.framework.coffee = (function(){
             /** 
-             * instance of class
-             * @private 
+             * @private
+             * @description The singleton instance of the class.
             */ 
             var _instance;
             
             /** 
-             * websocket instance.
-             * @private 
+             * @private
+             * @type {WebSocket}
+             * @description The WebSocket instance for server communication.
             */ 
             var _websocket;
 
             /** 
-             * session number
              * @private
+             * @type {string}
+             * @description The session number for the current connection.
             */ 
             var _s_session;
 
@@ -163,8 +118,9 @@
 
                 /** 
                  * @private 
-                 * @constant {map} 
-                 *  @description error code to error message map.
+                 * @const
+                 * @type {Array<object>}
+                 * @description A map of error codes to error messages.
                 */                
                 var _error_name_message = [
                     {name:'en_e_server_connect',message:"not connected to server"}
@@ -179,8 +135,9 @@
 
                 /** 
                  * @private 
-                 * @constant {string} 
-                 *  @description the direction of packet.
+                 * @const
+                 * @enum {string}
+                 * @description Defines the direction of a packet.
                 */                
                 var _type_request_type = {
                     CLINET_TO_SERVER: "T",
@@ -190,8 +147,9 @@
 
                 /** 
                  * @private 
-                 * @constant {string} 
-                 *  @description receiver of packet. manager or device.
+                 * @const
+                 * @enum {string}
+                 * @description Defines the receiver of a packet (manager or device).
                 */                
                 var _type_packet_owner = {
                     MANAGER: "M",
@@ -200,8 +158,9 @@
 
                 /** 
                  * @private 
-                 * @constant {string} 
-                 *  @description action code of packet
+                 * @const
+                 * @enum {string}
+                 * @description Defines the action code of a packet.
                 */                
                 var _type_action_code = {
                     UNKNOWN: "U",
@@ -225,8 +184,9 @@
 
                 /** 
                  * @private 
-                 * @constant {string} 
-                 *  @description the type of data field of packet.
+                 * @const
+                 * @enum {string}
+                 * @description Defines the data field type of a packet.
                 */                
                 var _type_data_field_type = {
                     HEX_STRING: "H",
@@ -235,24 +195,26 @@
 
                 /** 
                  * @private 
-                 * @constant {number} 
-                 *  @description impossible session number.
+                 * @const
+                 * @type {number}
+                 * @description Represents an impossible session number.
                 */                
                 var const_n_undefined_session_number = 0xFFFFFFFF;
 
                 /** 
                  * @private 
-                 * @constant {number} 
-                 *  @description impossible device index number
+                 * @const
+                 * @type {number}
+                 * @description Represents an impossible device index number.
                 */                
                 var const_n_undefined_device_index = 0;
 
                 /** 
                  * @private 
                  * @function _push_promise_parameter
-                 * @param {number} n_device_index
-                 * @param {object} paramemter of promise.
-                 * @description push promise parameter for promise method.
+                 * @param {number} n_device_index The device index to associate the promise with.
+                 * @param {object} parameter The promise parameter object (containing resolve, reject, etc.).
+                 * @description Pushes a promise parameter object to the queue for a specific device index.
                 */                
                 function _push_promise_parameter(n_device_index,paramemter) {
                     do{
@@ -271,10 +233,9 @@
                 /** 
                  * @private 
                  * @function _front_promise_parameter
-                 * @param {number} n_device_index
-                 * @returns {object|null} success - resolve & reject of promise.
-                 * <br /> empty - null
-                 * @description add promise parameter for promise method to queue.
+                 * @param {number} n_device_index The device index for which to retrieve the promise parameter.
+                 * @returns {object|null} The promise parameter object, or null if the queue is empty.
+                 * @description Retrieves and removes the next promise parameter from the queue for a specific device index.
                 */                
                 function _front_promise_parameter(n_device_index) {
                     var parameter = null;
@@ -298,10 +259,9 @@
                 /** 
                  * @private 
                  * @function _is_empty_promise_parameter
-                 * @param {number} n_device_index
-                 * @returns {boolean} true - empty promise parameter queue.
-                 * <br /> false - not  empty promise parameter queue.
-                 * @description check the promise parameter queue. if it is empty or not.
+                 * @param {number} n_device_index The device index to check.
+                 * @returns {boolean} True if the promise parameter queue for the device index is empty, otherwise false.
+                 * @description Checks if the promise parameter queue for a specific device index is empty.
                 */                
                 function _is_empty_promise_parameter(n_device_index) {
                     var b_empty = true;
@@ -322,8 +282,8 @@
                 /** 
                  * @private 
                  * @function _delete_promise_parameter
-                 * @param {number} n_device_index
-                 * @description delete the promise parameter queue.
+                 * @param {number} n_device_index The device index whose promise parameter queue is to be deleted.
+                 * @description Deletes the promise parameter queue for a specific device index.
                 */                
                 function _delete_promise_parameter(n_device_index){
                     if( _map_of_queue_promise_parameter.has(n_device_index)){
@@ -334,7 +294,7 @@
                 /** 
                  * @private 
                  * @function _clear_promise_parameter
-                 * @description remove all item of map of  the promise parameter queue.
+                 * @description Removes all items from the map of promise parameter queues.
                 */                
                 function _clear_promise_parameter(){
                     _map_of_queue_promise_parameter.clear();
@@ -1442,8 +1402,8 @@
                     /**
                      * @public 
                      * @function get_session_number
-                     * @return {string} the current session number.
-                     * @description get session number of connection.
+                     * @returns {string} The current session number.
+                     * @description Gets the session number of the current connection.
                      */
                     get_session_number : function () {
                         return _s_session;
@@ -1452,11 +1412,9 @@
                     /** 
                      * @public 
                      * @function get_error_message
-                     * @param {Error} error_object Error object
-                     * 
-                     * @returns {string} error description message
-                     * 
-                     * @description get error message of error object.
+                     * @param {Error} error_object The error object.
+                     * @returns {string} The error description message.
+                     * @description Gets the error message from an Error object.
                     */                
                     get_error_message : function(error_object){
                         return _get_error_message(error_object.name);
@@ -1466,14 +1424,10 @@
                      * @public 
                      * @async
                      * @function connect
-                     * @param {string} s_protocol For security Websocket. Use "wss". 
-                     * <br /> For WebSocket. Use "ws".
-                     * @param {string} s_port port number
-                     * 
-                     * @returns {Promise} if success, resolve with session number by string format.
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description connect to server by promise.
+                     * @param {string} [s_protocol="wss"] The protocol to use ("wss" for secure, "ws" for standard).
+                     * @param {string} [s_port] The port number. Defaults to 443 for "wss" and 80 for "ws".
+                     * @returns {Promise<string>} A promise that resolves with the session number string on success, or rejects with an Error.
+                     * @description Connects to the server.
                     */                
                    connect : function (s_protocol, s_port){
                         return new Promise(function (resolve, reject) {
@@ -1514,11 +1468,8 @@
                      * @public 
                      * @async
                      * @function disconnect
-                     * 
-                     * @returns {Promise} if success, resolve with session number by string format.
-                     * <br /> else reject with Error object.
-                     * 
-                     * @description disconnet with server by promise.
+                     * @returns {Promise<string>} A promise that resolves with the session number string on success, or rejects with an Error.
+                     * @description Disconnects from the server.
                     */                
                     disconnect : function () {
                         return new Promise(function (resolve, reject) {

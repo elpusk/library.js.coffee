@@ -27,7 +27,6 @@
     /**@private */
     var _elpusk = window.elpusk;
 
-    /** documented as elpusk.util */
     if (!_elpusk) {
         _elpusk = {};
     }
@@ -38,7 +37,6 @@
         _elpusk.util.keyboard = {};
     }
 
-    /** documented as elpusk.util.keyboard.map */
     if (!_elpusk.util.keyboard.map) {
         _elpusk.util.keyboard.map = {};
 

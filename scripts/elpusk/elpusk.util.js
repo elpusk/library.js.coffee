@@ -27,7 +27,6 @@
     /**@private */
     var _elpusk = window.elpusk;
 
-    /** documented as elpusk.util */
     if (!_elpusk) {
         _elpusk = {};
     }
@@ -37,8 +36,9 @@
         /**
          * @public
          * @function elpusk.util.get_number_from_little_endian_hex_string
-         * @param {string} s_hex little endian hex string.
-         * @returns {number} converted number.
+         * @param {string} s_hex A hexadecimal string in little-endian format.
+         * @returns {number} The converted number.
+         * @description Converts a little-endian hexadecimal string to a number.
          */
         _elpusk.util.get_number_from_little_endian_hex_string = function( s_hex ){
             var n_value = 0;
@@ -56,10 +56,10 @@
         }
 
         /**
-         * @private
-         * @function _elpusk.util.get_version_string_from_version
-         * @param {number[]} version 4 number array
-         * @returns {string} version string
+         * @public
+         * @function elpusk.util.get_version_string_from_version
+         * @param {number[]} version An array of 4 numbers representing the version.
+         * @returns {string} The formatted version string (e.g., "1.2.3.4").
          */
         _elpusk.util.get_version_string_from_version = function( version ){
             var s_value = "0.0.0.0";
@@ -82,8 +82,9 @@
         /**
          * @public
          * @function elpusk.util.get_dword_hex_string_from_number
-         * @param {number} dw_data unsigned int - double word number.
-         * @returns {string} little endian double word hex string format. always 8 characters.
+         * @param {number} dw_data An unsigned 32-bit integer (double word).
+         * @returns {string} A little-endian hexadecimal string representing the double word (8 characters).
+         * @description Converts a number to a little-endian, 8-character hexadecimal string.
          */
         _elpusk.util.get_dword_hex_string_from_number = function( dw_data ){
             var s_big_hex = dw_data.toString(16);
@@ -104,8 +105,9 @@
         /**
          * @public
          * @function elpusk.util.get_byte_hex_string_from_number
-         * @param {number} c_data unsigned char
-         * @returns {string} little endian byte hex string format. always 2 characters.
+         * @param {number} c_data An unsigned 8-bit integer (byte).
+         * @returns {string} A 2-character hexadecimal string.
+         * @description Converts a number to a 2-character hexadecimal string.
          */
         _elpusk.util.get_byte_hex_string_from_number = function( c_data ){
             var s_big_hex = c_data.toString(16);
@@ -122,9 +124,10 @@
         /**
          * @public
          * @function elpusk.util.insert_to_set
-         * @param {any[]} target_set array type set
-         * @param {any} item
-         * @returns {boolean} processing result
+         * @param {any[]} target_set The array to treat as a set.
+         * @param {*} item The item to insert.
+         * @returns {boolean} True if the item was inserted, false if it already exists or an error occurred.
+         * @description Inserts an item into an array if it does not already exist.
          */
         _elpusk.util.insert_to_set = function( target_set, item ){
             var b_result = false;
@@ -153,9 +156,10 @@
         /**
          * @public
          * @function elpusk.util.remove_from_set
-         * @param {any[]} target_set array type set
-         * @param {any} item
-         * @returns {boolean} processing result
+         * @param {any[]} target_set The array to treat as a set.
+         * @param {*} item The item to remove.
+         * @returns {boolean} True if the item was removed, false if it was not found or an error occurred.
+         * @description Removes an item from an array.
          */
         _elpusk.util.remove_from_set = function( target_set, item ){
             var b_result = false;
@@ -185,8 +189,8 @@
         /**
          * @public
          * @function elpusk.util.clear_set
-         * @param {any[]} target_set array type set
-         * @param {any} item
+         * @param {any[]} target_set The array to clear.
+         * @description Clears all items from an array.
          */
         _elpusk.util.clear_set = function( target_set ){
             var b_result = false;
@@ -204,9 +208,10 @@
         /**
          * @public
          * @function elpusk.util.find_from_set
-         * @param {any[]} target_set array type set
-         * @param {any} item
-         * @returns {number} index of item in target_set.
+         * @param {any[]} target_set The array to search.
+         * @param {*} item The item to find.
+         * @returns {number} The index of the item in the array, or -1 if not found.
+         * @description Finds the index of an item in an array.
          */
         _elpusk.util.find_from_set = function( target_set, item ){
             var n_index = -1;
@@ -228,10 +233,10 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_push
-         * @param {object} target_map instance of Map
-         * @param {any} key the key of map(target_map).
-         * @param {any} value the push value to queue of key in map.
-         * @description push key value pair to map(target_map).
+         * @param {Map} target_map The Map instance where keys map to queues (arrays).
+         * @param {*} key The key of the map.
+         * @param {*} value The value to push to the queue associated with the key.
+         * @description Pushes a value onto a queue within a map. If the key does not exist, a new queue is created.
         */                
         _elpusk.util.map_of_queue_push = function(target_map,key,value) {
             do{
@@ -251,12 +256,10 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_front
-         * @param {object} target_map Map instance
-         * @param {any} key the key of map(target_map).
-         * @returns {object|null} success - The front value of the queue corresponding to the key in the map.
-         * <br /> error - null
-         * @description return the front value of the queue corresponding to the key in the map.
-         * <br /> key & value is removed.
+         * @param {Map} target_map The Map instance.
+         * @param {*} key The key of the map.
+         * @returns {*|null} The first value from the queue, or null if the queue is empty or the key doesn't exist.
+         * @description Retrieves and removes the first value from the queue associated with the given key.
         */                
         _elpusk.util.map_of_queue_front =  function(target_map,key) {
             var value = null;
@@ -282,12 +285,10 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_get
-         * @param {object} target_map Map instance
-         * @param {any} key the key of map(target_map).
-         * @returns {object|null} success - The value of the queue corresponding to the key in the map.
-         * <br /> error - null
-         * @description return the value of the queue corresponding to the key in the map.
-         * <br /> key & value is not removed.
+         * @param {Map} target_map The Map instance.
+         * @param {*} key The key of the map.
+         * @returns {*|null} The first value from the queue without removing it, or null if not found.
+         * @description Retrieves the first value from the queue for a given key without removing it.
         */                
        _elpusk.util.map_of_queue_get =  function(target_map,key) {
             var value = null;
@@ -310,11 +311,10 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_is_empty
-         * @param {object} target_map Map instance
-         * @param {any} key the key of map(target_map).
-         * @returns {boolean} true - It is empty that the queue corresponding to the key in the map.
-         * <br /> false - It is not empty that the queue corresponding to the key in the map.
-         * @description check the queue corresponding to the key in the map. if it is empty or not.
+         * @param {Map} target_map The Map instance.
+         * @param {*} key The key of the map.
+         * @returns {boolean} True if the queue for the given key is empty or does not exist, otherwise false.
+         * @description Checks if the queue for a given key in the map is empty.
         */                
         _elpusk.util.map_of_queue_is_empty = function(target_map, key) {
             var b_empty = true;
@@ -337,9 +337,9 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_delete
-         * @param {object} target_map Map instance
-         * @param {any} key the key of map(target_map).
-         * @description delete the queue corresponding to the key in the map.
+         * @param {Map} target_map The Map instance.
+         * @param {*} key The key to delete from the map.
+         * @description Deletes the queue associated with the given key from the map.
         */                
         _elpusk.util.map_of_queue_delete = function(target_map,key){
             do{
@@ -355,8 +355,8 @@
         /** 
          * @public 
          * @function elpusk.util.map_of_queue_clear
-         * @param {object} target_map Map instance
-         * @description remove all queue of map.
+         * @param {Map} target_map The Map instance to clear.
+         * @description Removes all key-value pairs from the map.
         */                
         _elpusk.util.map_of_queue_clear = function(target_map){
             if(target_map instanceof Map){
@@ -364,6 +364,12 @@
             }
         }
 
+        /**
+         * @private
+         * @const
+         * @type {Array<string>}
+         * @description An array mapping ASCII codes (0-127) to their common symbol representations.
+         */
         _elpusk.util.ascii_symbol_map = [
              "NUL"
             ,"SOH"
@@ -493,9 +499,9 @@
         /** 
          * @public 
          * @function elpusk.util.get_ascii_symbol_from_char_code
-         * @param {number} one byte ascii code.
-         * @returns {string} ascii symbol string
-         * @description ASCII symbol from ascii code.
+         * @param {number} n_ascii A one-byte ASCII code.
+         * @returns {string} The corresponding ASCII symbol string, or an empty string if the code is invalid.
+         * @description Gets an ASCII symbol string from an ASCII code.
         */                
         _elpusk.util.get_ascii_symbol_from_char_code = function(n_ascii){
             var s_symbol = "";
@@ -515,10 +521,10 @@
         /** 
          * @public 
          * @function elpusk.util.is_a_greater_than_equal_b
-         * @param {string} s_a version string.
-         * @param {string} s_b version string.
-         * @returns {boolean} version s_a is greater then equal version s_b.
-         * @description compare version string
+         * @param {string} s_a The first version string (e.g., "x.y.z").
+         * @param {string} s_b The second version string (e.g., "x.y.z").
+         * @returns {boolean} True if version `s_a` is greater than or equal to version `s_b`.
+         * @description Compares two version strings in "x.y.z" format.
         */                
         _elpusk.util.is_a_greater_than_equal_b = function(s_a,s_b){
             // input version format(x.y.z)
