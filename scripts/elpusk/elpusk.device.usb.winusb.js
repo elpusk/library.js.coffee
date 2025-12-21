@@ -27,29 +27,26 @@
     /**@private */
     var _elpusk = window.elpusk;
 
-    /** documented as elpusk */
     if (!_elpusk) {
         _elpusk = {};
     }
-    /** documented as elpusk.device */
     if (!_elpusk.device) {
         _elpusk.device = {};
     }
-    /** documented as elpusk.device.usb */
     if (!_elpusk.device.usb) {
         _elpusk.device.usb = {};
     }
 
     /**
-     * @class usb winusb base class
-    */
+     * @class
+     * @classdesc Represents a USB WinUSB device, inheriting from `elpusk.device.usb`.
+     * @augments elpusk.device.usb
+     */
     if (!_elpusk.device.usb.winusb) {
-
-        'use strict';
         /**
          * @constructs elpusk.device.usb.winusb
-         * @param {string} s_path the path of usb winusb device.
-        */
+         * @param {string} s_path The path of the USB WinUSB device.
+         */
         _elpusk.device.usb.winusb = function( s_path ){
             elpusk.device.usb.call(this,s_path);
         };
@@ -57,7 +54,6 @@
         _elpusk.device.usb.winusb.prototype = Object.create(elpusk.device.usb.prototype);
         _elpusk.device.usb.winusb.prototype.constructor = _elpusk.device.usb.winusb;
     }
-
 
     // the end of function
     window.elpusk = _elpusk;
