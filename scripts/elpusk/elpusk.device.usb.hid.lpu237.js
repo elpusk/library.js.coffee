@@ -2404,7 +2404,7 @@
          * @private
          * @function _get_track_order_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {null|number array} 3 item number array
+         * @returns {null|number[]} 3 item number array
          * <br /> null - error.
          */
          function _get_track_order_from_response(s_response){
@@ -2431,7 +2431,7 @@
          * @private
          * @function _get_blank_4bytes_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {null|number array} number array - blank field 4 bytes number.
+         * @returns {null|number[]} number array - blank field 4 bytes number.
          * <br /> null - error.
          */
 		function _get_blank_4bytes_from_response(s_response){
@@ -2534,8 +2534,7 @@
          * @private
          * @function _get_boot_run_time_from_response
          * @param {string} s_response - lpu237 protocol packet.( = websocket's protocol's data field)
-         * @returns {number} MSD bootloader running msec time .
-         * <br /> negative value is error.
+         * @returns {number} MSD bootloader running msec time . or negative value is error.
          */
 		function _get_boot_run_time_from_response(s_response){
 			var n_value = -1;
@@ -3395,8 +3394,7 @@
          * @private
          * @function _get_track_order_from_string
          * @param {string} s_string - "and" or "or"
-         * @returns {(null|array number)} the order of track
-         * <br /> null - error.
+         * @returns {(null|number[])} the order of track or null if error.
          */
          function _get_track_order_from_string(s_string){
 			var n_order = null;
@@ -6052,7 +6050,7 @@
         /**
          * @public
          * @function elpusk.device.usb.hid.lpu237.get_track_order
-         * @returns {array,number} the sending order of msr track. 
+         * @returns {number[]} the sending order of msr track. 
          */
          _elpusk.device.usb.hid.lpu237.prototype.get_track_order = function(){
             return this._n_order; 
@@ -9042,7 +9040,7 @@
         }   
         
         /**
-         * @public this function may be deleted. -_-;;
+         * this function may be deleted. -_-;;
          * @function elpusk.device.usb.hid.lpu237.update_firmware
          * @param {File} file_rom rom file contains a firmware.
          * @return {Promise} processing result.
