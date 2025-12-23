@@ -1,0 +1,22 @@
+{
+  "name": "library.js.coffee",
+  "version": "1.0.0",
+  "description": "* For stable use, Chrome 109+, Edge 109+, and Firefox 102+ environments are recommended. Some features may be limited or not function in older browsers.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
