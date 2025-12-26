@@ -7880,7 +7880,7 @@
 
                     //set key map
                     if( this._b_removed_key_map_table ){
-                        if( !_generate_set_key_map(this._deque_generated_tx,this._n_language_index)){continue;}
+                        if( !_generate_set_key_map(this._dequeu_s_tx,this._n_language_index)){continue;}
                         this._deque_generated_tx.push( _type_generated_tx_type.get_set_keymap );
                     }
                     
