@@ -27,13 +27,13 @@ export class device extends elpusk {
      * The path of the device.
      * @private
      */
-    private _s_path: string;
+    protected _s_path: string;
 
     /**
      * The index of the device. 0 is an undefined index number.
      * @private
      */
-    private _n_device_index: number;
+    protected _n_device_index: number;
 
     /**
      * @class elpusk.device
