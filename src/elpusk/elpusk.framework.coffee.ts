@@ -95,27 +95,21 @@ interface JsonPacket {
     data_field?: string | string[];
 }
 
-type type_cb_error =
-    ((deviceIndex: number, error: Error) => void)
-    | ((deviceIndex: number, event: Event) => void);
-
-interface TypeCbError {
-    (deviceIndex: number, error: Error): void;
-    (deviceIndex: number, event: Event): void;
-}
+export type type_cb_received = (deviceIndex: number, s_rx: Array<string> | string) => void;
+export type type_cb_error = (deviceIndex: number, event_error: Event | Error) => void;
 
 interface PromiseParameter {
     n_device_index: number;
     method: string;
     resolve: ((value: any) => void) | null;
     reject: ((reason?: any) => void) | null;
-    cb_received?: (device_index_or_data: number | string, data?: string) => void;
-    cb_error?: TypeCbError;
+    cb_received?: type_cb_received;
+    cb_error?:  type_cb_error;
     cb_progress?: (b_result: boolean, n_current: number, n_total: number, s_message: string) => void;
     b_device_index?: boolean;
 }
 
-type SystemEventHandler = (action_code: string, device_paths: string[]) => void;
+export type SystemEventHandler = (action_code: string, device_paths: string[]) => void;
 
 // Coffee class extending framework
 export class coffee extends framework {
@@ -691,7 +685,7 @@ export class coffee extends framework {
                                 parameter.cb_received(n_device_index,json_obj.data_field);
                             }
                             else{
-                                parameter.cb_received(json_obj.data_field);
+                                parameter.cb_received(this.const_n_undefined_device_index,json_obj.data_field);
                             }
                         }
                     }
@@ -726,7 +720,7 @@ export class coffee extends framework {
                                 parameter.cb_received(n_device_index,json_obj.data_field);
                             }
                             else{
-                                parameter.cb_received(json_obj.data_field);
+                                parameter.cb_received(this.const_n_undefined_device_index,json_obj.data_field);
                             }
                         }
                     }
@@ -764,7 +758,7 @@ export class coffee extends framework {
                                 parameter.cb_received(n_device_index,json_obj.data_field);
                             }
                             else{
-                                parameter.cb_received(json_obj.data_field);
+                                parameter.cb_received(this.const_n_undefined_device_index,json_obj.data_field);
                             }
                         }
                     }
@@ -824,7 +818,7 @@ export class coffee extends framework {
                         if (parameter.b_device_index && parameter.cb_received) {
                             parameter.cb_received(n_device_index, json_obj.data_field);
                         } else if (parameter.cb_received) {
-                            parameter.cb_received(json_obj.data_field);
+                            parameter.cb_received(this.const_n_undefined_device_index,json_obj.data_field);
                         }
                     } else {
                         parameter.resolve!(json_obj.data_field);
@@ -2394,8 +2388,8 @@ export class coffee extends framework {
     public device_receive_with_callback(
         n_device_index: number, 
         n_in_id: number, 
-        cb_received: (data: any) => void, 
-        cb_error: (err: any) => void, 
+        cb_received: type_cb_received, 
+        cb_error: type_cb_error, 
         b_need_device_index?: boolean
     ): boolean {
         let b_result = false;
@@ -2552,8 +2546,8 @@ export class coffee extends framework {
      * @param {number} n_in_id - (수신용) HID In Report ID 또는 WinUSB In End-point.
      * @param {number} n_out_id - (송신용) HID Out Report ID 또는 WinUSB Out End-point.
      * @param {string} s_hex_string - 전송할 16진수 문자열 데이터.
-     * @param {Function} cb_received - 데이터 수신 시 호출될 콜백 (hex_string 전달).
-     * @param {Function} cb_error - 에러 발생 시 호출될 콜백 (Error 객체 전달).
+     * @param {Function} fun_cb_received - 데이터 수신 시 호출될 콜백 (hex_string 전달).
+     * @param {Function} fun_cb_error - 에러 발생 시 호출될 콜백 (Error 객체 전달).
      * @param {boolean} [b_need_device_index] - 콜백의 첫 번째 인자로 n_device_index를 포함할지 여부.
      * @returns {boolean} 프로세스 시작 성공 시 true, 실패 시 false.
      * @description 전송 후 수신(Transmit) 동작을 콜백 방식으로 수행합니다.
@@ -2563,8 +2557,8 @@ export class coffee extends framework {
         n_in_id: number,
         n_out_id: number,
         s_hex_string: string,
-        cb_received: (data: any) => void,
-        cb_error: (err: any) => void,
+        fun_cb_received: type_cb_received,
+        fun_cb_error: type_cb_error,
         b_need_device_index?: boolean
     ): boolean {
         let b_result = false;
@@ -2575,7 +2569,7 @@ export class coffee extends framework {
             b_device_index = true;
         }
 
-        if (typeof cb_received !== 'function' || typeof cb_error !== 'function') {
+        if (typeof fun_cb_received !== 'function' || typeof fun_cb_error !== 'function') {
             return false;
         }
 
@@ -2619,8 +2613,9 @@ export class coffee extends framework {
             method: "device_transmit", // 내부 매칭을 위해 device_transmit 사용
             resolve: null,
             reject: null,
-            cb_received: cb_received,
-            cb_error: cb_error,
+            cb_received: fun_cb_received,
+            cb_error: fun_cb_error,
+            undefined,
             b_device_index: b_device_index
         };
         this._push_promise_parameter(n_device_index, parameter);
@@ -2725,8 +2720,8 @@ export class coffee extends framework {
         n_device_index: number,
         n_in_id: number,
         n_out_id: number,
-        cb_received: (result: string | number) => void,
-        cb_error: (err: any) => void,
+        cb_received: type_cb_received,
+        cb_error: type_cb_error,
         b_need_device_index?: boolean
     ): boolean {
         let b_result = false;
