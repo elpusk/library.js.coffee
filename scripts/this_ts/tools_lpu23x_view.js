@@ -1,4 +1,4 @@
-function tools_dom_buld_inital_page(){
+export function tools_dom_buld_inital_page(){
     var _body = document.getElementById('body_for_main_html');
     var _div_for_ini = document.createElement('div');
 
@@ -14,7 +14,7 @@ function tools_dom_buld_inital_page(){
     _body.appendChild(_div_for_ini);
 }
 
-function tools_dom_add_connected_device_page(_ctl_lpu237,_b_device_is_composite){
+export function tools_dom_add_connected_device_page(_ctl_lpu237,_b_device_is_composite){
     if(typeof _ctl_lpu237==='undefined'){
         return;
     }
@@ -75,7 +75,7 @@ function tools_dom_add_connected_device_page(_ctl_lpu237,_b_device_is_composite)
     _tools_dom_button_status(true,s_type);
 }
 
-function tools_dom_remove_connected_device_page(){
+export function tools_dom_remove_connected_device_page(){
 
     _tools_dom_button_status(false,'');
 
@@ -106,7 +106,7 @@ function tools_dom_remove_connected_device_page(){
     }//end for i
 }
 
-function _tools_dom_open_tab_page(evt, page_id) {
+export function _tools_dom_open_tab_page(evt, page_id) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -120,7 +120,7 @@ function _tools_dom_open_tab_page(evt, page_id) {
     evt.currentTarget.className += " active";
 }
 
-function _tools_dom_adjust_page_size( b_connected ){
+export function _tools_dom_adjust_page_size( b_connected ){
     do{
         if( typeof b_connected  !== 'boolean'){
             continue;
@@ -184,7 +184,7 @@ function _tools_dom_adjust_page_size( b_connected ){
     }while(false);
 }
 
-function tools_dom_update_device_list_with_promise( _array_device_list ){
+export function tools_dom_update_device_list_with_promise( _array_device_list ){
     elpusk.framework.coffee.get_instance().get_device_list("hid#vid_134b&pid_0206&mi_01")
     .then(
         function(s_rx){
@@ -220,7 +220,7 @@ function tools_dom_update_device_list_with_promise( _array_device_list ){
     );
 }
 
-function _tools_dom_button_status( b_connected, s_connected_device_type ){
+export function _tools_dom_button_status( b_connected, s_connected_device_type ){
     do{
         s_connected_device_type = s_connected_device_type || '';
 
